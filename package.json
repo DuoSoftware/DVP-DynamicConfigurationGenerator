@@ -10,7 +10,7 @@
     "config": "^1.15.0",
     "dvp-common": "^0.6.7",
     "dvp-dbmodels": "^1.0.0",
-    "dvp-ruleservice": "^1.2.4",
+    "dvp-ruleservice": "^1.2.5",
     "ip": "^1.1.0",
     "libphonenumber": "0.0.9",
     "moment": "^2.14.1",
