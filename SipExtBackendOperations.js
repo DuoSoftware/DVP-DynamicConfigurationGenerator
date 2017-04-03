@@ -7,7 +7,7 @@ var GetUserBy_Ext_Domain = function(extension, domain, data, callback)
     try
     {
         dbModel.SipUACEndpoint
-            .find({where: {SipExtension: extension}, include: [{model: dbModel.CloudEndUser, as: "CloudEndUser", where: {Domain: domain}}]})
+            .find({where: {SipExtension: extension, Enabled: true}, include: [{model: dbModel.CloudEndUser, as: "CloudEndUser", where: {Domain: domain}}]})
             .then(function (ext)
             {
                 logger.debug('[DVP-DynamicConfigurationGenerator.GetUserBy_Ext_Domain] PGSQL Get sip endpoint for ext domain query success');
@@ -32,7 +32,7 @@ var GetUserBy_Name_Domain = function(extName, domain, data, callback)
     try
     {
         dbModel.SipUACEndpoint
-            .find({where: {SipUsername: extName}, include: [{model: dbModel.CloudEndUser, as: "CloudEndUser", where: {Domain : domain}}]})
+            .find({where: {SipUsername: extName, Enabled: true}, include: [{model: dbModel.CloudEndUser, as: "CloudEndUser", where: {Domain : domain}}]})
             .then(function (ext)
             {
                 logger.debug('[DVP-DynamicConfigurationGenerator.GetUserBy_Name_Domain] PGSQL Get sip endpoint for username domain query success');
@@ -80,7 +80,7 @@ var GetUserDetailsByUsername = function(reqId, username, data, callback)
     try
     {
         dbModel.SipUACEndpoint
-            .find({where: [{SipUsername: username}]})
+            .find({where: [{SipUsername: username, Enabled: true}]})
             .then(function (usr)
             {
                 logger.debug('[DVP-DynamicConfigurationGenerator.GetUserDetailsByUsername] PGSQL Get sip endpoint for username query success');
@@ -138,7 +138,7 @@ var GetUserByNameTenantDB = function(reqId, extName, companyId, tenantId, ignore
         if(!ignoreTenant)
         {
             dbModel.SipUACEndpoint
-                .find({where: [{SipUsername: extName},{TenantId: tenantId}], include:[{model: dbModel.Extension, as: 'Extension'}]})
+                .find({where: [{SipUsername: extName},{TenantId: tenantId}, {CompanyId: companyId}, {Enabled: true}], include:[{model: dbModel.Extension, as: 'Extension'}]})
                 .then(function (usr)
                 {
                     logger.debug('[DVP-DynamicConfigurationGenerator.GetUserByNameTenantDB] PGSQL Get sip endpoint for username tenant query success');
@@ -154,7 +154,7 @@ var GetUserByNameTenantDB = function(reqId, extName, companyId, tenantId, ignore
         else
         {
             dbModel.SipUACEndpoint
-                .find({where: [{SipUsername: extName}], include:[{model: dbModel.Extension, as: 'Extension'}]})
+                .find({where: [{SipUsername: extName, Enabled: true}], include:[{model: dbModel.Extension, as: 'Extension'}]})
                 .then(function (usr)
                 {
                     logger.debug('[DVP-DynamicConfigurationGenerator.GetUserByNameTenantDB] PGSQL Get sip endpoint for username tenant query success');
@@ -288,7 +288,7 @@ var GetAllDataForExt = function(reqId, extension, companyId, tenantId, extType, 
             dbModel.Extension.find({where: [{Extension: extension},{TenantId: tenantId},{CompanyId: companyId},{ObjCategory: extType}], include: [{model: dbModel.SipUACEndpoint, as:'SipUACEndpoint', include: [{model: dbModel.CloudEndUser, as:'CloudEndUser'},{model: dbModel.UserGroup, as:'UserGroup', include: [{model: dbModel.Extension, as:'Extension'}]}]}]})
                 .then(function (extData)
                 {
-                    if(extData && extData.SipUACEndpoint)
+                    if(extData && extData.SipUACEndpoint && extData.SipUACEndpoint.Enabled)
                     {
 
                         GetTransferCodesForTenantDB(reqId, companyId, tenantId, data, function(err, resTrans)
@@ -910,7 +910,7 @@ var GetCloudForUser = function(username, clusterId, data, callback)
 {
     var incomingRequest = {};
 
-    dbModel.SipUACEndpoint.find({where:[{SipUsername: username}]})
+    dbModel.SipUACEndpoint.find({where:[{SipUsername: username, Enabled: true}]})
         .then(function(sipUsr)
         {
             if(sipUsr && sipUsr.CompanyId && sipUsr.TenantId)
