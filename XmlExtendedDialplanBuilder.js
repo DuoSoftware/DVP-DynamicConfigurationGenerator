@@ -590,16 +590,16 @@ var CreateRouteUserDialplan = function(reqId, ep, context, profile, destinationP
         if(dvpCallDirection === 'outbound' && ep.Type !== 'GROUP')
         {
             if (ep.LegStartDelay > 0)
-                option = util.format('[leg_delay_start=%d, absolute_codec_string=\'PCMU\', origination_uuid=${my_uuid}, leg_timeout=%d,origination_caller_id_name=%s,origination_caller_id_number=%s]', ep.LegStartDelay, ep.LegTimeout, ep.Origination, ep.OriginationCallerIdNumber);
+                option = util.format('[leg_delay_start=%d, origination_uuid=${my_uuid}, leg_timeout=%d,origination_caller_id_name=%s,origination_caller_id_number=%s]', ep.LegStartDelay, ep.LegTimeout, ep.Origination, ep.OriginationCallerIdNumber);
             else
-                option = util.format('[leg_timeout=%d, absolute_codec_string=\'PCMU\', origination_uuid=${my_uuid}, origination_caller_id_name=%s,origination_caller_id_number=%s]', ep.LegTimeout, ep.Origination, ep.OriginationCallerIdNumber);
+                option = util.format('[leg_timeout=%d, origination_uuid=${my_uuid}, origination_caller_id_name=%s,origination_caller_id_number=%s]', ep.LegTimeout, ep.Origination, ep.OriginationCallerIdNumber);
         }
         else
         {
             if (ep.LegStartDelay > 0)
-                option = util.format('[leg_delay_start=%d, absolute_codec_string=\'PCMU\', leg_timeout=%d,origination_caller_id_name=%s,origination_caller_id_number=%s]', ep.LegStartDelay, ep.LegTimeout, ep.Origination, ep.OriginationCallerIdNumber);
+                option = util.format('[leg_delay_start=%d, leg_timeout=%d,origination_caller_id_name=%s,origination_caller_id_number=%s]', ep.LegStartDelay, ep.LegTimeout, ep.Origination, ep.OriginationCallerIdNumber);
             else
-                option = util.format('[leg_timeout=%d, absolute_codec_string=\'PCMU\', origination_caller_id_name=%s,origination_caller_id_number=%s]', ep.LegTimeout, ep.Origination, ep.OriginationCallerIdNumber);
+                option = util.format('[leg_timeout=%d, origination_caller_id_name=%s,origination_caller_id_number=%s]', ep.LegTimeout, ep.Origination, ep.OriginationCallerIdNumber);
         }
 
         //var httpUrl = Config.Services.HttApiUrl;
