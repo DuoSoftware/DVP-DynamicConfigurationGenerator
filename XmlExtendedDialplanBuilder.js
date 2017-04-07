@@ -143,6 +143,8 @@ var CreatePbxFeatures = function(reqId, destNum, pbxType, domain, trunkNumber, t
                 .up()
                 .ele('action').att('application', 'set').att('data', 'transfer_ringback=$${us-ring}')
                 .up()
+                .ele('action').att('application', 'set').att('data', 'DVP_OPERATION_CAT=ATT_XFER_USER')
+                .up()
 
             if(transferCodes)
             {
