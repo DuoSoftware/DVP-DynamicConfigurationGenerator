@@ -67,7 +67,7 @@ var createNotFoundResponse = function()
 
 };
 
-var CreatePbxFeatures = function(reqId, destNum, pbxType, domain, trunkNumber, trunkCode, companyId, tenantId, appId, context, transferCodes)
+var CreatePbxFeatures = function(reqId, destNum, pbxType, domain, trunkNumber, trunkCode, companyId, tenantId, appId, context, transferCodes, ardsClientUuid)
 {
     try
     {
@@ -180,11 +180,18 @@ var CreatePbxFeatures = function(reqId, destNum, pbxType, domain, trunkNumber, t
 
             }
 
-
-
-            cond.ele('action').att('application', 'att_xfer').att('data', '{companyid=' + companyId + ',tenantid=' + tenantId + ',dvp_app_id=' + appId + '}' + pbxType + '/${digits}@' + domain)
-                .up()
-                .end({pretty: true});
+            if(ardsClientUuid)
+            {
+                cond.ele('action').att('application', 'att_xfer').att('data', '{companyid=' + companyId + ',ards_client_uuid=' + ardsClientUuid + ',tenantid=' + tenantId + ',DVP_OPERATION_CAT=ATT_XFER_USER,dvp_app_id=' + appId + '}' + pbxType + '/${digits}@' + domain)
+                    .up()
+                    .end({pretty: true});
+            }
+            else
+            {
+                cond.ele('action').att('application', 'att_xfer').att('data', '{companyid=' + companyId + ',tenantid=' + tenantId + ',DVP_OPERATION_CAT=ATT_XFER_USER,dvp_app_id=' + appId + '}' + pbxType + '/${digits}@' + domain)
+                    .up()
+                    .end({pretty: true});
+            }
         }
 
 
