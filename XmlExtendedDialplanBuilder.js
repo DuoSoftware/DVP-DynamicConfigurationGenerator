@@ -182,7 +182,7 @@ var CreatePbxFeatures = function(reqId, destNum, pbxType, domain, trunkNumber, t
 
 
 
-            cond.ele('action').att('application', 'att_xfer').att('data', '{companyid=' + companyId + ',tenantid=' + tenantId + 'DVP_OPERATION_CAT=ATT_XFER_USER,dvp_app_id=' + appId + '}' + pbxType + '/${digits}@' + domain)
+            cond.ele('action').att('application', 'att_xfer').att('data', '{companyid=' + companyId + ',tenantid=' + tenantId + ',DVP_OPERATION_CAT=ATT_XFER_USER,dvp_app_id=' + appId + '}' + pbxType + '/${digits}@' + domain)
                 .up()
                 .end({pretty: true});
         }
