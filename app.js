@@ -667,6 +667,12 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
         var opCat = data["variable_DVP_OPERATION_CAT"];
         var isDialplanGiven = data["variable_companyid"];
         var ardsClientUuid = data["variable_ards_client_uuid"];
+        var otherlegUuid = data["Other-Leg-Unique-ID"];
+
+        if(!ardsClientUuid)
+        {
+            ardsClientUuid = otherlegUuid;
+        }
 
 
 
