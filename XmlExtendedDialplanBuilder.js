@@ -1742,7 +1742,7 @@ var CreateForwardingDialplan = function(reqId, endpoint, context, profile, desti
             codecListString = codecList.join();
         }
 
-        option = util.format('[leg_timeout=%d,origination_caller_id_name=%s,origination_caller_id_number=%s]', endpoint.LegTimeout, endpoint.Origination, endpoint.OriginationCallerIdNumber);
+        option = util.format('[leg_timeout=%d,origination_caller_id_name=%s,origination_caller_id_number=%s', endpoint.LegTimeout, endpoint.Origination, endpoint.OriginationCallerIdNumber);
 
         if (endpoint.LegStartDelay > 0)
         {
@@ -2088,7 +2088,7 @@ var CreateRouteGatewayDialplan = function(reqId, ep, context, profile, destinati
             codecListString = codecList.join();
         }
 
-        option = util.format('[leg_timeout=%d, origination_caller_id_name=%s,origination_caller_id_number=%s,sip_h_X-Gateway=%s]', ep.LegTimeout, ep.Origination, ep.OriginationCallerIdNumber, ep.Domain);
+        option = util.format('[leg_timeout=%d, origination_caller_id_name=%s,origination_caller_id_number=%s,sip_h_X-Gateway=%s', ep.LegTimeout, ep.Origination, ep.OriginationCallerIdNumber, ep.Domain);
 
         if (ep.LegStartDelay > 0)
         {
