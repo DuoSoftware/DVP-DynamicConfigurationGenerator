@@ -405,9 +405,24 @@ var ProcessCallForwarding = function(reqId, aniNum, dnisNum, callerDomain, conte
                                         {
                                             if (balanceRes && balanceRes.IsSuccess)
                                             {
-                                                var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, null, null, uuid);
+                                                backendFactory.getBackendHandler().getContextPreferences(context, 'public', companyId, tenantId).then(function(codecPrefs)
+                                                {
+                                                    var tempCodecPref = null;
+                                                    if(codecPrefs)
+                                                    {
+                                                        tempCodecPref = codecPrefs.Codecs;
+                                                    }
 
-                                                callback(undefined, xml);
+                                                    var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, null, null, uuid, tempCodecPref);
+
+                                                    callback(undefined, xml);
+
+                                                }).catch(function(err)
+                                                {
+                                                    logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Error Occurred getting context prefs', reqId);
+                                                    callback(err, xmlBuilder.createRejectResponse());
+                                                });
+
                                             }
                                             else
                                             {
@@ -495,9 +510,24 @@ var ProcessCallForwarding = function(reqId, aniNum, dnisNum, callerDomain, conte
                                                 logger.debug('DVP-DynamicConfigurationGenerator.ProcessCallForwarding] - [%s] - Redis set object success', reqId);
 
                                                 var attTransInfo = AttendantTransferLegInfoHandler(reqId, null, extDetails.SipUACEndpoint);
-                                                var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, undefined, attTransInfo, null);
 
-                                                callback(undefined, xml);
+                                                backendFactory.getBackendHandler().getContextPreferences(context, extDetails.SipUACEndpoint.ContextId, companyId, tenantId).then(function(codecPrefs)
+                                                {
+                                                    var tempCodecPref = null;
+                                                    if(codecPrefs)
+                                                    {
+                                                        tempCodecPref = codecPrefs.Codecs;
+                                                    }
+                                                    var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, undefined, attTransInfo, null, tempCodecPref);
+
+                                                    callback(undefined, xml);
+
+                                                }).catch(function(err)
+                                                {
+                                                    logger.debug('DVP-DynamicConfigurationGenerator.ProcessCallForwarding] - [%s] - Redis set object failed', reqId);
+                                                    callback(err, xmlBuilder.createRejectResponse());
+                                                });
+
                                             }
                                             else
                                             {
@@ -790,9 +820,25 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                             ep.Domain = extDetails.SipUACEndpoint.Domain;
                                                         }
 
-                                                        var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, numLimitInfo, attTransInfo, dvpCallDirection);
+                                                        backendFactory.getBackendHandler().getContextPreferences(context, extDetails.SipUACEndpoint.ContextId, companyId, tenantId).then(function(codecPrefs)
+                                                        {
+                                                            var tempCodecPref = null;
+                                                            if(codecPrefs)
+                                                            {
+                                                                tempCodecPref = codecPrefs.Codecs;
+                                                            }
 
-                                                        callback(undefined, xml);
+                                                            var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, numLimitInfo, attTransInfo, dvpCallDirection, tempCodecPref);
+
+                                                            callback(undefined, xml);
+
+                                                        }).catch(function(err)
+                                                        {
+                                                            logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Error Occurred getting context prefs', reqId);
+                                                            callback(err, xmlBuilder.createRejectResponse());
+                                                        });
+
+
                                                     }
                                                     else
                                                     {
@@ -873,9 +919,24 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                     ep.Domain = extDetails.SipUACEndpoint.Domain;
                                                                 }
 
-                                                                var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, numLimitInfo, attTransInfo, dvpCallDirection);
+                                                                backendFactory.getBackendHandler().getContextPreferences(context, extDetails.SipUACEndpoint.ContextId, companyId, tenantId).then(function(codecPrefs)
+                                                                {
+                                                                    var tempCodecPref = null;
+                                                                    if(codecPrefs)
+                                                                    {
+                                                                        tempCodecPref = codecPrefs.Codecs;
+                                                                    }
+                                                                    var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, numLimitInfo, attTransInfo, dvpCallDirection, tempCodecPref);
 
-                                                                callback(undefined, xml);
+                                                                    callback(undefined, xml);
+
+                                                                }).catch(function(err)
+                                                                {
+                                                                    logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Error Occurred getting context prefs', reqId);
+                                                                    callback(err, xmlBuilder.createRejectResponse());
+                                                                });
+
+
                                                             }
                                                             else
                                                             {
@@ -955,9 +1016,25 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
 
                                                                     var attTransInfo = AttendantTransferLegInfoHandler(reqId, null, extDetails.SipUACEndpoint);
 
-                                                                    var xml = xmlBuilder.CreateForwardingDialplan(reqId, ep, context, profile, '[^\\s]*', false, pbxFwdKey, numLimitInfo, attTransInfo, dvpCallDirection);
+                                                                    backendFactory.getBackendHandler().getContextPreferences(context, extDetails.SipUACEndpoint.ContextId, companyId, tenantId).then(function(codecPrefs)
+                                                                    {
+                                                                        var tempCodecPref = null;
+                                                                        if(codecPrefs)
+                                                                        {
+                                                                            tempCodecPref = codecPrefs.Codecs;
+                                                                        }
 
-                                                                    callback(undefined, xml);
+                                                                        var xml = xmlBuilder.CreateForwardingDialplan(reqId, ep, context, profile, '[^\\s]*', false, pbxFwdKey, numLimitInfo, attTransInfo, dvpCallDirection, tempCodecPref);
+
+                                                                        callback(undefined, xml);
+
+                                                                    }).catch(function(err)
+                                                                    {
+                                                                        logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Error Occurred getting context prefs', reqId);
+                                                                        callback(err, xmlBuilder.createRejectResponse());
+                                                                    });
+
+
                                                                 }
                                                             });
                                                         }
@@ -999,9 +1076,24 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                         ep.Domain = extDetails.SipUACEndpoint.Domain;
                                                                     }
 
-                                                                    var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, numLimitInfo, attTransInfo, dvpCallDirection);
+                                                                    backendFactory.getBackendHandler().getContextPreferences(context, extDetails.SipUACEndpoint.ContextId, companyId, tenantId).then(function(codecPrefs)
+                                                                    {
+                                                                        var tempCodecPref = null;
+                                                                        if(codecPrefs)
+                                                                        {
+                                                                            tempCodecPref = codecPrefs.Codecs;
+                                                                        }
+                                                                        var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, numLimitInfo, attTransInfo, dvpCallDirection, tempCodecPref);
 
-                                                                    callback(undefined, xml);
+                                                                        callback(undefined, xml);
+
+                                                                    }).catch(function(err)
+                                                                    {
+                                                                        logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Error Occurred getting context prefs', reqId);
+                                                                        callback(err, xmlBuilder.createRejectResponse());
+                                                                    });
+
+
                                                                 }
                                                                 else
                                                                 {
@@ -1050,10 +1142,25 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                         {
                                                                             if (balanceRes && balanceRes.IsSuccess)
                                                                             {
+                                                                                backendFactory.getBackendHandler().getContextPreferences(context, 'public', companyId, tenantId).then(function(codecPrefs)
+                                                                                {
+                                                                                    var tempCodecPref = null;
+                                                                                    if(codecPrefs)
+                                                                                    {
+                                                                                        tempCodecPref = codecPrefs.Codecs;
+                                                                                    }
 
-                                                                                var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection);
+                                                                                    var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, tempCodecPref);
 
-                                                                                callback(undefined, xml);
+                                                                                    callback(undefined, xml);
+
+                                                                                }).catch(function(err)
+                                                                                {
+                                                                                    logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Error Occurred getting context prefs', reqId);
+                                                                                    callback(err, xmlBuilder.createRejectResponse());
+                                                                                });
+
+
                                                                             }
                                                                             else
                                                                             {
@@ -1108,8 +1215,23 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                             ep.Domain = extDetails.SipUACEndpoint.Domain;
                                                                         }
 
-                                                                        var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, numLimitInfo, attTransInfo, dvpCallDirection);
-                                                                        callback(undefined, xml);
+                                                                        backendFactory.getBackendHandler().getContextPreferences(context, extDetails.SipUACEndpoint.ContextId, companyId, tenantId).then(function(codecPrefs)
+                                                                        {
+                                                                            var tempCodecPref = null;
+                                                                            if(codecPrefs)
+                                                                            {
+                                                                                tempCodecPref = codecPrefs.Codecs;
+                                                                            }
+                                                                            var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, numLimitInfo, attTransInfo, tempCodecPref);
+                                                                            callback(undefined, xml);
+
+                                                                        }).catch(function(err)
+                                                                        {
+                                                                            logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Error Occurred getting context prefs', reqId);
+                                                                            callback(err, xmlBuilder.createRejectResponse());
+                                                                        });
+
+
 
                                                                     }
                                                                     else
@@ -1179,9 +1301,24 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                     ep.Domain = extDetails.SipUACEndpoint.Domain;
                                                                 }
 
-                                                                var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, numLimitInfo, attTransInfo, dvpCallDirection);
+                                                                backendFactory.getBackendHandler().getContextPreferences(context, extDetails.SipUACEndpoint.ContextId, companyId, tenantId).then(function(codecPrefs)
+                                                                {
+                                                                    var tempCodecPref = null;
+                                                                    if(codecPrefs)
+                                                                    {
+                                                                        tempCodecPref = codecPrefs.Codecs;
+                                                                    }
+                                                                    var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, numLimitInfo, attTransInfo, dvpCallDirection, tempCodecPref);
 
-                                                                callback(undefined, xml);
+                                                                    callback(undefined, xml);
+
+                                                                }).catch(function(err)
+                                                                {
+                                                                    logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Error Occurred getting context prefs', reqId);
+                                                                    callback(err, xmlBuilder.createRejectResponse());
+                                                                });
+
+
                                                             }
                                                             else
                                                             {
@@ -1238,9 +1375,24 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                     ep.Domain = extDetails.SipUACEndpoint.Domain;
                                                 }
 
-                                                var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, numLimitInfo, attTransInfo, dvpCallDirection);
+                                                backendFactory.getBackendHandler().getContextPreferences(context, extDetails.SipUACEndpoint.ContextId, companyId, tenantId).then(function(codecPrefs)
+                                                {
+                                                    var tempCodecPref = null;
+                                                    if(codecPrefs)
+                                                    {
+                                                        tempCodecPref = codecPrefs.Codecs;
+                                                    }
+                                                    var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, numLimitInfo, attTransInfo, dvpCallDirection, tempCodecPref);
 
-                                                callback(undefined, xml);
+                                                    callback(undefined, xml);
+
+                                                }).catch(function(err)
+                                                {
+                                                    logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Error Occurred getting context prefs', reqId);
+                                                    callback(err, xmlBuilder.createRejectResponse());
+                                                });
+
+
                                             }
                                             else
                                             {
@@ -1321,7 +1473,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                         if (!err && redisResult)
                                         {
                                             var attTransInfo = AttendantTransferLegInfoHandler(reqId, null, extDetails.SipUACEndpoint);
-                                            var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, numLimitInfo, attTransInfo, dvpCallDirection);
+                                            var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, numLimitInfo, attTransInfo, dvpCallDirection, null);
                                             callback(undefined, xml);
                                         }
                                         else
@@ -1561,9 +1713,24 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                     ep.Domain = extDetails.SipUACEndpoint.Domain;
                                                                 }
 
-                                                                var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, undefined, attTransInfo, dvpCallDirection);
+                                                                backendFactory.getBackendHandler().getContextPreferences(context, extDetails.SipUACEndpoint.ContextId, companyId, tenantId).then(function(codecPrefs)
+                                                                {
+                                                                    var tempCodecPref = null;
+                                                                    if(codecPrefs)
+                                                                    {
+                                                                        tempCodecPref = codecPrefs.Codecs;
+                                                                    }
+                                                                    var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, undefined, attTransInfo, dvpCallDirection, tempCodecPref);
 
-                                                                callback(undefined, xml);
+                                                                    callback(undefined, xml);
+
+                                                                }).catch(function(err)
+                                                                {
+                                                                    logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Error Occurred getting context prefs', reqId);
+                                                                    callback(err, xmlBuilder.createRejectResponse());
+                                                                });
+
+
                                                             }
                                                             else
                                                             {
@@ -1660,9 +1827,24 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                         ep.Domain = extDetails.SipUACEndpoint.Domain;
                                                                     }
 
-                                                                    var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, undefined, attTransInfo, dvpCallDirection);
+                                                                    backendFactory.getBackendHandler().getContextPreferences(context, extDetails.SipUACEndpoint.ContextId, companyId, tenantId).then(function(codecPrefs)
+                                                                    {
+                                                                        var tempCodecPref = null;
+                                                                        if(codecPrefs)
+                                                                        {
+                                                                            tempCodecPref = codecPrefs.Codecs;
+                                                                        }
+                                                                        var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, undefined, attTransInfo, dvpCallDirection, tempCodecPref);
 
-                                                                    callback(undefined, xml);
+                                                                        callback(undefined, xml);
+
+                                                                    }).catch(function(err)
+                                                                    {
+                                                                        logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Error Occurred getting context prefs', reqId);
+                                                                        callback(err, xmlBuilder.createRejectResponse());
+                                                                    });
+
+
                                                                 }
                                                                 else
                                                                 {
@@ -1746,11 +1928,25 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
 
                                                                         var attTransInfo = AttendantTransferLegInfoHandler(reqId, null, extDetails.SipUACEndpoint);
 
+                                                                        backendFactory.getBackendHandler().getContextPreferences(context, extDetails.SipUACEndpoint.ContextId, companyId, tenantId).then(function(codecPrefs)
+                                                                        {
+                                                                            var tempCodecPref = null;
+                                                                            if(codecPrefs)
+                                                                            {
+                                                                                tempCodecPref = codecPrefs.Codecs;
+                                                                            }
 
-                                                                        var xml = xmlBuilder.CreateForwardingDialplan(reqId, ep, context, profile, '[^\\s]*', false, pbxFwdKey, undefined, attTransInfo, dvpCallDirection);
+                                                                            var xml = xmlBuilder.CreateForwardingDialplan(reqId, ep, context, profile, '[^\\s]*', false, pbxFwdKey, null, attTransInfo, dvpCallDirection, tempCodecPref);
+                                                                            callback(undefined, xml);
+
+                                                                        }).catch(function(err)
+                                                                        {
+                                                                            logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Error Occurred getting context prefs', reqId);
+                                                                            callback(err, xmlBuilder.createRejectResponse());
+                                                                        });
 
 
-                                                                        callback(undefined, xml);
+
                                                                     }
                                                                 });
                                                             }
@@ -1811,9 +2007,24 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                             ep.Domain = extDetails.SipUACEndpoint.Domain;
                                                                         }
 
-                                                                        var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, undefined, attTransInfo, dvpCallDirection);
+                                                                        backendFactory.getBackendHandler().getContextPreferences(context, extDetails.SipUACEndpoint.ContextId, companyId, tenantId).then(function(codecPrefs)
+                                                                        {
+                                                                            var tempCodecPref = null;
+                                                                            if(codecPrefs)
+                                                                            {
+                                                                                tempCodecPref = codecPrefs.Codecs;
+                                                                            }
+                                                                            var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, undefined, attTransInfo, dvpCallDirection, tempCodecPref);
 
-                                                                        callback(undefined, xml);
+                                                                            callback(undefined, xml);
+
+                                                                        }).catch(function(err)
+                                                                        {
+                                                                            logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Error Occurred getting context prefs', reqId);
+                                                                            callback(err, xmlBuilder.createRejectResponse());
+                                                                        });
+
+
                                                                     }
                                                                     else
                                                                     {
@@ -1871,10 +2082,25 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                             {
                                                                                 if (balanceRes && balanceRes.IsSuccess)
                                                                                 {
+                                                                                    backendFactory.getBackendHandler().getContextPreferences(context, 'public', companyId, tenantId).then(function(codecPrefs)
+                                                                                    {
+                                                                                        var tempCodecPref = null;
+                                                                                        if(codecPrefs)
+                                                                                        {
+                                                                                            tempCodecPref = codecPrefs.Codecs;
+                                                                                        }
 
-                                                                                    var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection);
+                                                                                        var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, tempCodecPref);
 
-                                                                                    callback(undefined, xml);
+                                                                                        callback(undefined, xml);
+
+                                                                                    }).catch(function(err)
+                                                                                    {
+                                                                                        logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Error Occurred getting context prefs', reqId);
+                                                                                        callback(err, xmlBuilder.createRejectResponse());
+                                                                                    });
+
+
                                                                                 }
                                                                                 else
                                                                                 {
@@ -1931,9 +2157,23 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                                 ep.Domain = extDetails.SipUACEndpoint.Domain;
                                                                             }
 
-                                                                            var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, numLimitInfo, attTransInfo, dvpCallDirection);
+                                                                            backendFactory.getBackendHandler().getContextPreferences(context, extDetails.SipUACEndpoint.ContextId, companyId, tenantId).then(function(codecPrefs)
+                                                                            {
+                                                                                var tempCodecPref = null;
+                                                                                if(codecPrefs)
+                                                                                {
+                                                                                    tempCodecPref = codecPrefs.Codecs;
+                                                                                }
+                                                                                var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, numLimitInfo, attTransInfo, dvpCallDirection, codecPrefs);
 
-                                                                            callback(undefined, xml);
+                                                                                callback(undefined, xml);
+
+                                                                            }).catch(function(err)
+                                                                            {
+                                                                                logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Error Occurred getting context prefs', reqId);
+                                                                                callback(err, xmlBuilder.createRejectResponse());
+                                                                            });
+
 
                                                                         }
                                                                         else
@@ -2011,9 +2251,24 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                         ep.Domain = extDetails.SipUACEndpoint.Domain;
                                                                     }
 
-                                                                    var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, undefined, attTransInfo, dvpCallDirection);
+                                                                    backendFactory.getBackendHandler().getContextPreferences(context, extDetails.SipUACEndpoint.ContextId, companyId, tenantId).then(function(codecPrefs)
+                                                                    {
+                                                                        var tempCodecPref = null;
+                                                                        if(codecPrefs)
+                                                                        {
+                                                                            tempCodecPref = codecPrefs.Codecs;
+                                                                        }
+                                                                        var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, undefined, attTransInfo, dvpCallDirection, tempCodecPref);
 
-                                                                    callback(undefined, xml);
+                                                                        callback(undefined, xml);
+
+                                                                    }).catch(function(err)
+                                                                    {
+                                                                        logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Error Occurred getting context prefs', reqId);
+                                                                        callback(err, xmlBuilder.createRejectResponse());
+                                                                    });
+
+
                                                                 }
                                                                 else
                                                                 {
@@ -2089,9 +2344,24 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                             ep.Domain = extDetails.SipUACEndpoint.Domain;
                                                         }
 
-                                                        var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, undefined, attTransInfo, dvpCallDirection);
+                                                        backendFactory.getBackendHandler().getContextPreferences(context, extDetails.SipUACEndpoint.ContextId, companyId, tenantId).then(function(codecPrefs)
+                                                        {
+                                                            var tempCodecPref = null;
+                                                            if(codecPrefs)
+                                                            {
+                                                                tempCodecPref = codecPrefs.Codecs;
+                                                            }
+                                                            var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, undefined, attTransInfo, dvpCallDirection, tempCodecPref);
 
-                                                        callback(undefined, xml);
+                                                            callback(undefined, xml);
+
+                                                        }).catch(function(err)
+                                                        {
+                                                            logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Error Occurred getting context prefs', reqId);
+                                                            callback(err, xmlBuilder.createRejectResponse());
+                                                        });
+
+
                                                     }
                                                     else
                                                     {
@@ -2174,7 +2444,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                 if (!err && redisResult)
                                                 {
                                                     var attTransInfo = AttendantTransferLegInfoHandler(reqId, fromUserData, null);
-                                                    var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, undefined, attTransInfo, dvpCallDirection);
+                                                    var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, undefined, attTransInfo, dvpCallDirection, null);
                                                     callback(undefined, xml);
                                                 }
                                                 else
@@ -2426,10 +2696,25 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                     {
                                                                         if (balanceRes && balanceRes.IsSuccess)
                                                                         {
+                                                                            backendFactory.getBackendHandler().getContextPreferences(context, 'public', companyId, tenantId).then(function(codecPrefs)
+                                                                            {
+                                                                                var tempCodecPref = null;
+                                                                                if(codecPrefs)
+                                                                                {
+                                                                                    tempCodecPref = codecPrefs.Codecs;
+                                                                                }
 
-                                                                            var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection);
+                                                                                var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, tempCodecPref);
 
-                                                                            callback(undefined, xml);
+                                                                                callback(undefined, xml);
+
+                                                                            }).catch(function(err)
+                                                                            {
+                                                                                logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Error Occurred getting context prefs', reqId);
+                                                                                callback(err, xmlBuilder.createRejectResponse());
+                                                                            });
+
+
                                                                         }
                                                                         else
                                                                         {
@@ -2691,10 +2976,25 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                             {
                                                                 if (balanceRes && balanceRes.IsSuccess)
                                                                 {
+                                                                    backendFactory.getBackendHandler().getContextPreferences(context, 'public', companyId, tenantId).then(function(codecPrefs)
+                                                                    {
+                                                                        var tempCodecPref = null;
+                                                                        if(codecPrefs)
+                                                                        {
+                                                                            tempCodecPref = codecPrefs.Codecs;
+                                                                        }
 
-                                                                    var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection);
+                                                                        var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, tempCodecPref);
 
-                                                                    callback(undefined, xml);
+                                                                        callback(undefined, xml);
+
+                                                                    }).catch(function(err)
+                                                                    {
+                                                                        logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Error Occurred getting context prefs', reqId);
+                                                                        callback(err, xmlBuilder.createRejectResponse());
+                                                                    });
+
+
                                                                 }
                                                                 else
                                                                 {
@@ -2805,10 +3105,25 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                 {
                                                     if (balanceRes && balanceRes.IsSuccess)
                                                     {
+                                                        backendFactory.getBackendHandler().getContextPreferences(context, 'public', companyId, tenantId).then(function(codecPrefs)
+                                                        {
+                                                            var tempCodecPref = null;
+                                                            if(codecPrefs)
+                                                            {
+                                                                tempCodecPref = codecPrefs.Codecs;
+                                                            }
 
-                                                        var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection);
+                                                            var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, tempCodecPref);
 
-                                                        callback(undefined, xml);
+                                                            callback(undefined, xml);
+
+                                                        }).catch(function(err)
+                                                        {
+                                                            logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Error Occurred getting context prefs', reqId);
+                                                            callback(err, xmlBuilder.createRejectResponse());
+                                                        });
+
+
                                                     }
                                                     else
                                                     {
@@ -2942,9 +3257,24 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                         ep.Domain = extDetails.SipUACEndpoint.Domain;
                                                                     }
 
-                                                                    var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, undefined, attTransInfo, dvpCallDirection);
+                                                                    backendFactory.getBackendHandler().getContextPreferences(context, extDetails.SipUACEndpoint.ContextId, companyId, tenantId).then(function(codecPrefs)
+                                                                    {
+                                                                        var tempCodecPref = null;
+                                                                        if(codecPrefs)
+                                                                        {
+                                                                            tempCodecPref = codecPrefs.Codecs;
+                                                                        }
+                                                                        var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, undefined, attTransInfo, dvpCallDirection, tempCodecPref);
 
-                                                                    callback(undefined, xml);
+                                                                        callback(undefined, xml);
+
+                                                                    }).catch(function(err)
+                                                                    {
+                                                                        logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Error Occurred getting context prefs', reqId);
+                                                                        callback(err, xmlBuilder.createRejectResponse());
+                                                                    });
+
+
                                                                 }
                                                                 else
                                                                 {
@@ -3024,9 +3354,24 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                             ep.Domain = extDetails.SipUACEndpoint.Domain;
                                                                         }
 
-                                                                        var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, undefined, attTransInfo, dvpCallDirection);
+                                                                        backendFactory.getBackendHandler().getContextPreferences(context, extDetails.SipUACEndpoint.ContextId, companyId, tenantId).then(function(codecPrefs)
+                                                                        {
+                                                                            var tempCodecPref = null;
+                                                                            if(codecPrefs)
+                                                                            {
+                                                                                tempCodecPref = codecPrefs.Codecs;
+                                                                            }
+                                                                            var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, undefined, attTransInfo, dvpCallDirection, tempCodecPref);
 
-                                                                        callback(undefined, xml);
+                                                                            callback(undefined, xml);
+
+                                                                        }).catch(function(err)
+                                                                        {
+                                                                            logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Error Occurred getting context prefs', reqId);
+                                                                            callback(err, xmlBuilder.createRejectResponse());
+                                                                        });
+
+
                                                                     }
                                                                     else
                                                                     {
@@ -3106,11 +3451,24 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
 
                                                                             var attTransInfo = AttendantTransferLegInfoHandler(reqId, null, extDetails.SipUACEndpoint);
 
+                                                                            backendFactory.getBackendHandler().getContextPreferences(context, extDetails.SipUACEndpoint.ContextId, companyId, tenantId).then(function(codecPrefs)
+                                                                            {
+                                                                                var tempCodecPref = null;
+                                                                                if(codecPrefs)
+                                                                                {
+                                                                                    tempCodecPref = codecPrefs.Codecs;
+                                                                                }
 
-                                                                            var xml = xmlBuilder.CreateForwardingDialplan(reqId, ep, context, profile, '[^\\s]*', false, pbxFwdKey, undefined, attTransInfo, dvpCallDirection);
+                                                                                var xml = xmlBuilder.CreateForwardingDialplan(reqId, ep, context, profile, '[^\\s]*', false, pbxFwdKey, null, attTransInfo, dvpCallDirection, tempCodecPref);
 
+                                                                                callback(undefined, xml);
 
-                                                                            callback(undefined, xml);
+                                                                            }).catch(function(err)
+                                                                            {
+                                                                                logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Error Occurred getting context prefs', reqId);
+                                                                                callback(err, xmlBuilder.createRejectResponse());
+                                                                            });
+
                                                                         }
                                                                     });
                                                                 }
@@ -3156,9 +3514,24 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                                 ep.Domain = extDetails.SipUACEndpoint.Domain;
                                                                             }
 
-                                                                            var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, undefined, attTransInfo, dvpCallDirection);
+                                                                            backendFactory.getBackendHandler().getContextPreferences(context, extDetails.SipUACEndpoint.ContextId, companyId, tenantId).then(function(codecPrefs)
+                                                                            {
+                                                                                var tempCodecPref = null;
+                                                                                if(codecPrefs)
+                                                                                {
+                                                                                    tempCodecPref = codecPrefs.Codecs;
+                                                                                }
+                                                                                var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, undefined, attTransInfo, dvpCallDirection, tempCodecPref);
 
-                                                                            callback(undefined, xml);
+                                                                                callback(undefined, xml);
+
+                                                                            }).catch(function(err)
+                                                                            {
+                                                                                logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Error Occurred getting context prefs', reqId);
+                                                                                callback(err, xmlBuilder.createRejectResponse());
+                                                                            });
+
+
                                                                         }
                                                                         else
                                                                         {
@@ -3216,10 +3589,25 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                                 {
                                                                                     if (balanceRes && balanceRes.IsSuccess)
                                                                                     {
+                                                                                        backendFactory.getBackendHandler().getContextPreferences(context, 'public', companyId, tenantId).then(function(codecPrefs)
+                                                                                        {
+                                                                                            var tempCodecPref = null;
+                                                                                            if(codecPrefs)
+                                                                                            {
+                                                                                                tempCodecPref = codecPrefs.Codecs;
+                                                                                            }
 
-                                                                                        var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection);
+                                                                                            var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, tempCodecPref);
 
-                                                                                        callback(undefined, xml);
+                                                                                            callback(undefined, xml);
+
+                                                                                        }).catch(function(err)
+                                                                                        {
+                                                                                            logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Error Occurred getting context prefs', reqId);
+                                                                                            callback(err, xmlBuilder.createRejectResponse());
+                                                                                        });
+
+
                                                                                     }
                                                                                     else
                                                                                     {
@@ -3276,9 +3664,24 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                                     ep.Domain = extDetails.SipUACEndpoint.Domain;
                                                                                 }
 
-                                                                                var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, numLimitInfo, attTransInfo, dvpCallDirection);
+                                                                                backendFactory.getBackendHandler().getContextPreferences(context, extDetails.SipUACEndpoint.ContextId, companyId, tenantId).then(function(codecPrefs)
+                                                                                {
+                                                                                    var tempCodecPref = null;
+                                                                                    if(codecPrefs)
+                                                                                    {
+                                                                                        tempCodecPref = codecPrefs.Codecs;
+                                                                                    }
+                                                                                    var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, numLimitInfo, attTransInfo, dvpCallDirection, tempCodecPref);
 
-                                                                                callback(undefined, xml);
+                                                                                    callback(undefined, xml);
+
+                                                                                }).catch(function(err)
+                                                                                {
+                                                                                    logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Error Occurred getting context prefs', reqId);
+                                                                                    callback(err, xmlBuilder.createRejectResponse());
+                                                                                });
+
+
 
                                                                             }
                                                                             else
@@ -3341,9 +3744,24 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                             ep.Domain = extDetails.SipUACEndpoint.Domain;
                                                                         }
 
-                                                                        var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, undefined, attTransInfo, dvpCallDirection);
+                                                                        backendFactory.getBackendHandler().getContextPreferences(context, extDetails.SipUACEndpoint.ContextId, companyId, tenantId).then(function(codecPrefs)
+                                                                        {
+                                                                            var tempCodecPref = null;
+                                                                            if(codecPrefs)
+                                                                            {
+                                                                                tempCodecPref = codecPrefs.Codecs;
+                                                                            }
+                                                                            var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, undefined, attTransInfo, dvpCallDirection, tempCodecPref);
 
-                                                                        callback(undefined, xml);
+                                                                            callback(undefined, xml);
+
+                                                                        }).catch(function(err)
+                                                                        {
+                                                                            logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Error Occurred getting context prefs', reqId);
+                                                                            callback(err, xmlBuilder.createRejectResponse());
+                                                                        });
+
+
                                                                     }
                                                                     else
                                                                     {
@@ -3403,9 +3821,24 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                 ep.Domain = extDetails.SipUACEndpoint.Domain;
                                                             }
 
-                                                            var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, undefined, attTransInfo, dvpCallDirection);
+                                                            backendFactory.getBackendHandler().getContextPreferences(context, extDetails.SipUACEndpoint.ContextId, companyId, tenantId).then(function(codecPrefs)
+                                                            {
+                                                                var tempCodecPref = null;
+                                                                if(codecPrefs)
+                                                                {
+                                                                    tempCodecPref = codecPrefs.Codecs;
+                                                                }
+                                                                var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, undefined, attTransInfo, dvpCallDirection, tempCodecPref);
 
-                                                            callback(undefined, xml);
+                                                                callback(undefined, xml);
+
+                                                            }).catch(function(err)
+                                                            {
+                                                                logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Error Occurred getting context prefs', reqId);
+                                                                callback(err, xmlBuilder.createRejectResponse());
+                                                            });
+
+
                                                         }
                                                         else
                                                         {
@@ -3469,7 +3902,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                     if (!err && redisResult)
                                                     {
                                                         var attTransInfo = AttendantTransferLegInfoHandler(reqId, null, null);
-                                                        var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, undefined, attTransInfo, dvpCallDirection);
+                                                        var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, undefined, attTransInfo, dvpCallDirection, null);
                                                         callback(undefined, xml);
                                                     }
                                                     else
@@ -3670,10 +4103,25 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                 {
                                                     if (balanceRes && balanceRes.IsSuccess)
                                                     {
+                                                        backendFactory.getBackendHandler().getContextPreferences(context, 'public', companyId, tenantId).then(function(codecPrefs)
+                                                        {
+                                                            var tempCodecPref = null;
+                                                            if(codecPrefs)
+                                                            {
+                                                                tempCodecPref = codecPrefs.Codecs;
+                                                            }
 
-                                                        var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection);
+                                                            var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, tempCodecPref);
 
-                                                        callback(undefined, xml);
+                                                            callback(undefined, xml);
+
+                                                        }).catch(function(err)
+                                                        {
+                                                            logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Error Occurred getting context prefs', reqId);
+                                                            callback(err, xmlBuilder.createRejectResponse());
+                                                        });
+
+
                                                     }
                                                     else
                                                     {

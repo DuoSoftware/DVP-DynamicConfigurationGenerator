@@ -18,7 +18,8 @@ module.exports = {
   "Host":{
     "Ip":"0.0.0.0",
     "Port":8817,
-    "Version":"1.0.0.0"
+    "Version":"1.0.0.0",
+    "AllowCodecConfigure": true
   },
 
   "Services":

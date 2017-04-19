@@ -273,19 +273,36 @@ var HandleOutRequest = function(reqId, data, callerIdNum, contextTenant, appType
                                                             ep.Origination = rule.ANI;
                                                             ep.OriginationCallerIdNumber = rule.ANI;
                                                         }
-                                                        externalApi.CheckBalance(reqId, varUuid, ep.Origination, ep.Destination, 'minute', ep.Operator, ep.CompanyId, ep.TenantId)
+                                                        externalApi.CheckBalance(reqId, varUuid, ep.Origination, ep.Destination, 'minute', ep.Operator, rule.CompanyId, rule.TenantId)
                                                             .then(function(balanceRes)
                                                             {
                                                                 if (balanceRes && balanceRes.IsSuccess)
                                                                 {
+                                                                    backendFactory.getBackendHandler().getContextPreferences(callerContext, 'public', rule.CompanyId, rule.TenantId).then(function(codecPrefs)
+                                                                    {
+                                                                        var tempCodecPref = null;
+                                                                        if(codecPrefs)
+                                                                        {
+                                                                            tempCodecPref = codecPrefs.Codecs;
+                                                                        }
+                                                                        var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, callerContext, profile, '[^\\s]*', false, null, 'outbound', tempCodecPref);
 
-                                                                    var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, callerContext, profile, '[^\\s]*', false, null, 'outbound');
+                                                                        RedisOperations(varUuid, rule.CompanyId, rule.TenantId, null, 'EMERGENCY', isDialPlanGiven, 'outbound');
 
-                                                                    RedisOperations(varUuid, rule.CompanyId, rule.TenantId, null, 'EMERGENCY', isDialPlanGiven, 'outbound');
+                                                                        logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
 
-                                                                    logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+                                                                        res.end(xml);
 
-                                                                    res.end(xml);
+                                                                    }).catch(function(err)
+                                                                    {
+                                                                        var xml = xmlGen.createRejectResponse(callerContext);
+
+                                                                        logger.error('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, err);
+
+                                                                        res.end(xml);
+                                                                    });
+
+
                                                                 }
                                                                 else
                                                                 {
@@ -681,6 +698,8 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
             var pabxFeaturesPattern = new RegExp('^(PBXFeatures)[^\s]*');
 
             huntDestNum = decodeURIComponent(huntDestNum);
+
+            huntContext = decodeURIComponent(huntContext);
 
             cdnum = decodeURIComponent(cdnum);
 

@@ -1,6 +1,10 @@
 var logger = require('dvp-common/LogHandler/CommonLogHandler.js').logger;
 var dbModel = require('dvp-dbmodels');
 var ipValidator = require('./IpValidator.js');
+var Promise = require('bluebird');
+var config = require('config');
+
+var allowCodecPref = config.Host.AllowCodecConfigure;
 
 var GetUserBy_Ext_Domain = function(extension, domain, data, callback)
 {
@@ -1300,6 +1304,27 @@ var GetCallServerClusterDetailsDB = function(csId, data, callback)
     }
 };
 
+var getContextPreferences = function(context1, context2, companyId, tenantId)
+{
+    if(allowCodecPref === 'true' || allowCodecPref === true)
+    {
+        var tempArr = [];
+        tempArr.push(context1, context2);
+
+        var sortedArr = tempArr.sort();
+
+        return dbModel.ContextCodecPref
+            .find({where :[{Context1: sortedArr[0], Context2: sortedArr[1], CompanyId: companyId, TenantId: tenantId}]})
+    }
+    else
+    {
+        return new Promise(function(fulfill, reject){
+            fulfill(null);
+        })
+    }
+
+};
+
 
 module.exports.GetUserBy_Name_Domain = GetUserBy_Name_Domain;
 module.exports.GetUserBy_Ext_Domain = GetUserBy_Ext_Domain;
@@ -1325,4 +1350,5 @@ module.exports.GetGroupByExtension = GetGroupByExtension;
 module.exports.ValidateBlacklistNumber = ValidateBlacklistNumber;
 module.exports.GetCacheObject = GetCacheObject;
 module.exports.PickGatewayTransferRules = PickGatewayTransferRules;
+module.exports.getContextPreferences = getContextPreferences;
 
