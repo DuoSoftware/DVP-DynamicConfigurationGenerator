@@ -413,7 +413,7 @@ var ProcessCallForwarding = function(reqId, aniNum, dnisNum, callerDomain, conte
                                                         tempCodecPref = codecPrefs.Codecs;
                                                     }
 
-                                                    var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, null, null, uuid, tempCodecPref);
+                                                    var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, null, null, tempCodecPref);
 
                                                     callback(undefined, xml);
 
