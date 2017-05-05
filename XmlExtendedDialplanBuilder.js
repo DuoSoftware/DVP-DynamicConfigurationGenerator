@@ -601,7 +601,11 @@ var CreateRouteUserDialplan = function(reqId, ep, context, profile, destinationP
 
         var codecListString = null;
 
-        codecList = JSON.parse(codecList);
+        if(codecList)
+        {
+            codecList = JSON.parse(codecList);
+        }
+
 
         if(codecList && codecList.length > 0)
         {
@@ -1735,7 +1739,10 @@ var CreateForwardingDialplan = function(reqId, endpoint, context, profile, desti
 
         var codecListString = null;
 
-        codecList = JSON.parse(codecList);
+        if(codecList)
+        {
+            codecList = JSON.parse(codecList);
+        }
 
         if(codecList && codecList.length > 0)
         {
@@ -2081,7 +2088,10 @@ var CreateRouteGatewayDialplan = function(reqId, ep, context, profile, destinati
 
         var codecListString = null;
 
-        codecList = JSON.parse(codecList);
+        if(codecList)
+        {
+            codecList = JSON.parse(codecList);
+        }
 
         if(codecList && codecList.length > 0)
         {
