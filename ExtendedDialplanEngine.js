@@ -981,7 +981,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                 Origination: callerIdName,
                                                                 OriginationCallerIdNumber: callerIdNum,
                                                                 Destination: extDetails.Extension,
-                                                                Domain: '',
+                                                                Domain: toUsrDomain,
                                                                 Group: grp,
                                                                 CompanyId: companyId,
                                                                 TenantId: tenantId,
