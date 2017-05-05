@@ -2386,24 +2386,26 @@ var CreateFollowMeDialplan = function(reqId, fmEndpoints, context, profile, dest
 
             var dnis = '';
 
-            if (ep.Domain)
-            {
-                dnis = util.format('%s@%s', ep.Destination, ep.Domain);
-            }
-            else
-            {
-                dnis = util.format('%s', ep.Destination);
-            }
+
 
             var protocol = 'sofia';
             var calling = '';
 
             if(ep.Type === 'GATEWAY')
             {
+                dnis = util.format('%s', ep.Destination);
                 calling = util.format('%s%s/%s/%s', option, protocol, destinationGroup, dnis);
             }
             else
             {
+                if (ep.Domain)
+                {
+                    dnis = util.format('%s@%s', ep.Destination, ep.Domain);
+                }
+                else
+                {
+                    dnis = util.format('%s', ep.Destination);
+                }
                 calling = util.format('%s%s/%s', option, destinationGroup, dnis);
             }
 
