@@ -265,7 +265,7 @@ var CreatePbxFeaturesGateway = function(reqId, destNum, trunkNumber, trunkCode, 
             .up()
             .ele('action').att('application', 'export').att('data', 'DVP_CALL_DIRECTION=outbound')
             .up()
-            .ele('action').att('application', 'att_xfer').att('data', '{origination_caller_id_number=' + trunkNumber + ',dvp_app_id=' + appId + ',sip_h_X-Gateway=' + trunkIp + '}sofia/gateway/' + trunkCode + '/' +digits)
+            .ele('action').att('application', 'att_xfer').att('data', '{leg_timeout=60, origination_caller_id_name=' + trunkNumber + ', origination_caller_id_number=' + trunkNumber + ',dvp_app_id=' + appId + ',sip_h_X-Gateway=' + trunkIp + '}sofia/gateway/' + trunkCode + '/' +digits)
             .up()
             .end({pretty: true});
 
