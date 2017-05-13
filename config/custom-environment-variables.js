@@ -15,7 +15,8 @@ module.exports = {
 
     "Host":{
         "Port":"HOST_DYNAMICCONFIGGEN_PORT",
-        "Version":"HOST_VERSION"
+        "Version":"HOST_VERSION",
+        "AllowCodecConfigure": "HOST_DYNAMICCONFIGGEN_CODECCONFIG"
     },
 
     "Redis":
