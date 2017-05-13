@@ -9,6 +9,8 @@ var fileServiceIp = config.Services.fileServiceHost;
 var fileServicePort = config.Services.fileServicePort;
 var fileServiceVersion = config.Services.fileServiceVersion;
 
+var allowCodecPref = config.Host.AllowCodecConfigure;
+
 var createRejectResponse = function(context)
 {
     try
@@ -67,7 +69,7 @@ var createNotFoundResponse = function()
 
 };
 
-var CreatePbxFeatures = function(reqId, destNum, pbxType, domain, trunkNumber, trunkCode, companyId, tenantId, appId, context, transferCodes)
+var CreatePbxFeatures = function(reqId, destNum, pbxType, domain, trunkNumber, trunkCode, companyId, tenantId, appId, context, transferCodes, ardsClientUuid)
 {
     try
     {
@@ -180,11 +182,22 @@ var CreatePbxFeatures = function(reqId, destNum, pbxType, domain, trunkNumber, t
 
             }
 
+            if(ardsClientUuid)
+            {
+                cond.ele('action').att('application', 'att_xfer').att('data', '{companyid=' + companyId + ',ards_client_uuid=' + ardsClientUuid + ',tenantid=' + tenantId + ',DVP_OPERATION_CAT=ATT_XFER_USER,dvp_app_id=' + appId + '}' + pbxType + '/${digits}@' + domain)
+                    .up()
+                    .end({pretty: true});
+            }
+            else
+            {
+                cond.ele('action').att('application', 'att_xfer').att('data', '{companyid=' + companyId + ',tenantid=' + tenantId + ',DVP_OPERATION_CAT=ATT_XFER_USER,dvp_app_id=' + appId + '}' + pbxType + '/${digits}@' + domain)
+                    .up()
+                    .end({pretty: true});
+            }
 
 
-            cond.ele('action').att('application', 'att_xfer').att('data', '{companyid=' + companyId + ',tenantid=' + tenantId + ',dvp_app_id=' + appId + '}' + pbxType + '/${digits}@' + domain)
-                .up()
-                .end({pretty: true});
+
+
         }
 
 
@@ -198,7 +211,7 @@ var CreatePbxFeatures = function(reqId, destNum, pbxType, domain, trunkNumber, t
     }
 };
 
-var CreatePbxFeaturesGateway = function(reqId, destNum, trunkNumber, trunkCode, companyId, tenantId, appId, context, digits, operator)
+var CreatePbxFeaturesGateway = function(reqId, destNum, trunkNumber, trunkCode, companyId, tenantId, appId, context, digits, operator, trunkIp)
 {
     try
     {
@@ -252,7 +265,9 @@ var CreatePbxFeaturesGateway = function(reqId, destNum, trunkNumber, trunkCode, 
             .up()
             .ele('action').att('application', 'export').att('data', 'DVP_CALL_DIRECTION=outbound')
             .up()
-            .ele('action').att('application', 'att_xfer').att('data', '{origination_caller_id_number=' + trunkNumber + ',dvp_app_id=' + appId + '}sofia/gateway/' + trunkCode + '/' +digits)
+            .ele('action').att('application', 'set').att('data', 'effective_caller_id_name=' + trunkNumber)
+            .up()
+            .ele('action').att('application', 'att_xfer').att('data', '{leg_timeout=60, origination_caller_id_name=' + trunkNumber + ', origination_caller_id_number=' + trunkNumber + ',dvp_app_id=' + appId + ',sip_h_X-Gateway=' + trunkIp + '}sofia/gateway/' + trunkCode + '/' +digits)
             .up()
             .end({pretty: true});
 
@@ -560,7 +575,7 @@ var CreateConferenceDialplan = function(reqId, epList, context, destinationPatte
 
 };
 
-var CreateRouteUserDialplan = function(reqId, ep, context, profile, destinationPattern, ignoreEarlyMedia, numLimitInfo, transferLegInfo, dvpCallDirection)
+var CreateRouteUserDialplan = function(reqId, ep, context, profile, destinationPattern, ignoreEarlyMedia, numLimitInfo, transferLegInfo, dvpCallDirection, codecList)
 {
     try
     {
@@ -586,8 +601,39 @@ var CreateRouteUserDialplan = function(reqId, ep, context, profile, destinationP
 
         var option = '';
 
+        var codecListString = null;
+
+        if(codecList)
+        {
+            codecList = JSON.parse(codecList);
+        }
+
+
+        if(codecList && codecList.length > 0)
+        {
+            codecListString = codecList.join();
+        }
+
+        option = util.format('[leg_timeout=%d, origination_caller_id_name=%s,origination_caller_id_number=%s', ep.LegTimeout, ep.Origination, ep.OriginationCallerIdNumber);
+
+        if (ep.LegStartDelay > 0)
+        {
+            option = option + ', leg_delay_start=' + ep.LegStartDelay;
+        }
 
         if(dvpCallDirection === 'outbound' && ep.Type !== 'GROUP')
+        {
+            option = option + ', origination_uuid=${my_uuid}';
+        }
+
+        if(codecListString && allowCodecPref)
+        {
+            option = option + ', absolute_codec_string=\'' + codecListString + '\'';
+        }
+
+        option = option + ']';
+
+        /*if(dvpCallDirection === 'outbound' && ep.Type !== 'GROUP')
         {
             if (ep.LegStartDelay > 0)
                 option = util.format('[leg_delay_start=%d, origination_uuid=${my_uuid}, leg_timeout=%d,origination_caller_id_name=%s,origination_caller_id_number=%s]', ep.LegStartDelay, ep.LegTimeout, ep.Origination, ep.OriginationCallerIdNumber);
@@ -597,10 +643,10 @@ var CreateRouteUserDialplan = function(reqId, ep, context, profile, destinationP
         else
         {
             if (ep.LegStartDelay > 0)
-                option = util.format('[leg_delay_start=%d,leg_timeout=%d,origination_caller_id_name=%s,origination_caller_id_number=%s]', ep.LegStartDelay, ep.LegTimeout, ep.Origination, ep.OriginationCallerIdNumber);
+                option = util.format('[leg_delay_start=%d, leg_timeout=%d,origination_caller_id_name=%s,origination_caller_id_number=%s]', ep.LegStartDelay, ep.LegTimeout, ep.Origination, ep.OriginationCallerIdNumber);
             else
-                option = util.format('[leg_timeout=%d,origination_caller_id_name=%s,origination_caller_id_number=%s]', ep.LegTimeout, ep.Origination, ep.OriginationCallerIdNumber);
-        }
+                option = util.format('[leg_timeout=%d, origination_caller_id_name=%s,origination_caller_id_number=%s]', ep.LegTimeout, ep.Origination, ep.OriginationCallerIdNumber);
+        }*/
 
         //var httpUrl = Config.Services.HttApiUrl;
 
@@ -1667,7 +1713,7 @@ var CreateAutoAttendantDialplan = function(reqId, endpoint, context, toContext, 
 
 };
 
-var CreateForwardingDialplan = function(reqId, endpoint, context, profile, destinationPattern, ignoreEarlyMedia, fwdKey, numLimitInfo, transferLegInfo, dvpCallDirection)
+var CreateForwardingDialplan = function(reqId, endpoint, context, profile, destinationPattern, ignoreEarlyMedia, fwdKey, numLimitInfo, transferLegInfo, dvpCallDirection, codecList)
 {
     try
     {
@@ -1693,10 +1739,36 @@ var CreateForwardingDialplan = function(reqId, endpoint, context, profile, desti
 
         var option = '';
 
+        var codecListString = null;
+
+        if(codecList)
+        {
+            codecList = JSON.parse(codecList);
+        }
+
+        if(codecList && codecList.length > 0)
+        {
+            codecListString = codecList.join();
+        }
+
+        option = util.format('[leg_timeout=%d,origination_caller_id_name=%s,origination_caller_id_number=%s', endpoint.LegTimeout, endpoint.Origination, endpoint.OriginationCallerIdNumber);
+
         if (endpoint.LegStartDelay > 0)
+        {
+            option = option + ', leg_delay_start=' + endpoint.LegStartDelay;
+        }
+
+        if(codecListString && allowCodecPref)
+        {
+            option = option + ', absolute_codec_string=\'' + codecListString + '\'';
+        }
+
+        option = option + ']';
+
+        /*if (endpoint.LegStartDelay > 0)
             option = util.format('[leg_delay_start=%d,leg_timeout=%d,origination_caller_id_name=%s,origination_caller_id_number=%s]', endpoint.LegStartDelay, endpoint.LegTimeout, endpoint.Origination, endpoint.OriginationCallerIdNumber);
         else
-            option = util.format('[leg_timeout=%d,origination_caller_id_name=%s,origination_caller_id_number=%s]', endpoint.LegTimeout, endpoint.Origination, endpoint.OriginationCallerIdNumber);
+            option = util.format('[leg_timeout=%d,origination_caller_id_name=%s,origination_caller_id_number=%s]', endpoint.LegTimeout, endpoint.Origination, endpoint.OriginationCallerIdNumber);*/
 
         //var httpUrl = Config.Services.HttApiUrl;
 
@@ -1872,7 +1944,7 @@ var CreateForwardingDialplan = function(reqId, endpoint, context, profile, desti
 
 };
 
-var CreateRouteGatewayDialplan = function(reqId, ep, context, profile, destinationPattern, ignoreEarlyMedia, transferLegInfo, dvpCallDirection)
+var CreateRouteGatewayDialplan = function(reqId, ep, context, profile, destinationPattern, ignoreEarlyMedia, transferLegInfo, dvpCallDirection, codecList)
 {
     try
     {
@@ -2016,7 +2088,38 @@ var CreateRouteGatewayDialplan = function(reqId, ep, context, profile, destinati
             destinationGroup = ep.Profile;
         }
 
+        var codecListString = null;
+
+        if(codecList)
+        {
+            codecList = JSON.parse(codecList);
+        }
+
+        if(codecList && codecList.length > 0)
+        {
+            codecListString = codecList.join();
+        }
+
+        option = util.format('[leg_timeout=%d, origination_caller_id_name=%s,origination_caller_id_number=%s,sip_h_X-Gateway=%s', ep.LegTimeout, ep.Origination, ep.OriginationCallerIdNumber, ep.Domain);
+
+        if (ep.LegStartDelay > 0)
+        {
+            option = option + ', leg_delay_start=' + ep.LegStartDelay;
+        }
+
         if(dvpCallDirection === 'outbound')
+        {
+            option = option + ', origination_uuid=${my_uuid}';
+        }
+
+        if(codecListString && allowCodecPref)
+        {
+            option = option + ', absolute_codec_string=\'' + codecListString + '\'';
+        }
+
+        option = option + ']';
+
+        /*if(dvpCallDirection === 'outbound')
         {
             if (ep.LegStartDelay > 0)
                 option = util.format('[leg_delay_start=%d, origination_uuid=${my_uuid}, leg_timeout=%d,origination_caller_id_name=%s,origination_caller_id_number=%s,sip_h_X-Gateway=%s]', ep.LegStartDelay, ep.LegTimeout, ep.Origination, ep.OriginationCallerIdNumber, ep.Domain);
@@ -2029,7 +2132,7 @@ var CreateRouteGatewayDialplan = function(reqId, ep, context, profile, destinati
                 option = util.format('[leg_delay_start=%d, leg_timeout=%d,origination_caller_id_name=%s,origination_caller_id_number=%s,sip_h_X-Gateway=%s]', ep.LegStartDelay, ep.LegTimeout, ep.Origination, ep.OriginationCallerIdNumber, ep.Domain);
             else
                 option = util.format('[leg_timeout=%d, origination_caller_id_name=%s,origination_caller_id_number=%s,sip_h_X-Gateway=%s]', ep.LegTimeout, ep.Origination, ep.OriginationCallerIdNumber, ep.Domain);
-        }
+        }*/
 
 
         var dnis = '';
@@ -2295,24 +2398,26 @@ var CreateFollowMeDialplan = function(reqId, fmEndpoints, context, profile, dest
 
             var dnis = '';
 
-            if (ep.Domain)
-            {
-                dnis = util.format('%s@%s', ep.Destination, ep.Domain);
-            }
-            else
-            {
-                dnis = util.format('%s', ep.Destination);
-            }
+
 
             var protocol = 'sofia';
             var calling = '';
 
             if(ep.Type === 'GATEWAY')
             {
+                dnis = util.format('%s', ep.Destination);
                 calling = util.format('%s%s/%s/%s', option, protocol, destinationGroup, dnis);
             }
             else
             {
+                if (ep.Domain)
+                {
+                    dnis = util.format('%s@%s', ep.Destination, ep.Domain);
+                }
+                else
+                {
+                    dnis = util.format('%s', ep.Destination);
+                }
                 calling = util.format('%s%s/%s', option, destinationGroup, dnis);
             }
 
