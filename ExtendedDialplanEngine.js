@@ -2615,7 +2615,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                     else if(rule)
                                                     {
                                                         var allowGwCall = false;
-                                                        if(!iddEnabled)
+                                                        if(iddEnabled)
                                                         {
                                                             if(CheckIddValidity(rule.DNIS, rule.TrunkNumber))
                                                             {
