@@ -2211,7 +2211,7 @@ var CreateRouteGatewayDialplan = function(reqId, ep, context, profile, destinati
 
             }*/
 
-            /*if(typeof ep.OutLimit != 'undefined' || typeof ep.BothLimit != 'undefined' || (compLimits && compLimits.OutboundLimit && typeof compLimits.OutboundLimit.MaxCount != 'undefined') || (compLimits && compLimits.BothLimit && typeof compLimits.BothLimit.MaxCount != 'undefined'))
+            if(typeof ep.OutLimit != 'undefined' || typeof ep.BothLimit != 'undefined' || (compLimits && compLimits.OutboundLimit && typeof compLimits.OutboundLimit.MaxCount != 'undefined') || (compLimits && compLimits.BothLimit && typeof compLimits.BothLimit.MaxCount != 'undefined'))
             {
                 if(typeof ep.OutLimit != 'undefined')
                 {
@@ -2240,17 +2240,17 @@ var CreateRouteGatewayDialplan = function(reqId, ep, context, profile, destinati
                     var limitStr = util.format('hash %d_%d_both companylimit %d !USER_BUSY', ep.TenantId, ep.CompanyId, compLimits.BothLimit.MaxCount);
                     cond.ele('action').att('application', 'limit').att('data', limitStr)
                         .up()
+                    cond.ele('action').att('application', 'limit').att('data', limitStr)
+                        .up()
 
                 }
             }
             else
             {
                 return createNotFoundResponse();
-            }*/
+            }
 
-            /*cond.ele('action').att('application', 'bridge').att('data', calling)
-                .up()*/
-            cond.ele('action').att('application', 'limit_execute').att('data', 'hash 1_103_both companylimit ' + compLimits.BothLimit.MaxCount + ' !USER_BUSY bridge ' + calling)
+            cond.ele('action').att('application', 'bridge').att('data', calling)
                 .up()
                 .ele('action').att('application', 'hangup')
                 .up()
