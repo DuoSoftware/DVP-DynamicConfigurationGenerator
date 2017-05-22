@@ -384,8 +384,6 @@ var ProcessCallForwarding = function(reqId, aniNum, dnisNum, callerDomain, conte
                                         OriginationCallerIdNumber: rule.ANI,
                                         Destination: rule.DNIS,
                                         Domain: rule.IpUrl,
-                                        OutLimit: rule.OutLimit,
-                                        BothLimit: rule.BothLimit,
                                         TrunkNumber: rule.TrunkNumber,
                                         NumberType: rule.NumberType,
                                         CompanyId: rule.CompanyId,
@@ -413,10 +411,40 @@ var ProcessCallForwarding = function(reqId, aniNum, dnisNum, callerDomain, conte
                                                         tempCodecPref = codecPrefs.Codecs;
                                                     }
 
-                                                    xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, null, null, tempCodecPref, function(xml)
+                                                    backendFactory.getBackendHandler().GetCompanyLimits(companyId, tenantId).then(function(compLimits)
                                                     {
-                                                        callback(null, xml);
+                                                        var limits = {
+                                                            NumberOutboundLimit: rule.OutLimit,
+                                                            NumberBothLimit: rule.BothLimit,
+                                                            CompanyOutboundLimit: compLimits.OutboundLimit,
+                                                            CompanyBothLimit: compLimits.BothLimit
+                                                        };
+
+                                                        var NumLimitInfo = LimitValidator(limits, rule.TrunkNumber, 'outbound');
+
+                                                        if(NumLimitInfo)
+                                                        {
+                                                            ep.Limits = NumLimitInfo;
+                                                            var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, null, null, tempCodecPref);
+
+                                                            callback(null, xml);
+                                                        }
+                                                        else
+                                                        {
+                                                            logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Limits not defined', reqId);
+                                                            callback(err, xmlBuilder.createRejectResponse());
+                                                        }
+
+
+
+                                                    }).catch(function(err)
+                                                    {
+                                                        logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Error getting company limits', reqId);
+                                                        callback(err, xmlBuilder.createRejectResponse());
+
                                                     });
+
+
 
 
 
@@ -1153,9 +1181,37 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                                         tempCodecPref = codecPrefs.Codecs;
                                                                                     }
 
-                                                                                    xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, tempCodecPref, function(xml)
+                                                                                    backendFactory.getBackendHandler().GetCompanyLimits(companyId, tenantId).then(function(compLimits)
                                                                                     {
-                                                                                        callback(null, xml);
+                                                                                        var limits = {
+                                                                                            NumberOutboundLimit: rule.OutLimit,
+                                                                                            NumberBothLimit: rule.BothLimit,
+                                                                                            CompanyOutboundLimit: compLimits.OutboundLimit,
+                                                                                            CompanyBothLimit: compLimits.BothLimit
+                                                                                        };
+
+                                                                                        var NumLimitInfo = LimitValidator(limits, rule.TrunkNumber, 'outbound');
+
+                                                                                        if(NumLimitInfo)
+                                                                                        {
+                                                                                            ep.Limits = NumLimitInfo;
+                                                                                            var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, tempCodecPref);
+
+                                                                                            callback(null, xml);
+                                                                                        }
+                                                                                        else
+                                                                                        {
+                                                                                            logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Limits not defined', reqId);
+                                                                                            callback(err, xmlBuilder.createRejectResponse());
+                                                                                        }
+
+
+
+                                                                                    }).catch(function(err)
+                                                                                    {
+                                                                                        logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Error getting company limits', reqId);
+                                                                                        callback(err, xmlBuilder.createRejectResponse());
+
                                                                                     });
 
 
@@ -2096,10 +2152,9 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                                             tempCodecPref = codecPrefs.Codecs;
                                                                                         }
 
-                                                                                        xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, tempCodecPref, function(xml)
-                                                                                        {
-                                                                                            callback(null, xml);
-                                                                                        });
+                                                                                        var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, tempCodecPref);
+
+                                                                                        callback(null, xml);
 
 
 
@@ -2713,11 +2768,9 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                                     tempCodecPref = codecPrefs.Codecs;
                                                                                 }
 
-                                                                                xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, tempCodecPref, function(xml)
-                                                                                {
-                                                                                    callback(null, xml);
+                                                                                var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, tempCodecPref);
 
-                                                                                });
+                                                                                callback(null, xml);
 
 
 
@@ -2997,11 +3050,9 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                             tempCodecPref = codecPrefs.Codecs;
                                                                         }
 
-                                                                        xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, tempCodecPref, function(xml)
-                                                                        {
-                                                                            callback(null, xml);
+                                                                        var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, tempCodecPref);
 
-                                                                        });
+                                                                        callback(null, xml);
 
 
 
@@ -3130,11 +3181,9 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                 tempCodecPref = codecPrefs.Codecs;
                                                             }
 
-                                                            xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, tempCodecPref, function(xml)
-                                                            {
-                                                                callback(null, xml);
+                                                            var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, tempCodecPref);
 
-                                                            });
+                                                            callback(null, xml);
 
 
 
@@ -3618,10 +3667,9 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                                                 tempCodecPref = codecPrefs.Codecs;
                                                                                             }
 
-                                                                                            xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, tempCodecPref, function(xml)
-                                                                                            {
-                                                                                                callback(null, xml);
-                                                                                            });
+                                                                                            var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, tempCodecPref);
+
+                                                                                            callback(null, xml);
 
 
 
@@ -4135,11 +4183,9 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                 tempCodecPref = codecPrefs.Codecs;
                                                             }
 
-                                                            xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, tempCodecPref, function(xml)
-                                                            {
-                                                                callback(null, xml);
+                                                            var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, tempCodecPref);
 
-                                                            });
+                                                            callback(null, xml);
 
 
 

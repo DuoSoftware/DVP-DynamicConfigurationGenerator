@@ -16,6 +16,7 @@ var backendFactory = require('./BackendFactory.js');
 var translationHandler = require('dvp-ruleservice/TranslationHandler.js');
 var underscore = require('underscore');
 var extApi = require('./ExternalApiAccess.js');
+var LimitValidator = require('./LimitValidator.js').LimitValidator;
 
 
 /*var backendHandler;
@@ -260,7 +261,9 @@ var HandleOutRequest = function(reqId, data, callerIdNum, contextTenant, appType
                                                             Domain: rule.IpUrl,
                                                             Action: 'DEFAULT',
                                                             RecordEnabled: fromUsr.Extension.RecordingEnabled,
-                                                            Operator: rule.Operator
+                                                            Operator: rule.Operator,
+                                                            OutLimit: rule.OutLimit,
+                                                            BothLimit: rule.BothLimit,
                                                         };
 
                                                         if(dodActive && dodNumber)
@@ -626,7 +629,7 @@ var HandleOutRequest = function(reqId, data, callerIdNum, contextTenant, appType
 
 };
 
-var LimitValidator = function(num, compLimits)
+/*var LimitValidator = function(num, compLimits)
 {
     if((num.LimitInfoInbound && num.LimitInfoInbound.Enable && typeof num.LimitInfoInbound.MaxCount != 'undefined') || (num.LimitInfoBoth && num.LimitInfoBoth.Enable && typeof num.LimitInfoBoth.MaxCount != 'undefined')
         || (compLimits.InboundLimit && compLimits.InboundLimit.Enable && typeof compLimits.InboundLimit.MaxCount != 'undefined') || (compLimits.BothLimit && compLimits.BothLimit.Enable && typeof compLimits.BothLimit.MaxCount != 'undefined'))
@@ -678,7 +681,7 @@ var LimitValidator = function(num, compLimits)
         return null;
     }
 
-}
+}*/
 
 server.post('/DVP/API/:version/DynamicConfigGenerator/Factory/:factory', function(req,res,next)
 {
@@ -996,6 +999,7 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
                                             {
                                                 if (balanceRes && balanceRes.IsSuccess)
                                                 {
+                                                    //Validate limits
 
                                                     var xml = xmlBuilder.CreatePbxFeaturesGateway(reqId, huntDestNum, outRule.TrunkNumber, outRule.GatewayCode, ctxt.CompanyId, ctxt.TenantId, null, huntContext, outRule.DNIS, outRule.Operator, outRule.IpUrl);
 
@@ -1304,7 +1308,14 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
 
                                                             backendFactory.getBackendHandler().GetCompanyLimits(num.CompanyId, num.TenantId).then(function(compLimits)
                                                             {
-                                                                var NumLimitInfo = LimitValidator(num, compLimits);
+                                                                var limits = {
+                                                                    NumberInboundLimit: num.LimitInfoInbound,
+                                                                    NumberBothLimit: num.LimitInfoBoth,
+                                                                    CompanyInboundLimit: compLimits.InboundLimit,
+                                                                    CompanyBothLimit: compLimits.BothLimit
+                                                                };
+
+                                                                var NumLimitInfo = LimitValidator(limits, num.PhoneNumber, 'inbound');
 
                                                                 if(NumLimitInfo)
                                                                 {

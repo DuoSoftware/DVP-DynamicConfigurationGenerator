@@ -595,30 +595,30 @@ var CreateHttpApiDialplan = function(destinationPattern, context, httApiUrl, req
 
         if(numLimitInfo)
         {
-            if(typeof numLimitInfo.InboundLimit != 'undefined')
+            if(typeof numLimitInfo.NumberInboundLimit != 'undefined')
             {
-                var limitStr = util.format('hash %d_%d_inbound %s %d !USER_BUSY', numLimitInfo.TenantId, numLimitInfo.CompanyId, numLimitInfo.TrunkNumber, numLimitInfo.InboundLimit);
+                var limitStr = util.format('hash %d_%d_inbound %s %d !USER_BUSY', tenantId, companyId, numLimitInfo.TrunkNumber, numLimitInfo.NumberInboundLimit);
                 cond.ele('action').att('application', 'limit').att('data', limitStr)
                     .up()
             }
 
-            if(typeof numLimitInfo.BothLimit != 'undefined')
+            if(typeof numLimitInfo.NumberBothLimit != 'undefined')
             {
-                var limitStr = util.format('hash %d_%d_both %s %d !USER_BUSY', numLimitInfo.TenantId, numLimitInfo.CompanyId, numLimitInfo.TrunkNumber, numLimitInfo.BothLimit);
+                var limitStr = util.format('hash %d_%d_both %s %d !USER_BUSY', tenantId, companyId, numLimitInfo.TrunkNumber, numLimitInfo.NumberBothLimit);
                 cond.ele('action').att('application', 'limit').att('data', limitStr)
                     .up()
             }
 
-            if(typeof numLimitInfo.CompInboundLimit != 'undefined')
+            if(typeof numLimitInfo.CompanyInboundLimit != 'undefined')
             {
-                var limitStr = util.format('hash %d_%d_inbound companylimit %d !USER_BUSY', numLimitInfo.TenantId, numLimitInfo.CompanyId, numLimitInfo.CompInboundLimit);
+                var limitStr = util.format('hash %d_%d_inbound companylimit %d !USER_BUSY', tenantId, companyId, numLimitInfo.CompanyInboundLimit);
                 cond.ele('action').att('application', 'limit').att('data', limitStr)
                     .up()
             }
 
-            if(typeof numLimitInfo.CompBothLimit != 'undefined')
+            if(typeof numLimitInfo.CompanyBothLimit != 'undefined')
             {
-                var limitStr = util.format('hash %d_%d_both companylimit %d !USER_BUSY', numLimitInfo.TenantId, numLimitInfo.CompanyId, numLimitInfo.CompBothLimit);
+                var limitStr = util.format('hash %d_%d_both companylimit %d !USER_BUSY', tenantId, companyId, numLimitInfo.CompanyBothLimit);
                 cond.ele('action').att('application', 'limit').att('data', limitStr)
                     .up()
             }
