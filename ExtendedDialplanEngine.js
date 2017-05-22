@@ -413,9 +413,12 @@ var ProcessCallForwarding = function(reqId, aniNum, dnisNum, callerDomain, conte
                                                         tempCodecPref = codecPrefs.Codecs;
                                                     }
 
-                                                    var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, null, null, tempCodecPref);
+                                                    xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, null, null, tempCodecPref, function(xml)
+                                                    {
+                                                        callback(null, xml);
+                                                    });
 
-                                                    callback(undefined, xml);
+
 
                                                 }).catch(function(err)
                                                 {
@@ -1150,9 +1153,12 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                                         tempCodecPref = codecPrefs.Codecs;
                                                                                     }
 
-                                                                                    var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, tempCodecPref);
+                                                                                    xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, tempCodecPref, function(xml)
+                                                                                    {
+                                                                                        callback(null, xml);
+                                                                                    });
 
-                                                                                    callback(undefined, xml);
+
 
                                                                                 }).catch(function(err)
                                                                                 {
@@ -2090,9 +2096,12 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                                             tempCodecPref = codecPrefs.Codecs;
                                                                                         }
 
-                                                                                        var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, tempCodecPref);
+                                                                                        xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, tempCodecPref, function(xml)
+                                                                                        {
+                                                                                            callback(null, xml);
+                                                                                        });
 
-                                                                                        callback(undefined, xml);
+
 
                                                                                     }).catch(function(err)
                                                                                     {
@@ -2704,9 +2713,13 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                                     tempCodecPref = codecPrefs.Codecs;
                                                                                 }
 
-                                                                                var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, tempCodecPref);
+                                                                                xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, tempCodecPref, function(xml)
+                                                                                {
+                                                                                    callback(null, xml);
 
-                                                                                callback(undefined, xml);
+                                                                                });
+
+
 
                                                                             }).catch(function(err)
                                                                             {
@@ -2984,9 +2997,13 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                             tempCodecPref = codecPrefs.Codecs;
                                                                         }
 
-                                                                        var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, tempCodecPref);
+                                                                        xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, tempCodecPref, function(xml)
+                                                                        {
+                                                                            callback(null, xml);
 
-                                                                        callback(undefined, xml);
+                                                                        });
+
+
 
                                                                     }).catch(function(err)
                                                                     {
@@ -3113,9 +3130,13 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                 tempCodecPref = codecPrefs.Codecs;
                                                             }
 
-                                                            var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, tempCodecPref);
+                                                            xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, tempCodecPref, function(xml)
+                                                            {
+                                                                callback(null, xml);
 
-                                                            callback(undefined, xml);
+                                                            });
+
+
 
                                                         }).catch(function(err)
                                                         {
@@ -3597,9 +3618,12 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                                                 tempCodecPref = codecPrefs.Codecs;
                                                                                             }
 
-                                                                                            var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, tempCodecPref);
+                                                                                            xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, tempCodecPref, function(xml)
+                                                                                            {
+                                                                                                callback(null, xml);
+                                                                                            });
 
-                                                                                            callback(undefined, xml);
+
 
                                                                                         }).catch(function(err)
                                                                                         {
@@ -4111,9 +4135,13 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                 tempCodecPref = codecPrefs.Codecs;
                                                             }
 
-                                                            var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, tempCodecPref);
+                                                            xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, tempCodecPref, function(xml)
+                                                            {
+                                                                callback(null, xml);
 
-                                                            callback(undefined, xml);
+                                                            });
+
+
 
                                                         }).catch(function(err)
                                                         {

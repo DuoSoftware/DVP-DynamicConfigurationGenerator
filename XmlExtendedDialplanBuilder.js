@@ -5,6 +5,7 @@ var util = require('util');
 var sf = require('stringformat');
 var validator = require('validator');
 var backendFactory = require('./BackendFactory.js');
+var Promise = require('bluebird');
 
 var fileServiceIp = config.Services.fileServiceHost;
 var fileServicePort = config.Services.fileServicePort;
@@ -1950,7 +1951,7 @@ var CreateForwardingDialplan = function(reqId, endpoint, context, profile, desti
 
 };
 
-var CreateRouteGatewayDialplan = function(reqId, ep, context, profile, destinationPattern, ignoreEarlyMedia, transferLegInfo, dvpCallDirection, codecList)
+var CreateRouteGatewayDialplan = function(reqId, ep, context, profile, destinationPattern, ignoreEarlyMedia, transferLegInfo, dvpCallDirection, codecList, callback)
 {
     try
     {
@@ -2259,12 +2260,12 @@ var CreateRouteGatewayDialplan = function(reqId, ep, context, profile, destinati
 
             var decoded = xmlStr.replace(/&amp;/g, '&');
 
-            return decoded;
+            callback(decoded);
 
         }).catch(function(err)
         {
             logger.error('[DVP-DynamicConfigurationGenerator.CreateRouteGatewayDialplan] - [%s] - Exception occurred creating xml', reqId, ex);
-            return createNotFoundResponse();
+            callback(createNotFoundResponse());
 
         });
 
@@ -2274,7 +2275,7 @@ var CreateRouteGatewayDialplan = function(reqId, ep, context, profile, destinati
     catch(ex)
     {
         logger.error('[DVP-DynamicConfigurationGenerator.CreateRouteGatewayDialplan] - [%s] - Exception occurred creating xml', reqId, ex);
-        return createNotFoundResponse();
+        callback(createNotFoundResponse());
     }
 
 };

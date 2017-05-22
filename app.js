@@ -285,13 +285,18 @@ var HandleOutRequest = function(reqId, data, callerIdNum, contextTenant, appType
                                                                         {
                                                                             tempCodecPref = codecPrefs.Codecs;
                                                                         }
-                                                                        var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, callerContext, profile, '[^\\s]*', false, null, 'outbound', tempCodecPref);
 
-                                                                        RedisOperations(varUuid, rule.CompanyId, rule.TenantId, null, 'EMERGENCY', isDialPlanGiven, 'outbound');
+                                                                        xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, callerContext, profile, '[^\\s]*', false, null, 'outbound', tempCodecPref, function(xml)
+                                                                        {
+                                                                            RedisOperations(varUuid, rule.CompanyId, rule.TenantId, null, 'EMERGENCY', isDialPlanGiven, 'outbound');
 
-                                                                        logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+                                                                            logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
 
-                                                                        res.end(xml);
+                                                                            res.end(xml);
+
+                                                                        });
+
+
 
                                                                     }).catch(function(err)
                                                                     {
