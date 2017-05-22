@@ -2248,7 +2248,9 @@ var CreateRouteGatewayDialplan = function(reqId, ep, context, profile, destinati
                 return createNotFoundResponse();
             }
 
-            cond.ele('action').att('application', 'bridge').att('data', calling)
+            /*cond.ele('action').att('application', 'bridge').att('data', calling)
+                .up()*/
+            cond.ele('action').att('application', 'limit_execute').att('data', 'hash 1_103_both companylimit ' + compLimits.BothLimit.MaxCount + ' !USER_BUSY bridge ' + calling)
                 .up()
                 .ele('action').att('application', 'hangup')
                 .up()
