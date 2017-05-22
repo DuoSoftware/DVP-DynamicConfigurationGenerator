@@ -31,7 +31,7 @@ var LimitValidator = function(limitInfo, trunkNumber, direction)
                 compInbLim = limitInfo.CompanyInboundLimit.MaxCount;
             }
 
-            if(limitInfo.CompanyBothLimitt)
+            if(limitInfo.CompanyBothLimit)
             {
                 compBothLim = limitInfo.CompanyBothLimit.MaxCount;
             }
