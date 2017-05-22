@@ -3,6 +3,7 @@ var dbModel = require('dvp-dbmodels');
 var ipValidator = require('./IpValidator.js');
 var Promise = require('bluebird');
 var config = require('config');
+var underscore = require('underscore');
 
 var allowCodecPref = config.Host.AllowCodecConfigure;
 
@@ -681,6 +682,62 @@ var GetEmergencyNumber = function(numb, companyId, tenantId, data, callback)
     }
 };
 
+var GetCompanyLimits = function(companyId, tenantId, callback)
+{
+    return new Promise(function(fulfill, reject)
+    {
+        try
+        {
+            dbModel.LimitInfo
+                .findAll({where :[{ObjType: 'COMPANY_NUMBER_LIMIT', CompanyId: companyId, TenantId: tenantId}]})
+                .then(function (limitInfo)
+                {
+                    if(limitInfo && limitInfo.length > 0)
+                    {
+                        var inbLim = underscore.find(limitInfo, function (limit)
+                        {
+                            return limit.ObjCategory === 'INBOUND';
+
+                        });
+
+                        var outbLim = underscore.find(limitInfo, function (limit)
+                        {
+                            return limit.ObjCategory === 'OUTBOUND';
+
+                        });
+
+                        var bothLim = underscore.find(limitInfo, function (limit)
+                        {
+                            return limit.ObjCategory === 'BOTH';
+
+                        });
+
+                        var limitInfo = {
+                            InboundLimit: inbLim,
+                            OutboundLimit: outbLim,
+                            BothLimit: bothLim
+                        };
+
+                        fulfill(limitInfo);
+                    }
+                    else
+                    {
+                        fulfill(null);
+                    }
+
+                }).catch(function(err)
+                {
+                    reject(err);
+                })
+        }
+        catch(ex)
+        {
+            reject(ex);
+        }
+    })
+
+};
+
 var GetPhoneNumberDetails = function(phnNum, callback)
 {
     try
@@ -1351,4 +1408,5 @@ module.exports.ValidateBlacklistNumber = ValidateBlacklistNumber;
 module.exports.GetCacheObject = GetCacheObject;
 module.exports.PickGatewayTransferRules = PickGatewayTransferRules;
 module.exports.getContextPreferences = getContextPreferences;
+module.exports.GetCompanyLimits = GetCompanyLimits;
 

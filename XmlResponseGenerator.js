@@ -593,31 +593,35 @@ var CreateHttpApiDialplan = function(destinationPattern, context, httApiUrl, req
             .ele('extension').att('name', 'test')
             .ele('condition').att('field', 'destination_number').att('expression', destinationPattern)
 
-        if(numLimitInfo && numLimitInfo.CheckLimit)
+        if(numLimitInfo)
         {
-            if(numLimitInfo.NumType === 'INBOUND')
+            if(numLimitInfo.InboundLimit)
             {
                 var limitStr = util.format('hash %d_%d_inbound %s %d !USER_BUSY', numLimitInfo.TenantId, numLimitInfo.CompanyId, numLimitInfo.TrunkNumber, numLimitInfo.InboundLimit);
                 cond.ele('action').att('application', 'limit').att('data', limitStr)
                     .up()
             }
-            else if(numLimitInfo.NumType === 'BOTH')
-            {
-                if(numLimitInfo.InboundLimit)
-                {
-                    var limitStr = util.format('hash %d_%d_inbound %s %d !USER_BUSY', numLimitInfo.TenantId, numLimitInfo.CompanyId, numLimitInfo.TrunkNumber, numLimitInfo.InboundLimit);
-                    cond.ele('action').att('application', 'limit').att('data', limitStr)
-                        .up()
-                }
 
-                if(numLimitInfo.BothLimit)
-                {
-                    var limitStr = util.format('hash %d_%d_both %s %d !USER_BUSY', numLimitInfo.TenantId, numLimitInfo.CompanyId, numLimitInfo.TrunkNumber, numLimitInfo.BothLimit);
-                    cond.ele('action').att('application', 'limit').att('data', limitStr)
-                        .up()
-                }
+            if(numLimitInfo.BothLimit)
+            {
+                var limitStr = util.format('hash %d_%d_both %s %d !USER_BUSY', numLimitInfo.TenantId, numLimitInfo.CompanyId, numLimitInfo.TrunkNumber, numLimitInfo.BothLimit);
+                cond.ele('action').att('application', 'limit').att('data', limitStr)
+                    .up()
             }
 
+            if(numLimitInfo.CompInboundLimit)
+            {
+                var limitStr = util.format('hash %d_%d_inbound companylimit %d !USER_BUSY', numLimitInfo.TenantId, numLimitInfo.CompanyId, numLimitInfo.CompInboundLimit);
+                cond.ele('action').att('application', 'limit').att('data', limitStr)
+                    .up()
+            }
+
+            if(numLimitInfo.CompBothLimit)
+            {
+                var limitStr = util.format('hash %d_%d_both companylimit %d !USER_BUSY', numLimitInfo.TenantId, numLimitInfo.CompanyId, numLimitInfo.CompBothLimit);
+                cond.ele('action').att('application', 'limit').att('data', limitStr)
+                    .up()
+            }
         }
 
         if(companyId)

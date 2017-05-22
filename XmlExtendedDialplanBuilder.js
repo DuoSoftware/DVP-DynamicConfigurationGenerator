@@ -4,6 +4,7 @@ var logger = require('dvp-common/LogHandler/CommonLogHandler.js').logger;
 var util = require('util');
 var sf = require('stringformat');
 var validator = require('validator');
+var backendFactory = require('./BackendFactory.js');
 
 var fileServiceIp = config.Services.fileServiceHost;
 var fileServicePort = config.Services.fileServicePort;
@@ -1948,243 +1949,243 @@ var CreateRouteGatewayDialplan = function(reqId, ep, context, profile, destinati
 {
     try
     {
-        if (!destinationPattern)
+        backendFactory.getBackendHandler().GetCompanyLimits(ep.CompanyId, ep.TenantId).then(function(compLimits)
         {
-            destinationPattern = "";
-        }
+            if (!destinationPattern)
+            {
+                destinationPattern = "";
+            }
 
-        if (!context)
-        {
-            context = "";
-        }
+            if (!context)
+            {
+                context = "";
+            }
 
-        var ignoreEarlyM = "ignore_early_media=false";
-        if (ignoreEarlyMedia)
-        {
-            ignoreEarlyM = "ignore_early_media=true";
-        }
+            var ignoreEarlyM = "ignore_early_media=false";
+            if (ignoreEarlyMedia)
+            {
+                ignoreEarlyM = "ignore_early_media=true";
+            }
 
-        var bypassMed = 'bypass_media=false';
+            var bypassMed = 'bypass_media=false';
 
-        var doc = xmlBuilder.create('document');
+            var doc = xmlBuilder.create('document');
 
-        var cond = doc.att('type', 'freeswitch/xml')
-            .ele('section').att('name', 'dialplan').att('description', 'RE Dial Plan For FreeSwitch')
-            .ele('context').att('name', context)
-            .ele('extension').att('name', 'test')
-            .ele('condition').att('field', 'destination_number').att('expression', destinationPattern)
+            var cond = doc.att('type', 'freeswitch/xml')
+                .ele('section').att('name', 'dialplan').att('description', 'RE Dial Plan For FreeSwitch')
+                .ele('context').att('name', context)
+                .ele('extension').att('name', 'test')
+                .ele('condition').att('field', 'destination_number').att('expression', destinationPattern)
 
-        cond.ele('action').att('application', 'set').att('data', 'ringback=${us-ring}')
-            .up()
-            .ele('action').att('application', 'set').att('data', 'continue_on_fail=true')
-            .up()
-
-        if(dvpCallDirection === 'outbound')
-        {
-            cond.ele('action').att('application', 'set').att('data', 'my_uuid=${create_uuid()}').att('inline', 'true')
+            cond.ele('action').att('application', 'set').att('data', 'ringback=${us-ring}')
                 .up()
-        }
+                .ele('action').att('application', 'set').att('data', 'continue_on_fail=true')
+                .up()
 
-        cond.ele('action').att('application', 'set').att('data', 'hangup_after_bridge=true')
-            .up()
-            .ele('action').att('application', 'set').att('data', ignoreEarlyM)
-            .up()
-            .ele('action').att('application', 'set').att('data', bypassMed)
-            .up()
-            .ele('action').att('application', 'set').att('data', 'sip_h_DVP-DESTINATION-TYPE=GATEWAY')
-            .up()
-            .ele('action').att('application', 'export').att('data', 'DVP_OPERATION_CAT=GATEWAY')
-            .up()
-            .up()
-
-        if(ep.RecordEnabled)
-        {
             if(dvpCallDirection === 'outbound')
             {
-                var fileUploadUrl = 'http://' + fileServiceIp + ':' + fileServicePort + '/DVP/API/' + fileServiceVersion + '/InternalFileService/File/Upload/' + ep.TenantId + '/' + ep.CompanyId;
+                cond.ele('action').att('application', 'set').att('data', 'my_uuid=${create_uuid()}').att('inline', 'true')
+                    .up()
+            }
 
-                if(!validator.isIP(fileServiceIp))
+            cond.ele('action').att('application', 'set').att('data', 'hangup_after_bridge=true')
+                .up()
+                .ele('action').att('application', 'set').att('data', ignoreEarlyM)
+                .up()
+                .ele('action').att('application', 'set').att('data', bypassMed)
+                .up()
+                .ele('action').att('application', 'set').att('data', 'sip_h_DVP-DESTINATION-TYPE=GATEWAY')
+                .up()
+                .ele('action').att('application', 'export').att('data', 'DVP_OPERATION_CAT=GATEWAY')
+                .up()
+                .up()
+
+            if(ep.RecordEnabled)
+            {
+                if(dvpCallDirection === 'outbound')
                 {
-                    fileUploadUrl = 'http://' + fileServiceIp + '/DVP/API/' + fileServiceVersion + '/InternalFileService/File/Upload/' + ep.TenantId + '/' + ep.CompanyId;
+                    var fileUploadUrl = 'http://' + fileServiceIp + ':' + fileServicePort + '/DVP/API/' + fileServiceVersion + '/InternalFileService/File/Upload/' + ep.TenantId + '/' + ep.CompanyId;
+
+                    if(!validator.isIP(fileServiceIp))
+                    {
+                        fileUploadUrl = 'http://' + fileServiceIp + '/DVP/API/' + fileServiceVersion + '/InternalFileService/File/Upload/' + ep.TenantId + '/' + ep.CompanyId;
+                    }
+
+                    var fileSavePath = '$${base_dir}/recordings/${my_uuid}.mp3';
+
+                    var playFileDetails = 'record_post_process_exec_api=curl_sendfile:' + fileUploadUrl + ' file=${dvpRecFile} class=CALLSERVER&type=CALL&category=CONVERSATION&referenceid=${my_uuid}&mediatype=audio&filetype=wav&sessionid=${my_uuid}&display=' + ep.Destination + '-${origination_caller_id_number}';
+
+                    cond.ele('action').att('application', 'set').att('data', 'dvpRecFile=' + fileSavePath)
+                        .up()
+                        .ele('action').att('application', 'export').att('data', 'execute_on_answer=record_session ${dvpRecFile}')
+                        .up()
+                        .ele('action').att('application', 'set').att('data', playFileDetails)
+                        .up()
+                }
+                else
+                {
+                    var fileUploadUrl = 'http://' + fileServiceIp + ':' + fileServicePort + '/DVP/API/' + fileServiceVersion + '/InternalFileService/File/Upload/' + ep.TenantId + '/' + ep.CompanyId;
+
+                    if(!validator.isIP(fileServiceIp))
+                    {
+                        fileUploadUrl = 'http://' + fileServiceIp + '/DVP/API/' + fileServiceVersion + '/InternalFileService/File/Upload/' + ep.TenantId + '/' + ep.CompanyId;
+                    }
+
+                    var fileSavePath = '$${base_dir}/recordings/${uuid}.mp3';
+
+                    var playFileDetails = 'record_post_process_exec_api=curl_sendfile:' + fileUploadUrl + ' file=${dvpRecFile} class=CALLSERVER&type=CALL&category=CONVERSATION&referenceid=${uuid}&mediatype=audio&filetype=wav&sessionid=${uuid}&display=' + ep.Destination + '-${origination_caller_id_number}';
+
+                    cond.ele('action').att('application', 'set').att('data', 'dvpRecFile=' + fileSavePath)
+                        .up()
+                        .ele('action').att('application', 'export').att('data', 'execute_on_answer=record_session ${dvpRecFile}')
+                        .up()
+                        .ele('action').att('application', 'set').att('data', playFileDetails)
+                        .up()
                 }
 
-                var fileSavePath = '$${base_dir}/recordings/${my_uuid}.mp3';
 
-                var playFileDetails = 'record_post_process_exec_api=curl_sendfile:' + fileUploadUrl + ' file=${dvpRecFile} class=CALLSERVER&type=CALL&category=CONVERSATION&referenceid=${my_uuid}&mediatype=audio&filetype=wav&sessionid=${my_uuid}&display=' + ep.Destination + '-${origination_caller_id_number}';
 
-                cond.ele('action').att('application', 'set').att('data', 'dvpRecFile=' + fileSavePath)
-                    .up()
-                    .ele('action').att('application', 'export').att('data', 'execute_on_answer=record_session ${dvpRecFile}')
-                    .up()
-                    .ele('action').att('application', 'set').att('data', playFileDetails)
+            }
+
+            if(ep.Operator)
+            {
+                cond.ele('action').att('application', 'export').att('data', 'veeryoperator=' + ep.Operator)
                     .up()
             }
-            else
-            {
-                var fileUploadUrl = 'http://' + fileServiceIp + ':' + fileServicePort + '/DVP/API/' + fileServiceVersion + '/InternalFileService/File/Upload/' + ep.TenantId + '/' + ep.CompanyId;
 
-                if(!validator.isIP(fileServiceIp))
+
+            if(ep.CompanyId)
+            {
+                cond.ele('action').att('application', 'export').att('data', 'companyid=' + ep.CompanyId)
+                    .up()
+            }
+            if(ep.TenantId)
+            {
+                cond.ele('action').att('application', 'export').att('data', 'tenantid=' + ep.TenantId)
+                    .up()
+            }
+            if(ep.AppId)
+            {
+                cond.ele('action').att('application', 'export').att('data', 'dvp_app_id=' + ep.AppId)
+                    .up()
+            }
+
+            if(ep.Action)
+            {
+                cond.ele('action').att('application', 'export').att('data', 'DVP_ACTION_CAT=' + ep.Action)
+                    .up()
+            }
+            if(dvpCallDirection)
+            {
+                cond.ele('action').att('application', 'export').att('data', 'DVP_CALL_DIRECTION=' + dvpCallDirection)
+                    .up()
+            }
+
+
+            var option = '';
+
+            var destinationGroup = util.format('gateway/%s', ep.Profile);
+
+            if(ep.Type == 'PUBLIC_USER')
+            {
+                destinationGroup = ep.Profile;
+            }
+
+            var codecListString = null;
+
+            if(codecList)
+            {
+                codecList = JSON.parse(codecList);
+            }
+
+            if(codecList && codecList.length > 0)
+            {
+                codecListString = codecList.join();
+            }
+
+            option = util.format('[leg_timeout=%d, origination_caller_id_name=%s,origination_caller_id_number=%s,sip_h_X-Gateway=%s', ep.LegTimeout, ep.Origination, ep.OriginationCallerIdNumber, ep.Domain);
+
+            if (ep.LegStartDelay > 0)
+            {
+                option = option + ', leg_delay_start=' + ep.LegStartDelay;
+            }
+
+            if(dvpCallDirection === 'outbound')
+            {
+                option = option + ', origination_uuid=${my_uuid}';
+            }
+
+            if(codecListString && allowCodecPref)
+            {
+                option = option + ', absolute_codec_string=\'' + codecListString + '\'';
+            }
+
+            option = option + ']';
+
+            /*if(dvpCallDirection === 'outbound')
+             {
+             if (ep.LegStartDelay > 0)
+             option = util.format('[leg_delay_start=%d, origination_uuid=${my_uuid}, leg_timeout=%d,origination_caller_id_name=%s,origination_caller_id_number=%s,sip_h_X-Gateway=%s]', ep.LegStartDelay, ep.LegTimeout, ep.Origination, ep.OriginationCallerIdNumber, ep.Domain);
+             else
+             option = util.format('[leg_timeout=%d, origination_uuid=${my_uuid}, origination_caller_id_name=%s,origination_caller_id_number=%s,sip_h_X-Gateway=%s]', ep.LegTimeout, ep.Origination, ep.OriginationCallerIdNumber, ep.Domain);
+             }
+             else
+             {
+             if (ep.LegStartDelay > 0)
+             option = util.format('[leg_delay_start=%d, leg_timeout=%d,origination_caller_id_name=%s,origination_caller_id_number=%s,sip_h_X-Gateway=%s]', ep.LegStartDelay, ep.LegTimeout, ep.Origination, ep.OriginationCallerIdNumber, ep.Domain);
+             else
+             option = util.format('[leg_timeout=%d, origination_caller_id_name=%s,origination_caller_id_number=%s,sip_h_X-Gateway=%s]', ep.LegTimeout, ep.Origination, ep.OriginationCallerIdNumber, ep.Domain);
+             }*/
+
+
+            var dnis = '';
+
+            if (ep.Domain)
+            {
+                //dnis = util.format('%s@%s', ep.Destination, ep.Domain);
+                dnis = util.format('%s', ep.Destination);
+            }
+
+            var protocol = 'sofia';
+            var calling = util.format('%s%s/%s/%s', option, protocol, destinationGroup, dnis);
+
+            if(transferLegInfo && transferLegInfo.TransferCode)
+            {
+                if(transferLegInfo.InternalLegs && transferLegInfo.TransferCode.InternalTransfer)
                 {
-                    fileUploadUrl = 'http://' + fileServiceIp + '/DVP/API/' + fileServiceVersion + '/InternalFileService/File/Upload/' + ep.TenantId + '/' + ep.CompanyId;
+                    cond.ele('action').att('application', 'bind_meta_app').att('data', transferLegInfo.TransferCode.InternalTransfer + ' ' + transferLegInfo.InternalLegs + ' s execute_extension::att_xfer XML PBXFeatures')
+                        .up()
                 }
 
-                var fileSavePath = '$${base_dir}/recordings/${uuid}.mp3';
+                if(transferLegInfo.ExternalLegs && transferLegInfo.TransferCode.ExternalTransfer)
+                {
+                    cond.ele('action').att('application', 'bind_meta_app').att('data', transferLegInfo.TransferCode.ExternalTransfer + ' ' + transferLegInfo.ExternalLegs + ' s execute_extension::att_xfer_outbound XML PBXFeatures')
+                        .up()
+                }
 
-                var playFileDetails = 'record_post_process_exec_api=curl_sendfile:' + fileUploadUrl + ' file=${dvpRecFile} class=CALLSERVER&type=CALL&category=CONVERSATION&referenceid=${uuid}&mediatype=audio&filetype=wav&sessionid=${uuid}&display=' + ep.Destination + '-${origination_caller_id_number}';
+                if(transferLegInfo.GroupLegs && transferLegInfo.TransferCode.GroupTransfer)
+                {
+                    cond.ele('action').att('application', 'bind_meta_app').att('data', transferLegInfo.TransferCode.GroupTransfer + ' ' + transferLegInfo.GroupLegs + ' s execute_extension::att_xfer_group XML PBXFeatures')
+                        .up()
+                }
 
-                cond.ele('action').att('application', 'set').att('data', 'dvpRecFile=' + fileSavePath)
-                    .up()
-                    .ele('action').att('application', 'export').att('data', 'execute_on_answer=record_session ${dvpRecFile}')
-                    .up()
-                    .ele('action').att('application', 'set').att('data', playFileDetails)
-                    .up()
+                if(transferLegInfo.ConferenceLegs && transferLegInfo.TransferCode.ConferenceTransfer)
+                {
+                    cond.ele('action').att('application', 'bind_meta_app').att('data', transferLegInfo.TransferCode.ConferenceTransfer + ' ' + transferLegInfo.ConferenceLegs + ' s execute_extension::att_xfer_conference XML PBXFeatures')
+                        .up()
+                }
+
+                if(transferLegInfo.IVRLegs && transferLegInfo.TransferCode.IVRTransfer)
+                {
+                    cond.ele('action').att('application', 'bind_meta_app').att('data', transferLegInfo.TransferCode.IVRTransfer + ' ' + transferLegInfo.IVRLegs + ' s execute_extension::att_xfer_ivr XML PBXFeatures')
+                        .up()
+                }
             }
 
-
-
-        }
-
-        if(ep.Operator)
-        {
-            cond.ele('action').att('application', 'export').att('data', 'veeryoperator=' + ep.Operator)
-                .up()
-        }
-
-
-        if(ep.CompanyId)
-        {
-            cond.ele('action').att('application', 'export').att('data', 'companyid=' + ep.CompanyId)
-                .up()
-        }
-        if(ep.TenantId)
-        {
-            cond.ele('action').att('application', 'export').att('data', 'tenantid=' + ep.TenantId)
-                .up()
-        }
-        if(ep.AppId)
-        {
-            cond.ele('action').att('application', 'export').att('data', 'dvp_app_id=' + ep.AppId)
-                .up()
-        }
-
-        if(ep.Action)
-        {
-            cond.ele('action').att('application', 'export').att('data', 'DVP_ACTION_CAT=' + ep.Action)
-                .up()
-        }
-        if(dvpCallDirection)
-        {
-            cond.ele('action').att('application', 'export').att('data', 'DVP_CALL_DIRECTION=' + dvpCallDirection)
-                .up()
-        }
-
-
-        var option = '';
-
-        var destinationGroup = util.format('gateway/%s', ep.Profile);
-
-        if(ep.Type == 'PUBLIC_USER')
-        {
-            destinationGroup = ep.Profile;
-        }
-
-        var codecListString = null;
-
-        if(codecList)
-        {
-            codecList = JSON.parse(codecList);
-        }
-
-        if(codecList && codecList.length > 0)
-        {
-            codecListString = codecList.join();
-        }
-
-        option = util.format('[leg_timeout=%d, origination_caller_id_name=%s,origination_caller_id_number=%s,sip_h_X-Gateway=%s', ep.LegTimeout, ep.Origination, ep.OriginationCallerIdNumber, ep.Domain);
-
-        if (ep.LegStartDelay > 0)
-        {
-            option = option + ', leg_delay_start=' + ep.LegStartDelay;
-        }
-
-        if(dvpCallDirection === 'outbound')
-        {
-            option = option + ', origination_uuid=${my_uuid}';
-        }
-
-        if(codecListString && allowCodecPref)
-        {
-            option = option + ', absolute_codec_string=\'' + codecListString + '\'';
-        }
-
-        option = option + ']';
-
-        /*if(dvpCallDirection === 'outbound')
-        {
-            if (ep.LegStartDelay > 0)
-                option = util.format('[leg_delay_start=%d, origination_uuid=${my_uuid}, leg_timeout=%d,origination_caller_id_name=%s,origination_caller_id_number=%s,sip_h_X-Gateway=%s]', ep.LegStartDelay, ep.LegTimeout, ep.Origination, ep.OriginationCallerIdNumber, ep.Domain);
-            else
-                option = util.format('[leg_timeout=%d, origination_uuid=${my_uuid}, origination_caller_id_name=%s,origination_caller_id_number=%s,sip_h_X-Gateway=%s]', ep.LegTimeout, ep.Origination, ep.OriginationCallerIdNumber, ep.Domain);
-        }
-        else
-        {
-            if (ep.LegStartDelay > 0)
-                option = util.format('[leg_delay_start=%d, leg_timeout=%d,origination_caller_id_name=%s,origination_caller_id_number=%s,sip_h_X-Gateway=%s]', ep.LegStartDelay, ep.LegTimeout, ep.Origination, ep.OriginationCallerIdNumber, ep.Domain);
-            else
-                option = util.format('[leg_timeout=%d, origination_caller_id_name=%s,origination_caller_id_number=%s,sip_h_X-Gateway=%s]', ep.LegTimeout, ep.Origination, ep.OriginationCallerIdNumber, ep.Domain);
-        }*/
-
-
-        var dnis = '';
-
-        if (ep.Domain)
-        {
-            //dnis = util.format('%s@%s', ep.Destination, ep.Domain);
-            dnis = util.format('%s', ep.Destination);
-        }
-
-        var protocol = 'sofia';
-        var calling = util.format('%s%s/%s/%s', option, protocol, destinationGroup, dnis);
-
-        if(transferLegInfo && transferLegInfo.TransferCode)
-        {
-            if(transferLegInfo.InternalLegs && transferLegInfo.TransferCode.InternalTransfer)
-            {
-                cond.ele('action').att('application', 'bind_meta_app').att('data', transferLegInfo.TransferCode.InternalTransfer + ' ' + transferLegInfo.InternalLegs + ' s execute_extension::att_xfer XML PBXFeatures')
-                    .up()
-            }
-
-            if(transferLegInfo.ExternalLegs && transferLegInfo.TransferCode.ExternalTransfer)
-            {
-                cond.ele('action').att('application', 'bind_meta_app').att('data', transferLegInfo.TransferCode.ExternalTransfer + ' ' + transferLegInfo.ExternalLegs + ' s execute_extension::att_xfer_outbound XML PBXFeatures')
-                    .up()
-            }
-
-            if(transferLegInfo.GroupLegs && transferLegInfo.TransferCode.GroupTransfer)
-            {
-                cond.ele('action').att('application', 'bind_meta_app').att('data', transferLegInfo.TransferCode.GroupTransfer + ' ' + transferLegInfo.GroupLegs + ' s execute_extension::att_xfer_group XML PBXFeatures')
-                    .up()
-            }
-
-            if(transferLegInfo.ConferenceLegs && transferLegInfo.TransferCode.ConferenceTransfer)
-            {
-                cond.ele('action').att('application', 'bind_meta_app').att('data', transferLegInfo.TransferCode.ConferenceTransfer + ' ' + transferLegInfo.ConferenceLegs + ' s execute_extension::att_xfer_conference XML PBXFeatures')
-                    .up()
-            }
-
-            if(transferLegInfo.IVRLegs && transferLegInfo.TransferCode.IVRTransfer)
-            {
-                cond.ele('action').att('application', 'bind_meta_app').att('data', transferLegInfo.TransferCode.IVRTransfer + ' ' + transferLegInfo.IVRLegs + ' s execute_extension::att_xfer_ivr XML PBXFeatures')
-                    .up()
-            }
-        }
-
-        if(ep.CheckLimit)
-        {
-            if(ep.NumberType === 'OUTBOUND')
+            /*if(ep.NumberType === 'OUTBOUND')
             {
                 //should only have an outbound limit
-                if(typeof ep.OutLimit != 'undefined')
+                if(typeof ep.OutLimit != 'undefined' || (compLimits && compLimits.OutboundLimit && typeof compLimits.OutboundLimit.MaxCount != 'undefined'))
                 {
 
                     var limitStr = util.format('hash %d_%d_outbound %s %d !USER_BUSY', ep.TenantId, ep.CompanyId, ep.TrunkNumber, ep.OutLimit);
@@ -2199,45 +2200,69 @@ var CreateRouteGatewayDialplan = function(reqId, ep, context, profile, destinati
             }
             else if(ep.NumberType === 'BOTH')
             {
-                if(typeof ep.OutLimit != 'undefined' || typeof ep.BothLimit != 'undefined')
-                {
-                    if(typeof ep.OutLimit != 'undefined')
-                    {
-                        var limitStr = util.format('hash %d_%d_outbound %s %d !USER_BUSY', ep.TenantId, ep.CompanyId, ep.TrunkNumber, ep.OutLimit);
-                        cond.ele('action').att('application', 'limit').att('data', limitStr)
-                            .up()
-                    }
 
-                    if(typeof ep.BothLimit != 'undefined')
-                    {
-                        outLim = ep.BothLimit;
-                        var limitStr = util.format('hash %d_%d_outbound %s %d !USER_BUSY', ep.TenantId, ep.CompanyId, ep.TrunkNumber, ep.BothLimit);
-                        cond.ele('action').att('application', 'limit').att('data', limitStr)
-                            .up()
-                    }
-                }
-                else
+
+
+            }*/
+
+            if(typeof ep.OutLimit != 'undefined' || typeof ep.BothLimit != 'undefined' || (compLimits && compLimits.OutboundLimit && typeof compLimits.OutboundLimit.MaxCount != 'undefined') || (compLimits && compLimits.BothLimit && typeof compLimits.BothLimit.MaxCount != 'undefined'))
+            {
+                if(typeof ep.OutLimit != 'undefined')
                 {
-                    return createNotFoundResponse();
+                    var limitStr = util.format('hash %d_%d_outbound %s %d !USER_BUSY', ep.TenantId, ep.CompanyId, ep.TrunkNumber, ep.OutLimit);
+                    cond.ele('action').att('application', 'limit').att('data', limitStr)
+                        .up()
                 }
 
+                if(typeof ep.BothLimit != 'undefined')
+                {
+                    var limitStr = util.format('hash %d_%d_both %s %d !USER_BUSY', ep.TenantId, ep.CompanyId, ep.TrunkNumber, ep.BothLimit);
+                    cond.ele('action').att('application', 'limit').att('data', limitStr)
+                        .up()
+                }
 
+                if(compLimits && compLimits.OutboundLimit && typeof compLimits.OutboundLimit.MaxCount != 'undefined')
+                {
+                    var limitStr = util.format('hash %d_%d_outbound companylimit %d !USER_BUSY', ep.TenantId, ep.CompanyId, compLimits.OutboundLimit.MaxCount);
+                    cond.ele('action').att('application', 'limit').att('data', limitStr)
+                        .up()
+
+                }
+
+                if(compLimits && compLimits.BothLimit && typeof compLimits.BothLimit.MaxCount != 'undefined')
+                {
+                    var limitStr = util.format('hash %d_%d_both companylimit %d !USER_BUSY', ep.TenantId, ep.CompanyId, compLimits.BothLimit.MaxCount);
+                    cond.ele('action').att('application', 'limit').att('data', limitStr)
+                        .up()
+
+                }
             }
-        }
+            else
+            {
+                return createNotFoundResponse();
+            }
 
-        cond.ele('action').att('application', 'bridge').att('data', calling)
-            .up()
-            .ele('action').att('application', 'hangup')
-            .up()
+            cond.ele('action').att('application', 'bridge').att('data', calling)
+                .up()
+                .ele('action').att('application', 'hangup')
+                .up()
 
-        cond.end({pretty: true});
+            cond.end({pretty: true});
 
 
-        var xmlStr = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\r\n" + doc.toString({pretty: true});
+            var xmlStr = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\r\n" + doc.toString({pretty: true});
 
-        var decoded = xmlStr.replace(/&amp;/g, '&');
+            var decoded = xmlStr.replace(/&amp;/g, '&');
 
-        return decoded;
+            return decoded;
+
+        }).catch(function(err)
+        {
+            logger.error('[DVP-DynamicConfigurationGenerator.CreateRouteGatewayDialplan] - [%s] - Exception occurred creating xml', reqId, ex);
+            return createNotFoundResponse();
+
+        });
+
 
 
     }
