@@ -2234,7 +2234,7 @@ var CreateRouteGatewayDialplan = function(reqId, ep, context, profile, destinati
 
         }*/
 
-        var limitStr = util.format('hash %d_%d_both %s %d !USER_BUSY', ep.TenantId, ep.CompanyId, ep.TrunkNumber, 1);
+        var limitStr = util.format('hash %d_%d_both %s %d !USER_BUSY', ep.TenantId, ep.CompanyId, ep.TrunkNumber, 2);
         cond.ele('action').att('application', 'limit').att('data', limitStr)
             .up()
 
