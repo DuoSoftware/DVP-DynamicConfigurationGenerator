@@ -2211,7 +2211,7 @@ var CreateRouteGatewayDialplan = function(reqId, ep, context, profile, destinati
 
             }*/
 
-            if(typeof ep.OutLimit != 'undefined' || typeof ep.BothLimit != 'undefined' || (compLimits && compLimits.OutboundLimit && typeof compLimits.OutboundLimit.MaxCount != 'undefined') || (compLimits && compLimits.BothLimit && typeof compLimits.BothLimit.MaxCount != 'undefined'))
+            /*if(typeof ep.OutLimit != 'undefined' || typeof ep.BothLimit != 'undefined' || (compLimits && compLimits.OutboundLimit && typeof compLimits.OutboundLimit.MaxCount != 'undefined') || (compLimits && compLimits.BothLimit && typeof compLimits.BothLimit.MaxCount != 'undefined'))
             {
                 if(typeof ep.OutLimit != 'undefined')
                 {
@@ -2246,7 +2246,7 @@ var CreateRouteGatewayDialplan = function(reqId, ep, context, profile, destinati
             else
             {
                 return createNotFoundResponse();
-            }
+            }*/
 
             /*cond.ele('action').att('application', 'bridge').att('data', calling)
                 .up()*/
