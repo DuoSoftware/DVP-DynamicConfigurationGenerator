@@ -273,21 +273,21 @@ var CreatePbxFeaturesGateway = function(reqId, destNum, trunkNumber, trunkCode, 
 
         if(limitInfo)
         {
-            if(typeof limitInfo.NumberOutboundLimit != 'undefined')
+            if(typeof limitInfo.NumberOutboundLimit != 'undefined' && limitInfo.NumberOutboundLimit != null)
             {
                 var limitStr = util.format('hash %d_%d_outbound %s %d !USER_BUSY', tenantId, companyId, trunkNumber, limitInfo.NumberOutboundLimit);
                 cond.ele('action').att('application', 'limit').att('data', limitStr)
                     .up()
             }
 
-            if(typeof limitInfo.NumberBothLimit != 'undefined')
+            if(typeof limitInfo.NumberBothLimit != 'undefined' && limitInfo.NumberBothLimit != null)
             {
                 var limitStr = util.format('hash %d_%d_both %s %d !USER_BUSY', tenantId, companyId, trunkNumber, limitInfo.NumberBothLimit);
                 cond.ele('action').att('application', 'limit').att('data', limitStr)
                     .up()
             }
 
-            if(typeof limitInfo.CompanyOutboundLimit != 'undefined')
+            if(typeof limitInfo.CompanyOutboundLimit != 'undefined' && limitInfo.CompanyOutboundLimit != null)
             {
                 var limitStr = util.format('hash %d_%d_outbound companylimit %d !USER_BUSY', tenantId, companyId, limitInfo.CompanyOutboundLimit);
                 cond.ele('action').att('application', 'limit').att('data', limitStr)
@@ -295,7 +295,7 @@ var CreatePbxFeaturesGateway = function(reqId, destNum, trunkNumber, trunkCode, 
 
             }
 
-            if(typeof limitInfo.CompanyBothLimit != 'undefined')
+            if(typeof limitInfo.CompanyBothLimit != 'undefined' && limitInfo.CompanyBothLimit != null)
             {
                 var limitStr = util.format('hash %d_%d_both companylimit %d !USER_BUSY', tenantId, companyId, limitInfo.CompanyBothLimit);
                 cond.ele('action').att('application', 'limit').att('data', limitStr)
@@ -880,28 +880,28 @@ var CreateRouteUserDialplan = function(reqId, ep, context, profile, destinationP
 
         if(numLimitInfo)
         {
-            if(typeof numLimitInfo.NumberInboundLimit != 'undefined')
+            if(typeof numLimitInfo.NumberInboundLimit != 'undefined' && numLimitInfo.NumberInboundLimit != null)
             {
                 var limitStr = util.format('hash %d_%d_inbound %s %d !USER_BUSY', ep.TenantId, ep.CompanyId, numLimitInfo.TrunkNumber, numLimitInfo.NumberInboundLimit);
                 cond.ele('action').att('application', 'limit').att('data', limitStr)
                     .up()
             }
 
-            if(typeof numLimitInfo.NumberBothLimit != 'undefined')
+            if(typeof numLimitInfo.NumberBothLimit != 'undefined' && numLimitInfo.NumberBothLimit != null)
             {
                 var limitStr = util.format('hash %d_%d_both %s %d !USER_BUSY', ep.TenantId, ep.CompanyId, numLimitInfo.TrunkNumber, numLimitInfo.NumberBothLimit);
                 cond.ele('action').att('application', 'limit').att('data', limitStr)
                     .up()
             }
 
-            if(typeof numLimitInfo.CompanyInboundLimit != 'undefined')
+            if(typeof numLimitInfo.CompanyInboundLimit != 'undefined' && numLimitInfo.CompanyInboundLimit != null)
             {
                 var limitStr = util.format('hash %d_%d_inbound companylimit %d !USER_BUSY', ep.TenantId, ep.CompanyId, numLimitInfo.CompanyInboundLimit);
                 cond.ele('action').att('application', 'limit').att('data', limitStr)
                     .up()
             }
 
-            if(typeof numLimitInfo.CompanyBothLimit != 'undefined')
+            if(typeof numLimitInfo.CompanyBothLimit != 'undefined' && numLimitInfo.CompanyBothLimit != null)
             {
                 var limitStr = util.format('hash %d_%d_both companylimit %d !USER_BUSY', ep.TenantId, ep.CompanyId, numLimitInfo.CompanyBothLimit);
                 cond.ele('action').att('application', 'limit').att('data', limitStr)
@@ -1734,28 +1734,28 @@ var CreateAutoAttendantDialplan = function(reqId, endpoint, context, toContext, 
 
         if(numLimitInfo)
         {
-            if(typeof numLimitInfo.NumberInboundLimit != 'undefined')
+            if(typeof numLimitInfo.NumberInboundLimit != 'undefined' && numLimitInfo.NumberInboundLimit != null)
             {
                 var limitStr = util.format('hash %d_%d_inbound %s %d !USER_BUSY', endpoint.TenantId, endpoint.CompanyId, numLimitInfo.TrunkNumber, numLimitInfo.NumberInboundLimit);
                 cond.ele('action').att('application', 'limit').att('data', limitStr)
                     .up()
             }
 
-            if(typeof numLimitInfo.NumberBothLimit != 'undefined')
+            if(typeof numLimitInfo.NumberBothLimit != 'undefined' && numLimitInfo.NumberBothLimit != null)
             {
                 var limitStr = util.format('hash %d_%d_both %s %d !USER_BUSY', endpoint.TenantId, endpoint.CompanyId, numLimitInfo.TrunkNumber, numLimitInfo.NumberBothLimit);
                 cond.ele('action').att('application', 'limit').att('data', limitStr)
                     .up()
             }
 
-            if(typeof numLimitInfo.CompanyInboundLimit != 'undefined')
+            if(typeof numLimitInfo.CompanyInboundLimit != 'undefined' && numLimitInfo.CompanyInboundLimit != null)
             {
                 var limitStr = util.format('hash %d_%d_inbound companylimit %d !USER_BUSY', endpoint.TenantId, endpoint.CompanyId, numLimitInfo.CompanyInboundLimit);
                 cond.ele('action').att('application', 'limit').att('data', limitStr)
                     .up()
             }
 
-            if(typeof numLimitInfo.CompanyBothLimit != 'undefined')
+            if(typeof numLimitInfo.CompanyBothLimit != 'undefined' && numLimitInfo.CompanyBothLimit != null)
             {
                 var limitStr = util.format('hash %d_%d_both companylimit %d !USER_BUSY', endpoint.TenantId, endpoint.CompanyId, numLimitInfo.CompanyBothLimit);
                 cond.ele('action').att('application', 'limit').att('data', limitStr)
@@ -1966,28 +1966,28 @@ var CreateForwardingDialplan = function(reqId, endpoint, context, profile, desti
 
         if(numLimitInfo)
         {
-            if(typeof numLimitInfo.NumberInboundLimit != 'undefined')
+            if(typeof numLimitInfo.NumberInboundLimit != 'undefined' && numLimitInfo.NumberInboundLimit != null)
             {
                 var limitStr = util.format('hash %d_%d_inbound %s %d !USER_BUSY', endpoint.TenantId, endpoint.CompanyId, numLimitInfo.TrunkNumber, numLimitInfo.NumberInboundLimit);
                 cond.ele('action').att('application', 'limit').att('data', limitStr)
                     .up()
             }
 
-            if(typeof numLimitInfo.NumberBothLimit != 'undefined')
+            if(typeof numLimitInfo.NumberBothLimit != 'undefined' && numLimitInfo.NumberBothLimit != null)
             {
                 var limitStr = util.format('hash %d_%d_both %s %d !USER_BUSY', endpoint.TenantId, endpoint.CompanyId, numLimitInfo.TrunkNumber, numLimitInfo.NumberBothLimit);
                 cond.ele('action').att('application', 'limit').att('data', limitStr)
                     .up()
             }
 
-            if(typeof numLimitInfo.CompanyInboundLimit != 'undefined')
+            if(typeof numLimitInfo.CompanyInboundLimit != 'undefined' && numLimitInfo.CompanyInboundLimit != null)
             {
                 var limitStr = util.format('hash %d_%d_inbound companylimit %d !USER_BUSY', endpoint.TenantId, endpoint.CompanyId, numLimitInfo.CompanyInboundLimit);
                 cond.ele('action').att('application', 'limit').att('data', limitStr)
                     .up()
             }
 
-            if(typeof numLimitInfo.CompanyBothLimit != 'undefined')
+            if(typeof numLimitInfo.CompanyBothLimit != 'undefined' && numLimitInfo.CompanyBothLimit != null)
             {
                 var limitStr = util.format('hash %d_%d_both companylimit %d !USER_BUSY', endpoint.TenantId, endpoint.CompanyId, numLimitInfo.CompanyBothLimit);
                 cond.ele('action').att('application', 'limit').att('data', limitStr)
@@ -2241,28 +2241,28 @@ var CreateRouteGatewayDialplan = function(reqId, ep, context, profile, destinati
 
         if(inbLimitInfo)
         {
-            if(typeof inbLimitInfo.NumberInboundLimit != 'undefined')
+            if(typeof inbLimitInfo.NumberInboundLimit != 'undefined' && inbLimitInfo.NumberInboundLimit != null)
             {
                 var limitStr = util.format('hash %d_%d_inbound %s %d !USER_BUSY', ep.TenantId, ep.CompanyId, inbLimitInfo.TrunkNumber, inbLimitInfo.NumberInboundLimit);
                 cond.ele('action').att('application', 'limit').att('data', limitStr)
                     .up()
             }
 
-            if(typeof inbLimitInfo.NumberBothLimit != 'undefined')
+            if(typeof inbLimitInfo.NumberBothLimit != 'undefined' && inbLimitInfo.NumberBothLimit != null)
             {
                 var limitStr = util.format('hash %d_%d_both %s %d !USER_BUSY', ep.TenantId, ep.CompanyId, inbLimitInfo.TrunkNumber, inbLimitInfo.NumberBothLimit);
                 cond.ele('action').att('application', 'limit').att('data', limitStr)
                     .up()
             }
 
-            if(typeof inbLimitInfo.CompanyInboundLimit != 'undefined')
+            if(typeof inbLimitInfo.CompanyInboundLimit != 'undefined' && inbLimitInfo.CompanyInboundLimit != null)
             {
                 var limitStr = util.format('hash %d_%d_inbound companylimit %d !USER_BUSY', ep.TenantId, ep.CompanyId, inbLimitInfo.CompanyInboundLimit);
                 cond.ele('action').att('application', 'limit').att('data', limitStr)
                     .up()
             }
 
-            if(typeof inbLimitInfo.CompanyBothLimit != 'undefined')
+            if(typeof inbLimitInfo.CompanyBothLimit != 'undefined' && inbLimitInfo.CompanyBothLimit != null)
             {
                 var limitStr = util.format('hash %d_%d_both companylimit %d !USER_BUSY', ep.TenantId, ep.CompanyId, inbLimitInfo.CompanyBothLimit);
                 cond.ele('action').att('application', 'limit').att('data', limitStr)
@@ -2272,21 +2272,21 @@ var CreateRouteGatewayDialplan = function(reqId, ep, context, profile, destinati
 
             ///////////////second leg limits//////////////////////
 
-            if(typeof ep.Limits.NumberOutboundLimit != 'undefined')
+            if(typeof ep.Limits.NumberOutboundLimit != 'undefined' && ep.Limits.NumberOutboundLimit != null)
             {
                 var limitStr = util.format('hash %d_%d_outbound %s %d !USER_BUSY', ep.TenantId, ep.CompanyId, ep.TrunkNumber, ep.Limits.NumberOutboundLimit);
                 cond.ele('action').att('application', 'export').att('data', 'nolocal:execute_on_answer=limit ' + limitStr)
                     .up()
             }
 
-            if(typeof ep.Limits.NumberBothLimit != 'undefined')
+            if(typeof ep.Limits.NumberBothLimit != 'undefined' && ep.Limits.NumberBothLimit != null)
             {
                 var limitStr = util.format('hash %d_%d_both %s %d !USER_BUSY', ep.TenantId, ep.CompanyId, ep.TrunkNumber, ep.Limits.NumberBothLimit);
                 cond.ele('action').att('application', 'export').att('data', 'nolocal:execute_on_answer=limit ' + limitStr)
                     .up()
             }
 
-            if(typeof ep.Limits.CompanyOutboundLimit != 'undefined')
+            if(typeof ep.Limits.CompanyOutboundLimit != 'undefined' && ep.Limits.CompanyOutboundLimit != null)
             {
                 var limitStr = util.format('hash %d_%d_outbound companylimit %d !USER_BUSY', ep.TenantId, ep.CompanyId, ep.Limits.CompanyOutboundLimit);
                 cond.ele('action').att('application', 'export').att('data', 'nolocal:execute_on_answer=limit ' + limitStr)
@@ -2294,7 +2294,7 @@ var CreateRouteGatewayDialplan = function(reqId, ep, context, profile, destinati
 
             }
 
-            if(typeof ep.Limits.CompanyBothLimit != 'undefined')
+            if(typeof ep.Limits.CompanyBothLimit != 'undefined' && ep.Limits.CompanyBothLimit != null)
             {
                 var limitStr = util.format('hash %d_%d_both companylimit %d !USER_BUSY', ep.TenantId, ep.CompanyId, ep.Limits.CompanyBothLimit);
                 cond.ele('action').att('application', 'export').att('data', 'nolocal:execute_on_answer=limit ' + limitStr)
@@ -2304,21 +2304,21 @@ var CreateRouteGatewayDialplan = function(reqId, ep, context, profile, destinati
         }
         else
         {
-            if(typeof ep.Limits.NumberOutboundLimit != 'undefined')
+            if(typeof ep.Limits.NumberOutboundLimit != 'undefined' && ep.Limits.NumberOutboundLimit != null)
             {
                 var limitStr = util.format('hash %d_%d_outbound %s %d !USER_BUSY', ep.TenantId, ep.CompanyId, ep.TrunkNumber, ep.Limits.NumberOutboundLimit);
                 cond.ele('action').att('application', 'limit').att('data', limitStr)
                     .up()
             }
 
-            if(typeof ep.Limits.NumberBothLimit != 'undefined')
+            if(typeof ep.Limits.NumberBothLimit != 'undefined' && ep.Limits.NumberBothLimit != null)
             {
                 var limitStr = util.format('hash %d_%d_both %s %d !USER_BUSY', ep.TenantId, ep.CompanyId, ep.TrunkNumber, ep.Limits.NumberBothLimit);
                 cond.ele('action').att('application', 'limit').att('data', limitStr)
                     .up()
             }
 
-            if(typeof ep.Limits.CompanyOutboundLimit != 'undefined')
+            if(typeof ep.Limits.CompanyOutboundLimit != 'undefined' && ep.Limits.CompanyOutboundLimit != null)
             {
                 var limitStr = util.format('hash %d_%d_outbound companylimit %d !USER_BUSY', ep.TenantId, ep.CompanyId, ep.Limits.CompanyOutboundLimit);
                 cond.ele('action').att('application', 'limit').att('data', limitStr)
@@ -2326,7 +2326,7 @@ var CreateRouteGatewayDialplan = function(reqId, ep, context, profile, destinati
 
             }
 
-            if(typeof ep.Limits.CompanyBothLimit != 'undefined')
+            if(typeof ep.Limits.CompanyBothLimit != 'undefined' && ep.Limits.CompanyBothLimit != null)
             {
                 var limitStr = util.format('hash %d_%d_both companylimit %d !USER_BUSY', ep.TenantId, ep.CompanyId, ep.Limits.CompanyBothLimit);
                 cond.ele('action').att('application', 'limit').att('data', limitStr)
@@ -2440,28 +2440,28 @@ var CreateFollowMeDialplan = function(reqId, fmEndpoints, context, profile, dest
 
         if(numLimitInfo)
         {
-            if(typeof numLimitInfo.NumberInboundLimit != 'undefined')
+            if(typeof numLimitInfo.NumberInboundLimit != 'undefined' && numLimitInfo.NumberInboundLimit != null)
             {
                 var limitStr = util.format('hash %d_%d_inbound %s %d !USER_BUSY', tenantId, companyId, numLimitInfo.TrunkNumber, numLimitInfo.NumberInboundLimit);
                 cond.ele('action').att('application', 'limit').att('data', limitStr)
                     .up()
             }
 
-            if(typeof numLimitInfo.NumberBothLimit != 'undefined')
+            if(typeof numLimitInfo.NumberBothLimit != 'undefined' && numLimitInfo.NumberBothLimit != null)
             {
                 var limitStr = util.format('hash %d_%d_both %s %d !USER_BUSY', tenantId, companyId, numLimitInfo.TrunkNumber, numLimitInfo.NumberBothLimit);
                 cond.ele('action').att('application', 'limit').att('data', limitStr)
                     .up()
             }
 
-            if(typeof numLimitInfo.CompanyInboundLimit != 'undefined')
+            if(typeof numLimitInfo.CompanyInboundLimit != 'undefined' && numLimitInfo.CompanyInboundLimit != null)
             {
                 var limitStr = util.format('hash %d_%d_inbound companylimit %d !USER_BUSY', tenantId, companyId, numLimitInfo.CompanyInboundLimit);
                 cond.ele('action').att('application', 'limit').att('data', limitStr)
                     .up()
             }
 
-            if(typeof numLimitInfo.CompanyBothLimit != 'undefined')
+            if(typeof numLimitInfo.CompanyBothLimit != 'undefined' && numLimitInfo.CompanyBothLimit != null)
             {
                 var limitStr = util.format('hash %d_%d_both companylimit %d !USER_BUSY', tenantId, companyId, numLimitInfo.CompanyBothLimit);
                 cond.ele('action').att('application', 'limit').att('data', limitStr)
@@ -2532,21 +2532,21 @@ var CreateFollowMeDialplan = function(reqId, fmEndpoints, context, profile, dest
                 dnis = util.format('%s', ep.Destination);
                 calling = util.format('%s%s/%s/%s', option, protocol, destinationGroup, dnis);
 
-                if(typeof ep.Limits.NumberOutboundLimit != 'undefined')
+                if(typeof ep.Limits.NumberOutboundLimit != 'undefined' && ep.Limits.NumberOutboundLimit != null)
                 {
                     var limitStr = util.format('hash %d_%d_outbound %s %d !USER_BUSY', tenantId, companyId, ep.TrunkNumber, ep.Limits.NumberOutboundLimit);
                     cond.ele('action').att('application', 'limit').att('data', limitStr)
                         .up()
                 }
 
-                if(typeof ep.Limits.NumberBothLimit != 'undefined')
+                if(typeof ep.Limits.NumberBothLimit != 'undefined' && ep.Limits.NumberBothLimit != null)
                 {
                     var limitStr = util.format('hash %d_%d_both %s %d !USER_BUSY', tenantId, companyId, ep.TrunkNumber, ep.Limits.NumberBothLimit);
                     cond.ele('action').att('application', 'limit').att('data', limitStr)
                         .up()
                 }
 
-                if(typeof ep.Limits.CompanyOutboundLimit != 'undefined')
+                if(typeof ep.Limits.CompanyOutboundLimit != 'undefined' && ep.Limits.CompanyOutboundLimit != null)
                 {
                     var limitStr = util.format('hash %d_%d_outbound companylimit %d !USER_BUSY', tenantId, companyId, ep.Limits.CompanyOutboundLimit);
                     cond.ele('action').att('application', 'limit').att('data', limitStr)
@@ -2554,7 +2554,7 @@ var CreateFollowMeDialplan = function(reqId, fmEndpoints, context, profile, dest
 
                 }
 
-                if(typeof ep.Limits.CompanyBothLimit != 'undefined')
+                if(typeof ep.Limits.CompanyBothLimit != 'undefined' && ep.Limits.CompanyBothLimit != null)
                 {
                     var limitStr = util.format('hash %d_%d_both companylimit %d !USER_BUSY', tenantId, companyId, ep.Limits.CompanyBothLimit);
                     cond.ele('action').att('application', 'limit').att('data', limitStr)

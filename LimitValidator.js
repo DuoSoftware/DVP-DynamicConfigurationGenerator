@@ -72,7 +72,7 @@ var LimitValidator = function(limitInfo, trunkNumber, direction)
                 compOutLim = limitInfo.CompanyOutboundLimit.MaxCount;
             }
 
-            if(limitInfo.CompanyBothLimitt)
+            if(limitInfo.CompanyBothLimit)
             {
                 compBothLim = limitInfo.CompanyBothLimit.MaxCount;
             }
