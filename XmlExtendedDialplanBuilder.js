@@ -2535,21 +2535,21 @@ var CreateFollowMeDialplan = function(reqId, fmEndpoints, context, profile, dest
                 if(typeof ep.Limits.NumberOutboundLimit != 'undefined' && ep.Limits.NumberOutboundLimit != null)
                 {
                     var limitStr = util.format('hash %d_%d_outbound %s %d !USER_BUSY', tenantId, companyId, ep.TrunkNumber, ep.Limits.NumberOutboundLimit);
-                    cond.ele('action').att('application', 'limit').att('data', limitStr)
+                    cond.ele('action').att('application', 'export').att('data', 'nolocal:execute_on_answer=limit ' + limitStr)
                         .up()
                 }
 
                 if(typeof ep.Limits.NumberBothLimit != 'undefined' && ep.Limits.NumberBothLimit != null)
                 {
                     var limitStr = util.format('hash %d_%d_both %s %d !USER_BUSY', tenantId, companyId, ep.TrunkNumber, ep.Limits.NumberBothLimit);
-                    cond.ele('action').att('application', 'limit').att('data', limitStr)
+                    cond.ele('action').att('application', 'export').att('data', 'nolocal:execute_on_answer=limit ' + limitStr)
                         .up()
                 }
 
                 if(typeof ep.Limits.CompanyOutboundLimit != 'undefined' && ep.Limits.CompanyOutboundLimit != null)
                 {
                     var limitStr = util.format('hash %d_%d_outbound companylimit %d !USER_BUSY', tenantId, companyId, ep.Limits.CompanyOutboundLimit);
-                    cond.ele('action').att('application', 'limit').att('data', limitStr)
+                    cond.ele('action').att('application', 'export').att('data', 'nolocal:execute_on_answer=limit ' + limitStr)
                         .up()
 
                 }
@@ -2557,7 +2557,7 @@ var CreateFollowMeDialplan = function(reqId, fmEndpoints, context, profile, dest
                 if(typeof ep.Limits.CompanyBothLimit != 'undefined' && ep.Limits.CompanyBothLimit != null)
                 {
                     var limitStr = util.format('hash %d_%d_both companylimit %d !USER_BUSY', tenantId, companyId, ep.Limits.CompanyBothLimit);
-                    cond.ele('action').att('application', 'limit').att('data', limitStr)
+                    cond.ele('action').att('application', 'export').att('data', 'nolocal:execute_on_answer=limit ' + limitStr)
                         .up()
 
                 }
