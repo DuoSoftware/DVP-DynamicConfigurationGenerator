@@ -13,6 +13,7 @@ var util = require('util');
 var underscore = require('underscore');
 var libphonenumber = require('libphonenumber');
 var backendFactory = require('./BackendFactory.js');
+var LimitValidator = require('./LimitValidator.js').LimitValidator;
 
 /*var backendHandler;
 var ruleHandler;
