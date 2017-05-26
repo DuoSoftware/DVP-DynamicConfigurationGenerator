@@ -458,6 +458,70 @@ var CreateSendBusyMessageDialplan = function(reqId, destinationPattern, context,
 
 };
 
+var CreateOutboundDeniedMessageDialplan = function(reqId, destinationPattern, context, companyId, tenantId, appId, dvpCallDirection)
+{
+    try
+    {
+        if (!destinationPattern) {
+            destinationPattern = "";
+        }
+
+        if (!context) {
+            context = "";
+        }
+
+
+        var doc = xmlBuilder.create('document');
+
+        var cond = doc.att('type', 'freeswitch/xml')
+            .ele('section').att('name', 'dialplan').att('description', 'RE Dial Plan For FreeSwitch')
+            .ele('context').att('name', context)
+            .ele('extension').att('name', 'test')
+            .ele('condition').att('field', 'destination_number').att('expression', destinationPattern)
+
+
+        if(companyId)
+        {
+            cond.ele('action').att('application', 'export').att('data', 'companyid=' + companyId)
+                .up()
+        }
+        if(tenantId)
+        {
+            cond.ele('action').att('application', 'export').att('data', 'tenantid=' + tenantId)
+                .up()
+        }
+        if(appId)
+        {
+            cond.ele('action').att('application', 'export').att('data', 'dvp_app_id=' + appId)
+                .up()
+        }
+
+        if(dvpCallDirection)
+        {
+            cond.ele('action').att('application', 'export').att('data', 'DVP_CALL_DIRECTION=' + dvpCallDirection)
+                .up()
+        }
+
+        cond.ele('action').att('application', 'set').att('data', 'DVP_ACTION_CAT=OUTBOUND_DENIED')
+            .up()
+            .ele('action').att('application', 'hangup').att('data', 'OUTGOING_CALL_BARRED')
+            .up()
+
+            .end({pretty: true});
+
+
+        return "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\r\n" + doc.toString({pretty: true});
+
+
+    }
+    catch(ex)
+    {
+        logger.error('[DVP-DynamicConfigurationGenerator.CreateSendBusyMessageDialplan] - [%s] - Exception occurred creating xml', reqId, ex);
+        return createNotFoundResponse();
+    }
+
+};
+
 var CreateConferenceDialplan = function(reqId, epList, context, destinationPattern, ignoreEarlyMedia, confName, domain, pin, mode, companyId, tenantId, appId, dvpCallDirection, template)
 {
     try
@@ -2619,3 +2683,4 @@ module.exports.createRejectResponse = createRejectResponse;
 module.exports.CreateAutoAttendantDialplan = CreateAutoAttendantDialplan;
 module.exports.CreateAttendantTransferGW = CreateAttendantTransferGW;
 module.exports.CreatePbxFeaturesGateway = CreatePbxFeaturesGateway;
+module.exports.CreateOutboundDeniedMessageDialplan = CreateOutboundDeniedMessageDialplan;
