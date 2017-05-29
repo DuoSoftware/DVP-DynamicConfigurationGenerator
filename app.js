@@ -260,7 +260,7 @@ var HandleOutRequest = function(reqId, data, callerIdNum, contextTenant, appType
                                                             Destination: rule.DNIS,
                                                             Domain: rule.IpUrl,
                                                             Action: 'DEFAULT',
-                                                            RecordEnabled: fromUsr.Extension.RecordingEnabled,
+                                                            RecordEnabled: fromUsr.RecordingEnabled,
                                                             Operator: rule.Operator,
                                                             OutLimit: rule.OutLimit,
                                                             BothLimit: rule.BothLimit,

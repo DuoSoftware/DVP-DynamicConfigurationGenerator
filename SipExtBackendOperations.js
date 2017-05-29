@@ -290,7 +290,7 @@ var GetAllDataForExt = function(reqId, extension, companyId, tenantId, extType, 
 
         if(extType === 'USER')
         {
-            dbModel.Extension.find({where: [{Extension: extension},{TenantId: tenantId},{CompanyId: companyId},{ObjCategory: extType}], include: [{model: dbModel.SipUACEndpoint, as:'SipUACEndpoint', include: [{model: dbModel.CloudEndUser, as:'CloudEndUser'},{model: dbModel.UserGroup, as:'UserGroup', include: [{model: dbModel.Extension, as:'Extension'}]}]}]})
+            dbModel.Extension.find({where: [{Extension: extension},{TenantId: tenantId},{CompanyId: companyId},{ObjCategory: extType}], include: [{model: dbModel.SipUACEndpoint, as:'SipUACEndpoint', include: [{model: dbModel.CloudEndUser, as:'CloudEndUser'},{model: dbModel.Context, as:'Context'},{model: dbModel.UserGroup, as:'UserGroup', include: [{model: dbModel.Extension, as:'Extension'}]}]}]})
                 .then(function (extData)
                 {
                     if(extData && extData.SipUACEndpoint && extData.SipUACEndpoint.Enabled)

@@ -841,6 +841,17 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                             }
                                             else if(!pbxDetails)
                                             {
+                                                var recEnabled = false;
+
+                                                if((extDetails.SipUACEndpoint.Context && extDetails.SipUACEndpoint.Context.RecordingEnabled) || extDetails.SipUACEndpoint.RecordingEnabled)
+                                                {
+                                                    recEnabled = true;
+                                                }
+                                                else
+                                                {
+                                                    recEnabled = false;
+                                                }
+
                                                 var ep =
                                                 {
                                                     Profile: profile,
@@ -859,7 +870,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                     TenantId: tenantId,
                                                     AppId: appId,
                                                     Action: 'DEFAULT',
-                                                    RecordEnabled: extDetails.RecordingEnabled
+                                                    RecordEnabled: recEnabled
                                                 };
 
                                                 var customStr = tenantId + '_' + extDetails.Extension + '_PBXUSERCALL';
@@ -941,6 +952,17 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                     else if(pbxObj.OperationType === 'USER_DIAL')
                                                     {
 
+                                                        var recEnabled = false;
+
+                                                        if((extDetails.SipUACEndpoint.Context && extDetails.SipUACEndpoint.Context.RecordingEnabled) || extDetails.SipUACEndpoint.RecordingEnabled)
+                                                        {
+                                                            recEnabled = true;
+                                                        }
+                                                        else
+                                                        {
+                                                            recEnabled = false;
+                                                        }
+
                                                         var ep =
                                                         {
                                                             Profile: profile,
@@ -959,7 +981,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                             TenantId: tenantId,
                                                             AppId: appId,
                                                             Action: 'DEFAULT',
-                                                            RecordEnabled: extDetails.RecordingEnabled
+                                                            RecordEnabled: recEnabled
                                                         };
 
                                                         var customStr = tenantId + '_' + extDetails.Extension + '_PBXUSERCALL';
@@ -1354,6 +1376,17 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                             grp = extDetails.SipUACEndpoint.UserGroup.Extension.Extension;
                                                         }
 
+                                                        var recEnabled = false;
+
+                                                        if((extDetails.SipUACEndpoint.Context && extDetails.SipUACEndpoint.Context.RecordingEnabled) || extDetails.SipUACEndpoint.RecordingEnabled)
+                                                        {
+                                                            recEnabled = true;
+                                                        }
+                                                        else
+                                                        {
+                                                            recEnabled = false;
+                                                        }
+
                                                         var ep =
                                                         {
                                                             Profile: profile,
@@ -1372,7 +1405,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                             TenantId: tenantId,
                                                             AppId: appId,
                                                             Action: 'DEFAULT',
-                                                            RecordEnabled: extDetails.RecordingEnabled
+                                                            RecordEnabled: recEnabled
                                                         };
 
                                                         var customStr = tenantId + '_' + extDetails.Extension + '_PBXUSERCALL';
@@ -1427,6 +1460,17 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                     {
                                         logger.info('[DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - APP URL NOT SET - TRYING NORMAL USER DIAL', reqId);
 
+                                        var recEnabled = false;
+
+                                        if((extDetails.SipUACEndpoint.Context && extDetails.SipUACEndpoint.Context.RecordingEnabled) || extDetails.SipUACEndpoint.RecordingEnabled)
+                                        {
+                                            recEnabled = true;
+                                        }
+                                        else
+                                        {
+                                            recEnabled = false;
+                                        }
+
                                         var ep =
                                         {
                                             Profile: profile,
@@ -1445,7 +1489,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                             TenantId: tenantId,
                                             AppId: appId,
                                             Action: 'DEFAULT',
-                                            RecordEnabled: extDetails.RecordingEnabled
+                                            RecordEnabled: recEnabled
                                         };
 
                                         var customStr = tenantId + '_' + extDetails.Extension + '_PBXUSERCALL';
@@ -1553,7 +1597,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                         TenantId: tenantId,
                                         AppId: appId,
                                         Action: 'DEFAULT',
-                                        RecordEnabled: extDetails.RecordingEnabled
+                                        RecordEnabled: false
                                     };
 
                                     var customStr = tenantId + '_' + extDetails.Extension + '_PBXUSERCALL';
@@ -1754,7 +1798,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                         }
                                                         else
                                                         {
-                                                            if(fromUserData.Extension.RecordingEnabled)
+                                                            if(fromUserData.RecordingEnabled)
                                                             {
                                                                 recEnabled = true;
                                                             }
@@ -1869,7 +1913,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                             }
                                                             else
                                                             {
-                                                                if(fromUserData.Extension.RecordingEnabled)
+                                                                if(fromUserData.RecordingEnabled)
                                                                 {
                                                                     recEnabled = true;
                                                                 }
@@ -2050,7 +2094,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                 }
                                                                 else
                                                                 {
-                                                                    if(fromUserData.Extension.RecordingEnabled)
+                                                                    if(fromUserData.RecordingEnabled)
                                                                     {
                                                                         recEnabled = true;
                                                                     }
@@ -2326,7 +2370,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                             }
                                                             else
                                                             {
-                                                                if(fromUserData.Extension.RecordingEnabled)
+                                                                if(fromUserData.RecordingEnabled)
                                                                 {
                                                                     recEnabled = true;
                                                                 }
@@ -2419,7 +2463,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                 }
                                                 else
                                                 {
-                                                    if(fromUserData.Extension.RecordingEnabled)
+                                                    if(fromUserData.RecordingEnabled)
                                                     {
                                                         recEnabled = true;
                                                     }
@@ -2530,7 +2574,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                             }
                                             else
                                             {
-                                                if(fromUserData.Extension.RecordingEnabled)
+                                                if(fromUserData.RecordingEnabled)
                                                 {
                                                     recEnabled = true;
                                                 }
@@ -2764,7 +2808,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                             }
                                                             else
                                                             {
-                                                                if(fromUserData && fromUserData.Extension.RecordingEnabled)
+                                                                if(fromUserData && fromUserData.RecordingEnabled)
                                                                 {
                                                                     recEnabled = true;
                                                                 }
@@ -3076,7 +3120,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                     }
                                                     else
                                                     {
-                                                        if(fromUserData && fromUserData.Extension.RecordingEnabled)
+                                                        if(fromUserData && fromUserData.RecordingEnabled)
                                                         {
                                                             recEnabled = true;
                                                         }
@@ -3235,7 +3279,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                         }
                                         else
                                         {
-                                            if(fromUserData && fromUserData.Extension.RecordingEnabled)
+                                            if(fromUserData && fromUserData.RecordingEnabled)
                                             {
                                                 recEnabled = true;
                                             }
@@ -4298,7 +4342,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                         }
                                         else
                                         {
-                                            if(fromUserData && fromUserData.Extension.RecordingEnabled)
+                                            if(fromUserData && fromUserData.RecordingEnabled)
                                             {
                                                 recEnabled = true;
                                             }
