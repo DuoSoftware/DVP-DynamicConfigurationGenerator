@@ -1786,7 +1786,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                 {
                                                     if(fromUserData.DenyOutboundFor === 'ALL')
                                                     {
-                                                        callback(new Error('Outbound denied for user'), xmlBuilder.CreateOutboundDeniedMessageDialplan(reqId, '[^\\s]*', context, companyId, tenantId, appId, dvpCallDirection));
+                                                        callback(null, xmlBuilder.CreateOutboundDeniedMessageDialplan(reqId, '[^\\s]*', context, companyId, tenantId, appId, dvpCallDirection));
                                                     }
                                                     else
                                                     {
@@ -2451,7 +2451,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                         {
                                             if(fromUserData.DenyOutboundFor === 'ALL')
                                             {
-                                                callback(new Error('Outbound denied for user'), xmlBuilder.CreateOutboundDeniedMessageDialplan(reqId, '[^\\s]*', context, companyId, tenantId, appId, dvpCallDirection));
+                                                callback(null, xmlBuilder.CreateOutboundDeniedMessageDialplan(reqId, '[^\\s]*', context, companyId, tenantId, appId, dvpCallDirection));
                                             }
                                             else
                                             {
@@ -2560,7 +2560,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                 {
                                     if(fromUserData.DenyOutboundFor === 'ALL')
                                     {
-                                        callback(new Error('Outbound denied for user'), xmlBuilder.CreateOutboundDeniedMessageDialplan(reqId, '[^\\s]*', context, companyId, tenantId, appId, dvpCallDirection));
+                                        callback(null, xmlBuilder.CreateOutboundDeniedMessageDialplan(reqId, '[^\\s]*', context, companyId, tenantId, appId, dvpCallDirection));
                                     }
                                     else
                                     {
@@ -2634,7 +2634,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                 {
                                     if(fromUserData.DenyOutboundFor === 'ALL')
                                     {
-                                        callback(new Error('Outbound denied for user'), xmlBuilder.CreateOutboundDeniedMessageDialplan(reqId, '[^\\s]*', context, companyId, tenantId, appId, dvpCallDirection));
+                                        callback(null, xmlBuilder.CreateOutboundDeniedMessageDialplan(reqId, '[^\\s]*', context, companyId, tenantId, appId, dvpCallDirection));
                                     }
                                     else
                                     {
@@ -3095,7 +3095,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                     {
                                         if(fromUserData.DenyOutboundFor === 'ALL' || fromUserData.DenyOutboundFor === 'GATEWAY')
                                         {
-                                            callback(new Error('Outbound denied for user'), xmlBuilder.CreateOutboundDeniedMessageDialplan(reqId, '[^\\s]*', context, companyId, tenantId, appId, dvpCallDirection));
+                                            callback(null, xmlBuilder.CreateOutboundDeniedMessageDialplan(reqId, '[^\\s]*', context, companyId, tenantId, appId, dvpCallDirection));
                                         }
                                         else
                                         {
@@ -3254,7 +3254,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                         {
                             if(fromUserData.DenyOutboundFor === 'ALL' || fromUserData.DenyOutboundFor === 'GATEWAY')
                             {
-                                callback(new Error('Outbound denied for user'), xmlBuilder.CreateOutboundDeniedMessageDialplan(reqId, '[^\\s]*', context, companyId, tenantId, appId, dvpCallDirection));
+                                callback(null, xmlBuilder.CreateOutboundDeniedMessageDialplan(reqId, '[^\\s]*', context, companyId, tenantId, appId, dvpCallDirection));
                             }
                             else
                             {
@@ -3475,7 +3475,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                     {
                                                         if(fromUserData && fromUserData.DenyOutboundFor === 'ALL')
                                                         {
-                                                            callback(new Error('Outbound denied for user'), xmlBuilder.CreateOutboundDeniedMessageDialplan(reqId, '[^\\s]*', context, companyId, tenantId, appId, dvpCallDirection));
+                                                            callback(null, xmlBuilder.CreateOutboundDeniedMessageDialplan(reqId, '[^\\s]*', context, companyId, tenantId, appId, dvpCallDirection));
                                                         }
                                                         else
                                                         {
@@ -4070,7 +4070,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                             {
                                                 if(fromUserData && fromUserData.DenyOutboundFor === 'ALL')
                                                 {
-                                                    callback(new Error('Outbound denied for user'), xmlBuilder.CreateOutboundDeniedMessageDialplan(reqId, '[^\\s]*', context, companyId, tenantId, appId, dvpCallDirection));
+                                                    callback(null, xmlBuilder.CreateOutboundDeniedMessageDialplan(reqId, '[^\\s]*', context, companyId, tenantId, appId, dvpCallDirection));
                                                 }
                                                 else
                                                 {
@@ -4163,7 +4163,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                     {
                                         if(fromUserData && fromUserData.DenyOutboundFor === 'ALL')
                                         {
-                                            callback(new Error('Outbound denied for user'), xmlBuilder.CreateOutboundDeniedMessageDialplan(reqId, '[^\\s]*', context, companyId, tenantId, appId, dvpCallDirection));
+                                            callback(null, xmlBuilder.CreateOutboundDeniedMessageDialplan(reqId, '[^\\s]*', context, companyId, tenantId, appId, dvpCallDirection));
                                         }
                                         else
                                         {
@@ -4218,7 +4218,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                     {
                                         if(fromUserData && fromUserData.DenyOutboundFor === 'ALL')
                                         {
-                                            callback(new Error('Outbound denied for user'), xmlBuilder.CreateOutboundDeniedMessageDialplan(reqId, '[^\\s]*', context, companyId, tenantId, appId, dvpCallDirection));
+                                            callback(null, xmlBuilder.CreateOutboundDeniedMessageDialplan(reqId, '[^\\s]*', context, companyId, tenantId, appId, dvpCallDirection));
                                         }
                                         else
                                         {
@@ -4317,7 +4317,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
 
                             if(fromUserData && (fromUserData.DenyOutboundFor === 'ALL' || fromUserData.DenyOutboundFor === 'GATEWAY'))
                             {
-                                callback(new Error('Outbound denied for user'), xmlBuilder.CreateOutboundDeniedMessageDialplan(reqId, '[^\\s]*', context, companyId, tenantId, appId, dvpCallDirection));
+                                callback(null, xmlBuilder.CreateOutboundDeniedMessageDialplan(reqId, '[^\\s]*', context, companyId, tenantId, appId, dvpCallDirection));
                             }
                             else
                             {
