@@ -922,7 +922,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
 
                                                 if(pbxDetails.OperationType === 'DENY')
                                                 {
-                                                    callback(new Error('DENY Request from extended dialplan'), xmlBuilder.createRejectResponse());
+                                                    callback(null, xmlBuilder.CreateOutboundDeniedMessageDialplan(reqId, '[^\\s]*', context, companyId, tenantId, appId, dvpCallDirection));
                                                 }
                                                 else
                                                 {
@@ -1879,7 +1879,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
 
                                                     if(pbxDetails.OperationType === 'DENY')
                                                     {
-                                                        callback(new Error('DENY Request from extended dialplan'), xmlBuilder.createRejectResponse());
+                                                        callback(null, xmlBuilder.CreateOutboundDeniedMessageDialplan(reqId, '[^\\s]*', context, companyId, tenantId, appId, dvpCallDirection));
                                                     }
                                                     else
                                                     {
@@ -2748,7 +2748,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                     {
                                         if(pbxObj.OperationType === 'DENY')
                                         {
-                                            callback(new Error('DENY Request from extended dialplan'), xmlBuilder.createRejectResponse());
+                                            callback(null, xmlBuilder.CreateOutboundDeniedMessageDialplan(reqId, '[^\\s]*', context, companyId, tenantId, appId, dvpCallDirection));
                                         }
                                         else
                                         {
@@ -3549,7 +3549,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                     {
                                                         if(pbxDetails.OperationType === 'DENY')
                                                         {
-                                                            callback(new Error('DENY Request from extended dialplan'), xmlBuilder.createRejectResponse());
+                                                            callback(null, xmlBuilder.CreateOutboundDeniedMessageDialplan(reqId, '[^\\s]*', context, companyId, tenantId, appId, dvpCallDirection));
                                                         }
                                                         else
                                                         {
