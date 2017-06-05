@@ -2107,8 +2107,8 @@ var FaxReceiveUpload = function(reqId, context, destinationPattern, numLimitInfo
             .up()
             //.ele('action').att('application', 'set').att('data', 'fax_enable_t38_request=true')
             //.up()
-            //.ele('action').att('application', 'set').att('data', 'fax_enable_t38=true')
-            //.up()
+            .ele('action').att('application', 'set').att('data', 'fax_enable_t38=true')
+            .up()
 
         if(companyId)
         {
@@ -2168,10 +2168,10 @@ var FaxReceiveUpload = function(reqId, context, destinationPattern, numLimitInfo
 
         cond.ele('action').att('application', 'answer')
             .up()
-            /*.ele('action').att('application', 'playback').att('data', 'silence_stream://2000')
+            .ele('action').att('application', 'playback').att('data', 'silence_stream://4000')
             .up()
-            .ele('action').att('application', 'set').att('data', 'api_hangup_hook=curl_sendfile ' + fileUploadUrl + ' file=${dvpUploadFaxFile} class=CALLSERVER&type=FAX&category=FAX&referenceid=${uuid}&mediatype=audio&filetype=tif&sessionid=${uuid}&display=FAX-' + trunkNum + '-${caller_id_number}')
-            .up()*/
+            //.ele('action').att('application', 'set').att('data', 'api_hangup_hook=curl_sendfile ' + fileUploadUrl + ' file=${dvpUploadFaxFile} class=CALLSERVER&type=FAX&category=FAX&referenceid=${uuid}&mediatype=audio&filetype=tif&sessionid=${uuid}&display=FAX-' + trunkNum + '-${caller_id_number}')
+            //.up()
             .ele('action').att('application', 'rxfax').att('data', fileSavePath)
             .up()
 
