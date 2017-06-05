@@ -2105,6 +2105,10 @@ var FaxReceiveUpload = function(reqId, context, destinationPattern, numLimitInfo
             .up()
             .ele('action').att('application', 'export').att('data', 'FAX')
             .up()
+            .ele('action').att('application', 'set').att('data', 'fax_enable_t38_request=true')
+            .up()
+            .ele('action').att('application', 'set').att('data', 'fax_enable_t38=true')
+            .up()
 
         if(companyId)
         {
