@@ -2081,6 +2081,117 @@ var CreateForwardingDialplan = function(reqId, endpoint, context, profile, desti
 
 };
 
+var FaxReceiveUpload = function(reqId, context, destinationPattern, numLimitInfo, dvpCallDirection, companyId, tenantId, trunkNum)
+{
+    try
+    {
+        if (!destinationPattern) {
+            destinationPattern = "";
+        }
+
+        if (!context) {
+            context = "";
+        }
+
+        var doc = xmlBuilder.create('document');
+
+        var cond = doc.att('type', 'freeswitch/xml')
+            .ele('section').att('name', 'dialplan').att('description', 'RE Dial Plan For FreeSwitch')
+            .ele('context').att('name', context)
+            .ele('extension').att('name', 'fax_receive')
+            .ele('condition').att('field', 'destination_number').att('expression', destinationPattern)
+
+        cond.ele('action').att('application', 'export').att('data', 'DVP_OPERATION_CAT=FAX_INBOUND')
+            .up()
+            .ele('action').att('application', 'export').att('data', 'FAX')
+            .up()
+
+        if(companyId)
+        {
+            cond.ele('action').att('application', 'export').att('data', 'companyid=' + companyId)
+                .up()
+        }
+        if(tenantId)
+        {
+            cond.ele('action').att('application', 'export').att('data', 'tenantid=' + tenantId)
+                .up()
+        }
+
+        if(dvpCallDirection)
+        {
+            cond.ele('action').att('application', 'export').att('data', 'DVP_CALL_DIRECTION=' + dvpCallDirection)
+                .up()
+        }
+
+        if(numLimitInfo)
+        {
+            if(typeof numLimitInfo.NumberInboundLimit != 'undefined' && numLimitInfo.NumberInboundLimit != null)
+            {
+                var limitStr = util.format('hash %d_%d_inbound %s %d !USER_BUSY', tenantId, companyId, numLimitInfo.TrunkNumber, numLimitInfo.NumberInboundLimit);
+                cond.ele('action').att('application', 'limit').att('data', limitStr)
+                    .up()
+            }
+
+            if(typeof numLimitInfo.NumberBothLimit != 'undefined' && numLimitInfo.NumberBothLimit != null)
+            {
+                var limitStr = util.format('hash %d_%d_both %s %d !USER_BUSY', tenantId, companyId, numLimitInfo.TrunkNumber, numLimitInfo.NumberBothLimit);
+                cond.ele('action').att('application', 'limit').att('data', limitStr)
+                    .up()
+            }
+
+            if(typeof numLimitInfo.CompanyInboundLimit != 'undefined' && numLimitInfo.CompanyInboundLimit != null)
+            {
+                var limitStr = util.format('hash %d_%d_inbound companylimit %d !USER_BUSY', tenantId, companyId, numLimitInfo.CompanyInboundLimit);
+                cond.ele('action').att('application', 'limit').att('data', limitStr)
+                    .up()
+            }
+
+            if(typeof numLimitInfo.CompanyBothLimit != 'undefined' && numLimitInfo.CompanyBothLimit != null)
+            {
+                var limitStr = util.format('hash %d_%d_both companylimit %d !USER_BUSY', tenantId, companyId, numLimitInfo.CompanyBothLimit);
+                cond.ele('action').att('application', 'limit').att('data', limitStr)
+                    .up()
+            }
+        }
+
+        var fileSavePath = '$${base_dir}/recordings/${uuid}.tif';
+
+        cond.ele('action').att('application', 'set').att('data', 'dvpUploadFaxFile=' + fileSavePath)
+        .up()
+
+
+        var fileUploadUrl = 'http://' + fileServiceIp + ':' + fileServicePort + '/DVP/API/' + fileServiceVersion + '/InternalFileService/File/Upload/' + tenantId + '/' + companyId;
+
+        cond.ele('action').att('application', 'answer')
+            .up()
+            .ele('action').att('application', 'playback').att('data', 'silence_stream://2000')
+            .up()
+            .ele('action').att('application', 'set').att('data', 'api_hangup_hook=curl_sendfile ' + fileUploadUrl + ' file=${dvpUploadFaxFile} class=CALLSERVER&type=FAX&category=FAX&referenceid=${uuid}&mediatype=audio&filetype=tif&sessionid=${uuid}&display=' + trunkNum + '-${caller_id_number}')
+            .up()
+            .ele('action').att('application', 'rxfax').att('data', fileSavePath)
+            .up()
+
+        cond.ele('action').att('application', 'hangup')
+            .up()
+
+        cond.end({pretty: true});
+
+        var xmlStr = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\r\n" + doc.toString({pretty: true});
+
+        var decoded = xmlStr.replace(/&amp;/g, '&');
+
+        return decoded;
+
+
+    }
+    catch(ex)
+    {
+        logger.error('[DVP-DynamicConfigurationGenerator.CreateSendBusyMessageDialplan] - [%s] - Exception occurred creating xml', reqId, ex);
+        return createNotFoundResponse();
+    }
+
+};
+
 var CreateRouteGatewayDialplan = function(reqId, ep, context, profile, destinationPattern, ignoreEarlyMedia, transferLegInfo, dvpCallDirection, codecList, inbLimitInfo)
 {
     try
@@ -2684,3 +2795,4 @@ module.exports.CreateAutoAttendantDialplan = CreateAutoAttendantDialplan;
 module.exports.CreateAttendantTransferGW = CreateAttendantTransferGW;
 module.exports.CreatePbxFeaturesGateway = CreatePbxFeaturesGateway;
 module.exports.CreateOutboundDeniedMessageDialplan = CreateOutboundDeniedMessageDialplan;
+module.exports.FaxReceiveUpload = FaxReceiveUpload;
