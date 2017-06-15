@@ -8,7 +8,8 @@
 #EXPOSE 8816
 
 FROM node:5.10.0
-RUN git clone https://github.com/DuoSoftware/DVP-DynamicConfigurationGenerator.git /usr/local/src/dynamicconfigurationgenerator
+ARG VERSION_TAG
+RUN git clone -b $VERSION_TAG https://github.com/DuoSoftware/DVP-DynamicConfigurationGenerator.git /usr/local/src/dynamicconfigurationgenerator
 RUN cd /usr/local/src/dynamicconfigurationgenerator;
 WORKDIR /usr/local/src/dynamicconfigurationgenerator
 RUN npm install

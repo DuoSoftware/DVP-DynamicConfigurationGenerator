@@ -1096,6 +1096,12 @@ var GetGatewayForOutgoingRequest = function(fromNumber, lbId, data, callback)
 };
 
 //Incomplete
+var GetCompanyLimits = function(companyId, tenantId, callback)
+{
+    callback(null, null);
+};
+
+//Incomplete
 var GetCloudForUser = function(username, clusterId, data, callback)
 {
     var incomingRequest = {};

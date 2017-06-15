@@ -3,6 +3,7 @@ var dbModel = require('dvp-dbmodels');
 var ipValidator = require('./IpValidator.js');
 var Promise = require('bluebird');
 var config = require('config');
+var underscore = require('underscore');
 
 var allowCodecPref = config.Host.AllowCodecConfigure;
 
@@ -289,7 +290,7 @@ var GetAllDataForExt = function(reqId, extension, companyId, tenantId, extType, 
 
         if(extType === 'USER')
         {
-            dbModel.Extension.find({where: [{Extension: extension},{TenantId: tenantId},{CompanyId: companyId},{ObjCategory: extType}], include: [{model: dbModel.SipUACEndpoint, as:'SipUACEndpoint', include: [{model: dbModel.CloudEndUser, as:'CloudEndUser'},{model: dbModel.UserGroup, as:'UserGroup', include: [{model: dbModel.Extension, as:'Extension'}]}]}]})
+            dbModel.Extension.find({where: [{Extension: extension},{TenantId: tenantId},{CompanyId: companyId},{ObjCategory: extType}], include: [{model: dbModel.SipUACEndpoint, as:'SipUACEndpoint', include: [{model: dbModel.CloudEndUser, as:'CloudEndUser'},{model: dbModel.Context, as:'Context'},{model: dbModel.UserGroup, as:'UserGroup', include: [{model: dbModel.Extension, as:'Extension'}]}]}]})
                 .then(function (extData)
                 {
                     if(extData && extData.SipUACEndpoint && extData.SipUACEndpoint.Enabled)
@@ -679,6 +680,62 @@ var GetEmergencyNumber = function(numb, companyId, tenantId, data, callback)
     {
         callback(ex, undefined);
     }
+};
+
+var GetCompanyLimits = function(companyId, tenantId, callback)
+{
+    return new Promise(function(fulfill, reject)
+    {
+        try
+        {
+            dbModel.LimitInfo
+                .findAll({where :[{ObjType: 'COMPANY_NUMBER_LIMIT', CompanyId: companyId, TenantId: tenantId}]})
+                .then(function (limitInfo)
+                {
+                    if(limitInfo && limitInfo.length > 0)
+                    {
+                        var inbLim = underscore.find(limitInfo, function (limit)
+                        {
+                            return limit.ObjCategory === 'INBOUND';
+
+                        });
+
+                        var outbLim = underscore.find(limitInfo, function (limit)
+                        {
+                            return limit.ObjCategory === 'OUTBOUND';
+
+                        });
+
+                        var bothLim = underscore.find(limitInfo, function (limit)
+                        {
+                            return limit.ObjCategory === 'BOTH';
+
+                        });
+
+                        var limitInfo = {
+                            InboundLimit: inbLim,
+                            OutboundLimit: outbLim,
+                            BothLimit: bothLim
+                        };
+
+                        fulfill(limitInfo);
+                    }
+                    else
+                    {
+                        fulfill(null);
+                    }
+
+                }).catch(function(err)
+                {
+                    reject(err);
+                })
+        }
+        catch(ex)
+        {
+            reject(ex);
+        }
+    })
+
 };
 
 var GetPhoneNumberDetails = function(phnNum, callback)
@@ -1351,4 +1408,5 @@ module.exports.ValidateBlacklistNumber = ValidateBlacklistNumber;
 module.exports.GetCacheObject = GetCacheObject;
 module.exports.PickGatewayTransferRules = PickGatewayTransferRules;
 module.exports.getContextPreferences = getContextPreferences;
+module.exports.GetCompanyLimits = GetCompanyLimits;
 
