@@ -1339,9 +1339,15 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
                                                                 var limits = {
                                                                     NumberInboundLimit: num.LimitInfoInbound,
                                                                     NumberBothLimit: num.LimitInfoBoth,
-                                                                    CompanyInboundLimit: compLimits.InboundLimit,
-                                                                    CompanyBothLimit: compLimits.BothLimit
+                                                                    CompanyInboundLimit: null,
+                                                                    CompanyBothLimit: null
                                                                 };
+
+                                                                if(compLimits)
+                                                                {
+                                                                    limits.CompanyInboundLimit = compLimits.InboundLimit;
+                                                                    limits.CompanyBothLimit = compLimits.BothLimit;
+                                                                }
 
                                                                 var NumLimitInfo = LimitValidator(limits, num.PhoneNumber, 'inbound');
 
