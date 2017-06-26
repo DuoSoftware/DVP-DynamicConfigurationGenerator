@@ -13,6 +13,7 @@ var util = require('util');
 var underscore = require('underscore');
 var libphonenumber = require('libphonenumber');
 var backendFactory = require('./BackendFactory.js');
+var LimitValidator = require('./LimitValidator.js').LimitValidator;
 
 /*var backendHandler;
 var ruleHandler;
@@ -38,104 +39,62 @@ var CreateFMEndpointList = function(reqId, aniNum, context, companyId, tenantId,
         var len = fmList.length;
         var count = 0;
 
-        fmList.forEach(function(fm)
+        backendFactory.getBackendHandler().GetCompanyLimits(companyId, tenantId).then(function(compLimits)
         {
-            if(count < len)
+            fmList.forEach(function(fm)
             {
-                if (fm.ObjCategory === 'GATEWAY')
+                if(count < len)
                 {
-                    //pick outbound rule
-                    backendFactory.getRuleHandler().PickCallRuleOutboundComplete(reqId, aniNum, fm.DestinationNumber, '', context, companyId, tenantId, false, cacheData, function (err, rule)
+                    if (fm.ObjCategory === 'GATEWAY')
                     {
-                        if (!err && rule)
+                        //pick outbound rule
+                        backendFactory.getRuleHandler().PickCallRuleOutboundComplete(reqId, aniNum, fm.DestinationNumber, '', context, companyId, tenantId, false, cacheData, function (err, rule)
                         {
-                            var ep =
-                            {
-                                Profile: rule.GatewayCode,
-                                Type: 'GATEWAY',
-                                LegStartDelay: 0,
-                                BypassMedia: false,
-                                LegTimeout: fm.RingTimeout,
-                                Destination: rule.DNIS,
-                                Domain: rule.IpUrl,
-                                CompanyId: companyId,
-                                TenantId: tenantId,
-                                AppId: appId,
-                                Action: 'FOLLOW_ME',
-                                Priority: fm.Priority
-
-                            };
-
-                            if(dodActive && dodNum)
-                            {
-                                ep.Origination = dodNum;
-                                ep.OriginationCallerIdNumber = dodNum;
-                            }
-                            else
-                            {
-                                ep.Origination = rule.ANI;
-                                ep.OriginationCallerIdNumber = rule.ANI;
-                            }
-
-                            epList.push(ep);
-
-                            count++;
-
-                            if(count >= len)
-                            {
-                                var tempEpList = underscore.sortBy(epList, 'Priority');
-                                callback(undefined, tempEpList);
-                            }
-                        }
-                        else
-                        {
-                            count++;
-
-                            if(count >= len)
-                            {
-                                var tempEpList = underscore.sortBy(epList, 'Priority');
-                                callback(undefined, tempEpList);
-                            }
-                        }
-                    })
-                }
-                else if(fm.ObjCategory === 'PBXUSER' || fm.ObjCategory === 'USER')
-                {
-                    backendFactory.getBackendHandler().GetAllDataForExt(reqId, fm.DestinationNumber, companyId, tenantId, 'USER', csId, cacheData, function (err, extDetails)
-                    {
-
-                        if (!err && extDetails)
-                        {
-                            if (extDetails.SipUACEndpoint && extDetails.SipUACEndpoint.CloudEndUser)
+                            if (!err && rule)
                             {
                                 var ep =
                                 {
-                                    Profile: '',
-                                    Type: 'USER',
+                                    Profile: rule.GatewayCode,
+                                    Type: 'GATEWAY',
                                     LegStartDelay: 0,
-                                    BypassMedia: fm.BypassMedia,
+                                    BypassMedia: false,
                                     LegTimeout: fm.RingTimeout,
-                                    Origination: callerIdName,
-                                    OriginationCallerIdNumber: callerIdNum,
-                                    Destination: fm.DestinationNumber,
-                                    Domain: extDetails.SipUACEndpoint.CloudEndUser.Domain,
+                                    Destination: rule.DNIS,
+                                    Domain: rule.IpUrl,
                                     CompanyId: companyId,
                                     TenantId: tenantId,
                                     AppId: appId,
                                     Action: 'FOLLOW_ME',
-                                    Priority: fm.Priority
+                                    Priority: fm.Priority,
+                                    TrunkNumber: rule.TrunkNumber
+
                                 };
 
-
-                                if(extDetails.SipUACEndpoint.UsePublic)
+                                if(dodActive && dodNum)
                                 {
-                                    ep.Profile = 'external';
-                                    ep.Type = 'PUBLIC_USER';
-                                    ep.Destination = extDetails.SipUACEndpoint.SipUsername;
-                                    ep.Domain = extDetails.SipUACEndpoint.Domain;
+                                    ep.Origination = dodNum;
+                                    ep.OriginationCallerIdNumber = dodNum;
+                                }
+                                else
+                                {
+                                    ep.Origination = rule.ANI;
+                                    ep.OriginationCallerIdNumber = rule.ANI;
                                 }
 
-                                epList.push(ep);
+                                var limits = {
+                                    NumberOutboundLimit: rule.OutLimit,
+                                    NumberBothLimit: rule.BothLimit,
+                                    CompanyOutboundLimit: compLimits.OutboundLimit,
+                                    CompanyBothLimit: compLimits.BothLimit
+                                };
+
+                                var NumLimitInfo = LimitValidator(limits, rule.TrunkNumber, 'outbound');
+
+                                if(NumLimitInfo)
+                                {
+                                    ep.Limits = NumLimitInfo;
+                                    epList.push(ep);
+                                }
 
                                 count++;
 
@@ -155,38 +114,107 @@ var CreateFMEndpointList = function(reqId, aniNum, context, companyId, tenantId,
                                     callback(undefined, tempEpList);
                                 }
                             }
-                        }
-                        else
+                        })
+                    }
+                    else if(fm.ObjCategory === 'PBXUSER' || fm.ObjCategory === 'USER')
+                    {
+                        backendFactory.getBackendHandler().GetAllDataForExt(reqId, fm.DestinationNumber, companyId, tenantId, 'USER', csId, cacheData, function (err, extDetails)
                         {
-                            count++;
 
-                            if(count >= len)
+                            if (!err && extDetails)
                             {
-                                var tempEpList = underscore.sortBy(epList, 'Priority');
-                                callback(undefined, tempEpList);
+                                if (extDetails.SipUACEndpoint && extDetails.SipUACEndpoint.CloudEndUser)
+                                {
+                                    var ep =
+                                    {
+                                        Profile: '',
+                                        Type: 'USER',
+                                        LegStartDelay: 0,
+                                        BypassMedia: fm.BypassMedia,
+                                        LegTimeout: fm.RingTimeout,
+                                        Origination: callerIdName,
+                                        OriginationCallerIdNumber: callerIdNum,
+                                        Destination: fm.DestinationNumber,
+                                        Domain: extDetails.SipUACEndpoint.CloudEndUser.Domain,
+                                        CompanyId: companyId,
+                                        TenantId: tenantId,
+                                        AppId: appId,
+                                        Action: 'FOLLOW_ME',
+                                        Priority: fm.Priority
+                                    };
+
+
+                                    if(extDetails.SipUACEndpoint.UsePublic)
+                                    {
+                                        ep.Profile = 'external';
+                                        ep.Type = 'PUBLIC_USER';
+                                        ep.Destination = extDetails.SipUACEndpoint.SipUsername;
+                                        ep.Domain = extDetails.SipUACEndpoint.Domain;
+                                    }
+
+                                    epList.push(ep);
+
+                                    count++;
+
+                                    if(count >= len)
+                                    {
+                                        var tempEpList = underscore.sortBy(epList, 'Priority');
+                                        callback(undefined, tempEpList);
+                                    }
+                                }
+                                else
+                                {
+                                    count++;
+
+                                    if(count >= len)
+                                    {
+                                        var tempEpList = underscore.sortBy(epList, 'Priority');
+                                        callback(undefined, tempEpList);
+                                    }
+                                }
                             }
+                            else
+                            {
+                                count++;
+
+                                if(count >= len)
+                                {
+                                    var tempEpList = underscore.sortBy(epList, 'Priority');
+                                    callback(undefined, tempEpList);
+                                }
+                            }
+
+                        });
+                    }
+                    else
+                    {
+                        count++;
+
+                        if(count >= len)
+                        {
+                            var tempEpList = underscore.sortBy(epList, 'Priority');
+                            callback(undefined, tempEpList);
                         }
 
-                    });
+                    }
                 }
                 else
                 {
-                    count++;
-
-                    if(count >= len)
-                    {
-                        var tempEpList = underscore.sortBy(epList, 'Priority');
-                        callback(undefined, tempEpList);
-                    }
-
+                    var tempEpList = underscore.sortBy(epList, 'Priority');
+                    callback(undefined, tempEpList);
                 }
-            }
-            else
-            {
-                var tempEpList = underscore.sortBy(epList, 'Priority');
-                callback(undefined, tempEpList);
-            }
+            });
+
+
+
+        }).catch(function(err)
+        {
+            logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Error getting company limits', reqId);
+            callback(err, xmlBuilder.createRejectResponse());
+
         });
+
+
     }
     catch(ex)
     {
@@ -384,8 +412,6 @@ var ProcessCallForwarding = function(reqId, aniNum, dnisNum, callerDomain, conte
                                         OriginationCallerIdNumber: rule.ANI,
                                         Destination: rule.DNIS,
                                         Domain: rule.IpUrl,
-                                        OutLimit: rule.OutLimit,
-                                        BothLimit: rule.BothLimit,
                                         TrunkNumber: rule.TrunkNumber,
                                         NumberType: rule.NumberType,
                                         CompanyId: rule.CompanyId,
@@ -413,9 +439,42 @@ var ProcessCallForwarding = function(reqId, aniNum, dnisNum, callerDomain, conte
                                                         tempCodecPref = codecPrefs.Codecs;
                                                     }
 
-                                                    var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, null, null, tempCodecPref);
+                                                    backendFactory.getBackendHandler().GetCompanyLimits(companyId, tenantId).then(function(compLimits)
+                                                    {
+                                                        var limits = {
+                                                            NumberOutboundLimit: rule.OutLimit,
+                                                            NumberBothLimit: rule.BothLimit,
+                                                            CompanyOutboundLimit: compLimits.OutboundLimit,
+                                                            CompanyBothLimit: compLimits.BothLimit
+                                                        };
 
-                                                    callback(undefined, xml);
+                                                        var NumLimitInfo = LimitValidator(limits, rule.TrunkNumber, 'outbound');
+
+                                                        if(NumLimitInfo)
+                                                        {
+                                                            ep.Limits = NumLimitInfo;
+                                                            var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, null, null, tempCodecPref, null);
+
+                                                            callback(null, xml);
+                                                        }
+                                                        else
+                                                        {
+                                                            logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Limits not defined', reqId);
+                                                            callback(err, xmlBuilder.createRejectResponse());
+                                                        }
+
+
+
+                                                    }).catch(function(err)
+                                                    {
+                                                        logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Error getting company limits', reqId);
+                                                        callback(err, xmlBuilder.createRejectResponse());
+
+                                                    });
+
+
+
+
 
                                                 }).catch(function(err)
                                                 {
@@ -782,6 +841,17 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                             }
                                             else if(!pbxDetails)
                                             {
+                                                var recEnabled = false;
+
+                                                if((extDetails.SipUACEndpoint.Context && extDetails.SipUACEndpoint.Context.RecordingEnabled) || extDetails.SipUACEndpoint.RecordingEnabled)
+                                                {
+                                                    recEnabled = true;
+                                                }
+                                                else
+                                                {
+                                                    recEnabled = false;
+                                                }
+
                                                 var ep =
                                                 {
                                                     Profile: profile,
@@ -800,7 +870,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                     TenantId: tenantId,
                                                     AppId: appId,
                                                     Action: 'DEFAULT',
-                                                    RecordEnabled: extDetails.RecordingEnabled
+                                                    RecordEnabled: recEnabled
                                                 };
 
                                                 var customStr = tenantId + '_' + extDetails.Extension + '_PBXUSERCALL';
@@ -852,7 +922,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
 
                                                 if(pbxDetails.OperationType === 'DENY')
                                                 {
-                                                    callback(new Error('DENY Request from extended dialplan'), xmlBuilder.createRejectResponse());
+                                                    callback(null, xmlBuilder.CreateOutboundDeniedMessageDialplan(reqId, '[^\\s]*', context, companyId, tenantId, appId, dvpCallDirection));
                                                 }
                                                 else
                                                 {
@@ -882,6 +952,17 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                     else if(pbxObj.OperationType === 'USER_DIAL')
                                                     {
 
+                                                        var recEnabled = false;
+
+                                                        if((extDetails.SipUACEndpoint.Context && extDetails.SipUACEndpoint.Context.RecordingEnabled) || extDetails.SipUACEndpoint.RecordingEnabled)
+                                                        {
+                                                            recEnabled = true;
+                                                        }
+                                                        else
+                                                        {
+                                                            recEnabled = false;
+                                                        }
+
                                                         var ep =
                                                         {
                                                             Profile: profile,
@@ -900,7 +981,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                             TenantId: tenantId,
                                                             AppId: appId,
                                                             Action: 'DEFAULT',
-                                                            RecordEnabled: extDetails.RecordingEnabled
+                                                            RecordEnabled: recEnabled
                                                         };
 
                                                         var customStr = tenantId + '_' + extDetails.Extension + '_PBXUSERCALL';
@@ -1150,9 +1231,40 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                                         tempCodecPref = codecPrefs.Codecs;
                                                                                     }
 
-                                                                                    var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, tempCodecPref);
+                                                                                    backendFactory.getBackendHandler().GetCompanyLimits(companyId, tenantId).then(function(compLimits)
+                                                                                    {
+                                                                                        var limits = {
+                                                                                            NumberOutboundLimit: rule.OutLimit,
+                                                                                            NumberBothLimit: rule.BothLimit,
+                                                                                            CompanyOutboundLimit: compLimits.OutboundLimit,
+                                                                                            CompanyBothLimit: compLimits.BothLimit
+                                                                                        };
 
-                                                                                    callback(undefined, xml);
+                                                                                        var NumLimitInfo = LimitValidator(limits, rule.TrunkNumber, 'outbound');
+
+                                                                                        if(NumLimitInfo)
+                                                                                        {
+                                                                                            ep.Limits = NumLimitInfo;
+                                                                                            var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, tempCodecPref, numLimitInfo);
+
+                                                                                            callback(null, xml);
+                                                                                        }
+                                                                                        else
+                                                                                        {
+                                                                                            logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Limits not defined', reqId);
+                                                                                            callback(err, xmlBuilder.createRejectResponse());
+                                                                                        }
+
+
+
+                                                                                    }).catch(function(err)
+                                                                                    {
+                                                                                        logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Error getting company limits', reqId);
+                                                                                        callback(err, xmlBuilder.createRejectResponse());
+
+                                                                                    });
+
+
 
                                                                                 }).catch(function(err)
                                                                                 {
@@ -1264,6 +1376,17 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                             grp = extDetails.SipUACEndpoint.UserGroup.Extension.Extension;
                                                         }
 
+                                                        var recEnabled = false;
+
+                                                        if((extDetails.SipUACEndpoint.Context && extDetails.SipUACEndpoint.Context.RecordingEnabled) || extDetails.SipUACEndpoint.RecordingEnabled)
+                                                        {
+                                                            recEnabled = true;
+                                                        }
+                                                        else
+                                                        {
+                                                            recEnabled = false;
+                                                        }
+
                                                         var ep =
                                                         {
                                                             Profile: profile,
@@ -1282,7 +1405,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                             TenantId: tenantId,
                                                             AppId: appId,
                                                             Action: 'DEFAULT',
-                                                            RecordEnabled: extDetails.RecordingEnabled
+                                                            RecordEnabled: recEnabled
                                                         };
 
                                                         var customStr = tenantId + '_' + extDetails.Extension + '_PBXUSERCALL';
@@ -1337,6 +1460,17 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                     {
                                         logger.info('[DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - APP URL NOT SET - TRYING NORMAL USER DIAL', reqId);
 
+                                        var recEnabled = false;
+
+                                        if((extDetails.SipUACEndpoint.Context && extDetails.SipUACEndpoint.Context.RecordingEnabled) || extDetails.SipUACEndpoint.RecordingEnabled)
+                                        {
+                                            recEnabled = true;
+                                        }
+                                        else
+                                        {
+                                            recEnabled = false;
+                                        }
+
                                         var ep =
                                         {
                                             Profile: profile,
@@ -1355,7 +1489,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                             TenantId: tenantId,
                                             AppId: appId,
                                             Action: 'DEFAULT',
-                                            RecordEnabled: extDetails.RecordingEnabled
+                                            RecordEnabled: recEnabled
                                         };
 
                                         var customStr = tenantId + '_' + extDetails.Extension + '_PBXUSERCALL';
@@ -1463,7 +1597,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                         TenantId: tenantId,
                                         AppId: appId,
                                         Action: 'DEFAULT',
-                                        RecordEnabled: extDetails.RecordingEnabled
+                                        RecordEnabled: false
                                     };
 
                                     var customStr = tenantId + '_' + extDetails.Extension + '_PBXUSERCALL';
@@ -1525,9 +1659,9 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                     toContext = extDetails.Context.Context;
                                 }
 
-                                var xml = xmlBuilder.CreateAutoAttendantDialplan(reqId, ep, context, toContext, '[^\\s]*', false, dvpCallDirection);
+                                var xml = xmlBuilder.CreateAutoAttendantDialplan(reqId, ep, context, toContext, '[^\\s]*', false, dvpCallDirection, numLimitInfo);
 
-                                callback(undefined, xml);
+                                callback(null, xml);
 
                             }
                             else if(extDetails.ObjCategory === 'IVR')
@@ -1652,7 +1786,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                 {
                                                     if(fromUserData.DenyOutboundFor === 'ALL')
                                                     {
-                                                        callback(new Error('Outbound denied for user'), xmlBuilder.createRejectResponse());
+                                                        callback(null, xmlBuilder.CreateOutboundDeniedMessageDialplan(reqId, '[^\\s]*', context, companyId, tenantId, appId, dvpCallDirection));
                                                     }
                                                     else
                                                     {
@@ -1664,7 +1798,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                         }
                                                         else
                                                         {
-                                                            if(fromUserData.Extension.RecordingEnabled)
+                                                            if(fromUserData.RecordingEnabled)
                                                             {
                                                                 recEnabled = true;
                                                             }
@@ -1745,7 +1879,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
 
                                                     if(pbxDetails.OperationType === 'DENY')
                                                     {
-                                                        callback(new Error('DENY Request from extended dialplan'), xmlBuilder.createRejectResponse());
+                                                        callback(null, xmlBuilder.CreateOutboundDeniedMessageDialplan(reqId, '[^\\s]*', context, companyId, tenantId, appId, dvpCallDirection));
                                                     }
                                                     else
                                                     {
@@ -1779,7 +1913,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                             }
                                                             else
                                                             {
-                                                                if(fromUserData.Extension.RecordingEnabled)
+                                                                if(fromUserData.RecordingEnabled)
                                                                 {
                                                                     recEnabled = true;
                                                                 }
@@ -1960,7 +2094,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                 }
                                                                 else
                                                                 {
-                                                                    if(fromUserData.Extension.RecordingEnabled)
+                                                                    if(fromUserData.RecordingEnabled)
                                                                     {
                                                                         recEnabled = true;
                                                                     }
@@ -2052,8 +2186,6 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                             LegTimeout: 60,
                                                                             Destination: rule.DNIS,
                                                                             Domain: rule.IpUrl,
-                                                                            OutLimit: rule.OutLimit,
-                                                                            BothLimit: rule.BothLimit,
                                                                             TrunkNumber: rule.TrunkNumber,
                                                                             AppId: appId,
                                                                             NumberType: rule.NumberType,
@@ -2090,9 +2222,43 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                                             tempCodecPref = codecPrefs.Codecs;
                                                                                         }
 
-                                                                                        var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, tempCodecPref);
 
-                                                                                        callback(undefined, xml);
+                                                                                        backendFactory.getBackendHandler().GetCompanyLimits(companyId, tenantId).then(function(compLimits)
+                                                                                        {
+                                                                                            var limits = {
+                                                                                                NumberOutboundLimit: rule.OutLimit,
+                                                                                                NumberBothLimit: rule.BothLimit,
+                                                                                                CompanyOutboundLimit: compLimits.OutboundLimit,
+                                                                                                CompanyBothLimit: compLimits.BothLimit
+                                                                                            };
+
+                                                                                            var NumLimitInfo = LimitValidator(limits, rule.TrunkNumber, 'outbound');
+
+                                                                                            if(NumLimitInfo)
+                                                                                            {
+                                                                                                ep.Limits = NumLimitInfo;
+                                                                                                var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, tempCodecPref, null);
+
+                                                                                                callback(null, xml);
+                                                                                            }
+                                                                                            else
+                                                                                            {
+                                                                                                logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Limits not defined', reqId);
+                                                                                                callback(err, xmlBuilder.createRejectResponse());
+                                                                                            }
+
+
+
+                                                                                        }).catch(function(err)
+                                                                                        {
+                                                                                            logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Error getting company limits', reqId);
+                                                                                            callback(err, xmlBuilder.createRejectResponse());
+
+                                                                                        });
+
+
+
+
 
                                                                                     }).catch(function(err)
                                                                                     {
@@ -2204,7 +2370,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                             }
                                                             else
                                                             {
-                                                                if(fromUserData.Extension.RecordingEnabled)
+                                                                if(fromUserData.RecordingEnabled)
                                                                 {
                                                                     recEnabled = true;
                                                                 }
@@ -2285,7 +2451,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                         {
                                             if(fromUserData.DenyOutboundFor === 'ALL')
                                             {
-                                                callback(new Error('Outbound denied for user'), xmlBuilder.createRejectResponse());
+                                                callback(null, xmlBuilder.CreateOutboundDeniedMessageDialplan(reqId, '[^\\s]*', context, companyId, tenantId, appId, dvpCallDirection));
                                             }
                                             else
                                             {
@@ -2297,7 +2463,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                 }
                                                 else
                                                 {
-                                                    if(fromUserData.Extension.RecordingEnabled)
+                                                    if(fromUserData.RecordingEnabled)
                                                     {
                                                         recEnabled = true;
                                                     }
@@ -2394,7 +2560,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                 {
                                     if(fromUserData.DenyOutboundFor === 'ALL')
                                     {
-                                        callback(new Error('Outbound denied for user'), xmlBuilder.createRejectResponse());
+                                        callback(null, xmlBuilder.CreateOutboundDeniedMessageDialplan(reqId, '[^\\s]*', context, companyId, tenantId, appId, dvpCallDirection));
                                     }
                                     else
                                     {
@@ -2408,7 +2574,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                             }
                                             else
                                             {
-                                                if(fromUserData.Extension.RecordingEnabled)
+                                                if(fromUserData.RecordingEnabled)
                                                 {
                                                     recEnabled = true;
                                                 }
@@ -2468,7 +2634,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                 {
                                     if(fromUserData.DenyOutboundFor === 'ALL')
                                     {
-                                        callback(new Error('Outbound denied for user'), xmlBuilder.createRejectResponse());
+                                        callback(null, xmlBuilder.CreateOutboundDeniedMessageDialplan(reqId, '[^\\s]*', context, companyId, tenantId, appId, dvpCallDirection));
                                     }
                                     else
                                     {
@@ -2543,7 +2709,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                         toContext = extDetails.Context.Context;
                                     }
 
-                                    var xml = xmlBuilder.CreateAutoAttendantDialplan(reqId, ep, context, toContext, '[^\\s]*', false, dvpCallDirection);
+                                    var xml = xmlBuilder.CreateAutoAttendantDialplan(reqId, ep, context, toContext, '[^\\s]*', false, dvpCallDirection, null);
 
                                     callback(undefined, xml);
 
@@ -2582,7 +2748,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                     {
                                         if(pbxObj.OperationType === 'DENY')
                                         {
-                                            callback(new Error('DENY Request from extended dialplan'), xmlBuilder.createRejectResponse());
+                                            callback(null, xmlBuilder.CreateOutboundDeniedMessageDialplan(reqId, '[^\\s]*', context, companyId, tenantId, appId, dvpCallDirection));
                                         }
                                         else
                                         {
@@ -2615,7 +2781,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                     else if(rule)
                                                     {
                                                         var allowGwCall = false;
-                                                        if(!iddEnabled)
+                                                        if(iddEnabled)
                                                         {
                                                             if(CheckIddValidity(rule.DNIS, rule.TrunkNumber))
                                                             {
@@ -2642,7 +2808,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                             }
                                                             else
                                                             {
-                                                                if(fromUserData && fromUserData.Extension.RecordingEnabled)
+                                                                if(fromUserData && fromUserData.RecordingEnabled)
                                                                 {
                                                                     recEnabled = true;
                                                                 }
@@ -2663,8 +2829,6 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                 OriginationCallerIdNumber: rule.ANI,
                                                                 Destination: rule.DNIS,
                                                                 Domain: rule.IpUrl,
-                                                                OutLimit: rule.OutLimit,
-                                                                BothLimit: rule.BothLimit,
                                                                 TrunkNumber: rule.TrunkNumber,
                                                                 NumberType: rule.NumberType,
                                                                 CompanyId: rule.CompanyId,
@@ -2704,9 +2868,42 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                                     tempCodecPref = codecPrefs.Codecs;
                                                                                 }
 
-                                                                                var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, tempCodecPref);
+                                                                                backendFactory.getBackendHandler().GetCompanyLimits(companyId, tenantId).then(function(compLimits)
+                                                                                {
+                                                                                    var limits = {
+                                                                                        NumberOutboundLimit: rule.OutLimit,
+                                                                                        NumberBothLimit: rule.BothLimit,
+                                                                                        CompanyOutboundLimit: compLimits.OutboundLimit,
+                                                                                        CompanyBothLimit: compLimits.BothLimit
+                                                                                    };
 
-                                                                                callback(undefined, xml);
+                                                                                    var NumLimitInfo = LimitValidator(limits, rule.TrunkNumber, 'outbound');
+
+                                                                                    if(NumLimitInfo)
+                                                                                    {
+                                                                                        ep.Limits = NumLimitInfo;
+                                                                                        var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, tempCodecPref, null);
+
+                                                                                        callback(null, xml);
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                        logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Limits not defined', reqId);
+                                                                                        callback(err, xmlBuilder.createRejectResponse());
+                                                                                    }
+
+
+
+                                                                                }).catch(function(err)
+                                                                                {
+                                                                                    logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Error getting company limits', reqId);
+                                                                                    callback(err, xmlBuilder.createRejectResponse());
+
+                                                                                });
+
+
+
+
 
                                                                             }).catch(function(err)
                                                                             {
@@ -2898,7 +3095,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                     {
                                         if(fromUserData.DenyOutboundFor === 'ALL' || fromUserData.DenyOutboundFor === 'GATEWAY')
                                         {
-                                            callback(new Error('Outbound denied for user'), xmlBuilder.createRejectResponse());
+                                            callback(null, xmlBuilder.CreateOutboundDeniedMessageDialplan(reqId, '[^\\s]*', context, companyId, tenantId, appId, dvpCallDirection));
                                         }
                                         else
                                         {
@@ -2923,7 +3120,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                     }
                                                     else
                                                     {
-                                                        if(fromUserData && fromUserData.Extension.RecordingEnabled)
+                                                        if(fromUserData && fromUserData.RecordingEnabled)
                                                         {
                                                             recEnabled = true;
                                                         }
@@ -2943,8 +3140,6 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                         OriginationCallerIdNumber: rule.ANI,
                                                         Destination: rule.DNIS,
                                                         Domain: rule.IpUrl,
-                                                        OutLimit: rule.OutLimit,
-                                                        BothLimit: rule.BothLimit,
                                                         TrunkNumber: rule.TrunkNumber,
                                                         NumberType: rule.NumberType,
                                                         CompanyId: rule.CompanyId,
@@ -2984,9 +3179,42 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                             tempCodecPref = codecPrefs.Codecs;
                                                                         }
 
-                                                                        var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, tempCodecPref);
+                                                                        backendFactory.getBackendHandler().GetCompanyLimits(companyId, tenantId).then(function(compLimits)
+                                                                        {
+                                                                            var limits = {
+                                                                                NumberOutboundLimit: rule.OutLimit,
+                                                                                NumberBothLimit: rule.BothLimit,
+                                                                                CompanyOutboundLimit: compLimits.OutboundLimit,
+                                                                                CompanyBothLimit: compLimits.BothLimit
+                                                                            };
 
-                                                                        callback(undefined, xml);
+                                                                            var NumLimitInfo = LimitValidator(limits, rule.TrunkNumber, 'outbound');
+
+                                                                            if(NumLimitInfo)
+                                                                            {
+                                                                                ep.Limits = NumLimitInfo;
+                                                                                var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, tempCodecPref, null);
+
+                                                                                callback(null, xml);
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Limits not defined', reqId);
+                                                                                callback(err, xmlBuilder.createRejectResponse());
+                                                                            }
+
+
+
+                                                                        }).catch(function(err)
+                                                                        {
+                                                                            logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Error getting company limits', reqId);
+                                                                            callback(err, xmlBuilder.createRejectResponse());
+
+                                                                        });
+
+
+
+
 
                                                                     }).catch(function(err)
                                                                     {
@@ -3026,7 +3254,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                         {
                             if(fromUserData.DenyOutboundFor === 'ALL' || fromUserData.DenyOutboundFor === 'GATEWAY')
                             {
-                                callback(new Error('Outbound denied for user'), xmlBuilder.createRejectResponse());
+                                callback(null, xmlBuilder.CreateOutboundDeniedMessageDialplan(reqId, '[^\\s]*', context, companyId, tenantId, appId, dvpCallDirection));
                             }
                             else
                             {
@@ -3051,7 +3279,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                         }
                                         else
                                         {
-                                            if(fromUserData && fromUserData.Extension.RecordingEnabled)
+                                            if(fromUserData && fromUserData.RecordingEnabled)
                                             {
                                                 recEnabled = true;
                                             }
@@ -3113,9 +3341,42 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                 tempCodecPref = codecPrefs.Codecs;
                                                             }
 
-                                                            var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, tempCodecPref);
+                                                            backendFactory.getBackendHandler().GetCompanyLimits(companyId, tenantId).then(function(compLimits)
+                                                            {
+                                                                var limits = {
+                                                                    NumberOutboundLimit: rule.OutLimit,
+                                                                    NumberBothLimit: rule.BothLimit,
+                                                                    CompanyOutboundLimit: compLimits.OutboundLimit,
+                                                                    CompanyBothLimit: compLimits.BothLimit
+                                                                };
 
-                                                            callback(undefined, xml);
+                                                                var NumLimitInfo = LimitValidator(limits, rule.TrunkNumber, 'outbound');
+
+                                                                if(NumLimitInfo)
+                                                                {
+                                                                    ep.Limits = NumLimitInfo;
+                                                                    var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, tempCodecPref, null);
+
+                                                                    callback(null, xml);
+                                                                }
+                                                                else
+                                                                {
+                                                                    logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Limits not defined', reqId);
+                                                                    callback(err, xmlBuilder.createRejectResponse());
+                                                                }
+
+
+
+                                                            }).catch(function(err)
+                                                            {
+                                                                logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Error getting company limits', reqId);
+                                                                callback(err, xmlBuilder.createRejectResponse());
+
+                                                            });
+
+
+
+
 
                                                         }).catch(function(err)
                                                         {
@@ -3214,7 +3475,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                     {
                                                         if(fromUserData && fromUserData.DenyOutboundFor === 'ALL')
                                                         {
-                                                            callback(new Error('Outbound denied for user'), xmlBuilder.createRejectResponse());
+                                                            callback(null, xmlBuilder.CreateOutboundDeniedMessageDialplan(reqId, '[^\\s]*', context, companyId, tenantId, appId, dvpCallDirection));
                                                         }
                                                         else
                                                         {
@@ -3288,7 +3549,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                     {
                                                         if(pbxDetails.OperationType === 'DENY')
                                                         {
-                                                            callback(new Error('DENY Request from extended dialplan'), xmlBuilder.createRejectResponse());
+                                                            callback(null, xmlBuilder.CreateOutboundDeniedMessageDialplan(reqId, '[^\\s]*', context, companyId, tenantId, appId, dvpCallDirection));
                                                         }
                                                         else
                                                         {
@@ -3559,8 +3820,6 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                                 LegTimeout: 60,
                                                                                 Destination: rule.DNIS,
                                                                                 Domain: rule.IpUrl,
-                                                                                OutLimit: rule.OutLimit,
-                                                                                BothLimit: rule.BothLimit,
                                                                                 TrunkNumber: rule.TrunkNumber,
                                                                                 NumberType: rule.NumberType,
                                                                                 CompanyId: rule.CompanyId,
@@ -3597,9 +3856,42 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                                                 tempCodecPref = codecPrefs.Codecs;
                                                                                             }
 
-                                                                                            var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, tempCodecPref);
+                                                                                            backendFactory.getBackendHandler().GetCompanyLimits(companyId, tenantId).then(function(compLimits)
+                                                                                            {
+                                                                                                var limits = {
+                                                                                                    NumberOutboundLimit: rule.OutLimit,
+                                                                                                    NumberBothLimit: rule.BothLimit,
+                                                                                                    CompanyOutboundLimit: compLimits.OutboundLimit,
+                                                                                                    CompanyBothLimit: compLimits.BothLimit
+                                                                                                };
 
-                                                                                            callback(undefined, xml);
+                                                                                                var NumLimitInfo = LimitValidator(limits, rule.TrunkNumber, 'outbound');
+
+                                                                                                if(NumLimitInfo)
+                                                                                                {
+                                                                                                    ep.Limits = NumLimitInfo;
+                                                                                                    var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, tempCodecPref, null);
+
+                                                                                                    callback(null, xml);
+                                                                                                }
+                                                                                                else
+                                                                                                {
+                                                                                                    logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Limits not defined', reqId);
+                                                                                                    callback(err, xmlBuilder.createRejectResponse());
+                                                                                                }
+
+
+
+                                                                                            }).catch(function(err)
+                                                                                            {
+                                                                                                logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Error getting company limits', reqId);
+                                                                                                callback(err, xmlBuilder.createRejectResponse());
+
+                                                                                            });
+
+
+
+
 
                                                                                         }).catch(function(err)
                                                                                         {
@@ -3778,7 +4070,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                             {
                                                 if(fromUserData && fromUserData.DenyOutboundFor === 'ALL')
                                                 {
-                                                    callback(new Error('Outbound denied for user'), xmlBuilder.createRejectResponse());
+                                                    callback(null, xmlBuilder.CreateOutboundDeniedMessageDialplan(reqId, '[^\\s]*', context, companyId, tenantId, appId, dvpCallDirection));
                                                 }
                                                 else
                                                 {
@@ -3871,7 +4163,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                     {
                                         if(fromUserData && fromUserData.DenyOutboundFor === 'ALL')
                                         {
-                                            callback(new Error('Outbound denied for user'), xmlBuilder.createRejectResponse());
+                                            callback(null, xmlBuilder.CreateOutboundDeniedMessageDialplan(reqId, '[^\\s]*', context, companyId, tenantId, appId, dvpCallDirection));
                                         }
                                         else
                                         {
@@ -3926,7 +4218,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                     {
                                         if(fromUserData && fromUserData.DenyOutboundFor === 'ALL')
                                         {
-                                            callback(new Error('Outbound denied for user'), xmlBuilder.createRejectResponse());
+                                            callback(null, xmlBuilder.CreateOutboundDeniedMessageDialplan(reqId, '[^\\s]*', context, companyId, tenantId, appId, dvpCallDirection));
                                         }
                                         else
                                         {
@@ -3986,7 +4278,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                             toContext = extDetails.Context.Context;
                                         }
 
-                                        var xml = xmlBuilder.CreateAutoAttendantDialplan(reqId, ep, context, toContext, '[^\\s]*', false, dvpCallDirection);
+                                        var xml = xmlBuilder.CreateAutoAttendantDialplan(reqId, ep, context, toContext, '[^\\s]*', false, dvpCallDirection, null);
 
                                         callback(undefined, xml);
 
@@ -4025,7 +4317,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
 
                             if(fromUserData && (fromUserData.DenyOutboundFor === 'ALL' || fromUserData.DenyOutboundFor === 'GATEWAY'))
                             {
-                                callback(new Error('Outbound denied for user'), xmlBuilder.createRejectResponse());
+                                callback(null, xmlBuilder.CreateOutboundDeniedMessageDialplan(reqId, '[^\\s]*', context, companyId, tenantId, appId, dvpCallDirection));
                             }
                             else
                             {
@@ -4050,7 +4342,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                         }
                                         else
                                         {
-                                            if(fromUserData && fromUserData.Extension.RecordingEnabled)
+                                            if(fromUserData && fromUserData.RecordingEnabled)
                                             {
                                                 recEnabled = true;
                                             }
@@ -4070,8 +4362,6 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                             OriginationCallerIdNumber: rule.ANI,
                                             Destination: rule.DNIS,
                                             Domain: rule.IpUrl,
-                                            OutLimit: rule.OutLimit,
-                                            BothLimit: rule.BothLimit,
                                             TrunkNumber: rule.TrunkNumber,
                                             NumberType: rule.NumberType,
                                             CompanyId: rule.CompanyId,
@@ -4111,9 +4401,42 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                 tempCodecPref = codecPrefs.Codecs;
                                                             }
 
-                                                            var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, tempCodecPref);
+                                                            backendFactory.getBackendHandler().GetCompanyLimits(companyId, tenantId).then(function(compLimits)
+                                                            {
+                                                                var limits = {
+                                                                    NumberOutboundLimit: rule.OutLimit,
+                                                                    NumberBothLimit: rule.BothLimit,
+                                                                    CompanyOutboundLimit: compLimits.OutboundLimit,
+                                                                    CompanyBothLimit: compLimits.BothLimit
+                                                                };
 
-                                                            callback(undefined, xml);
+                                                                var NumLimitInfo = LimitValidator(limits, rule.TrunkNumber, 'outbound');
+
+                                                                if(NumLimitInfo)
+                                                                {
+                                                                    ep.Limits = NumLimitInfo;
+                                                                    var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, tempCodecPref, null);
+
+                                                                    callback(null, xml);
+                                                                }
+                                                                else
+                                                                {
+                                                                    logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Limits not defined', reqId);
+                                                                    callback(err, xmlBuilder.createRejectResponse());
+                                                                }
+
+
+
+                                                            }).catch(function(err)
+                                                            {
+                                                                logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Error getting company limits', reqId);
+                                                                callback(err, xmlBuilder.createRejectResponse());
+
+                                                            });
+
+
+
+
 
                                                         }).catch(function(err)
                                                         {
