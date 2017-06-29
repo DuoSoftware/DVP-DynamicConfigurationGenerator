@@ -19,12 +19,28 @@ module.exports = {
         "AllowCodecConfigure": "HOST_DYNAMICCONFIGGEN_CODECCONFIG"
     },
 
+    //"Redis":
+    //{
+    //    "ip": "SYS_REDIS_HOST",
+    //    "port": "SYS_REDIS_PORT",
+    //    "password": "SYS_REDIS_PASSWORD",
+    //    "db": "SYS_REDIS_DB_CONFIG"
+    //},
+
     "Redis":
     {
+        "mode":"SYS_REDIS_MODE",
         "ip": "SYS_REDIS_HOST",
         "port": "SYS_REDIS_PORT",
+        "user": "SYS_REDIS_USER",
         "password": "SYS_REDIS_PASSWORD",
-        "db": "SYS_REDIS_DB_CONFIG"
+        "db": "SYS_REDIS_DB",
+        "sentinels":{
+            "hosts": "SYS_REDIS_SENTINEL_HOSTS",
+            "port":"SYS_REDIS_SENTINEL_PORT",
+            "name":"SYS_REDIS_SENTINEL_NAME"
+        }
+
     },
 
     "Services":
