@@ -43,7 +43,8 @@ if(redismode == 'sentinel'){
 
             redisSetting = {
                 sentinels:sentinelConnections,
-                name: Config.Redis.sentinels.name
+                name: Config.Redis.sentinels.name,
+                password: redispass
             }
 
         }else{
