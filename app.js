@@ -1028,6 +1028,11 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
                                                 res.end(xmlBuilder.createRejectResponse());
                                             });
                                         }
+                                        else
+                                        {
+                                            logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Limits not defined', reqId);
+                                            res.end(xmlBuilder.createRejectResponse());
+                                        }
 
                                     })
 
@@ -1073,11 +1078,37 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
                                 {
                                     backendFactory.getBackendHandler().GetTransferCodesForTenantDB(reqId, ctxt.CompanyId, ctxt.TenantId, cacheInfo, function (err, transCodes)
                                     {
-                                        var xml = xmlBuilder.CreatePbxFeaturesUser(reqId, huntDestNum, 'user', varDomain, null, null, ctxt.CompanyId, ctxt.TenantId, null, huntContext, transCodes, ardsClientUuid, destNum, tempCodecPref);
+                                        backendFactory.getBackendHandler().GetAllDataForExt(reqId, destNum, ctxt.CompanyId, ctxt.TenantId, 'USER', null, null, function(err, ext)
+                                        {
+                                            if(ext && ext.SipUACEndpoint)
+                                            {
+                                                backendFactory.getBackendHandler().getContextPreferences(varUsrContext, ext.SipUACEndpoint.ContextId, ctxt.CompanyId, ctxt.TenantId).then(function(codecPrefs)
+                                                {
+                                                    var tempCodecPref = null;
+                                                    if(codecPrefs)
+                                                    {
+                                                        tempCodecPref = codecPrefs.Codecs;
+                                                    }
+                                                    var xml = xmlBuilder.CreatePbxFeaturesUser(reqId, huntDestNum, 'user', varDomain, null, null, ctxt.CompanyId, ctxt.TenantId, null, huntContext, transCodes, ardsClientUuid, destNum, tempCodecPref);
 
-                                        logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+                                                    logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
 
-                                        res.end(xml);
+                                                    res.end(xml);
+
+                                                }).catch(function(err)
+                                                {
+                                                    logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Get codec preferences error', reqId);
+                                                    res.end(xmlBuilder.createRejectResponse());
+                                                });
+                                            }
+                                            else
+                                            {
+                                                logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Extension not found', reqId);
+                                                res.end(xmlBuilder.createRejectResponse());
+                                            }
+
+                                        })
+
 
                                     })
 
