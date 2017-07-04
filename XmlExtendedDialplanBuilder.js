@@ -894,7 +894,7 @@ var CreateRouteUserDialplan = function(reqId, ep, context, profile, destinationP
             codecListString = codecList.join();
         }
 
-        option = util.format('[leg_timeout=%d, origination_caller_id_name=%s,origination_caller_id_number=%s', ep.LegTimeout, ep.Origination, ep.OriginationCallerIdNumber);
+        option = util.format('{leg_timeout=%d, origination_caller_id_name=%s,origination_caller_id_number=%s', ep.LegTimeout, ep.Origination, ep.OriginationCallerIdNumber);
 
         if (ep.LegStartDelay > 0)
         {
@@ -911,7 +911,7 @@ var CreateRouteUserDialplan = function(reqId, ep, context, profile, destinationP
             option = option + ', absolute_codec_string=\'' + codecListString + '\'';
         }
 
-        option = option + ']';
+        option = option + '}';
 
         /*if(dvpCallDirection === 'outbound' && ep.Type !== 'GROUP')
         {
