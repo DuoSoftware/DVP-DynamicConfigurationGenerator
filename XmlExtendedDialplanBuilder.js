@@ -2069,16 +2069,17 @@ var CreateForwardingDialplan = function(reqId, endpoint, context, profile, desti
             codecListString = codecList.join();
         }
 
-        option = util.format('[leg_timeout=%d,origination_caller_id_name=%s,origination_caller_id_number=%s', endpoint.LegTimeout, endpoint.Origination, endpoint.OriginationCallerIdNumber);
+        if(codecListString && allowCodecPref)
+        {
+            option = option + '{absolute_codec_string=\'' + codecListString + '\'}';
+        }
+
+
+        option = option + util.format('[leg_timeout=%d,origination_caller_id_name=%s,origination_caller_id_number=%s', endpoint.LegTimeout, endpoint.Origination, endpoint.OriginationCallerIdNumber);
 
         if (endpoint.LegStartDelay > 0)
         {
             option = option + ', leg_delay_start=' + endpoint.LegStartDelay;
-        }
-
-        if(codecListString && allowCodecPref)
-        {
-            option = option + ', absolute_codec_string=\'' + codecListString + '\'';
         }
 
         option = option + ']';
@@ -2542,7 +2543,14 @@ var CreateRouteGatewayDialplan = function(reqId, ep, context, profile, destinati
             codecListString = codecList.join();
         }
 
-        option = util.format('[leg_timeout=%d, origination_caller_id_name=%s,origination_caller_id_number=%s,sip_h_X-Gateway=%s', ep.LegTimeout, ep.Origination, ep.OriginationCallerIdNumber, ep.Domain);
+        if(codecListString && allowCodecPref)
+        {
+            option = option + '{absolute_codec_string=\'' + codecListString + '\'}';
+        }
+
+
+
+        option = option + util.format('[leg_timeout=%d, origination_caller_id_name=%s,origination_caller_id_number=%s,sip_h_X-Gateway=%s', ep.LegTimeout, ep.Origination, ep.OriginationCallerIdNumber, ep.Domain);
 
         if (ep.LegStartDelay > 0)
         {
@@ -2554,14 +2562,12 @@ var CreateRouteGatewayDialplan = function(reqId, ep, context, profile, destinati
             option = option + ', origination_uuid=${my_uuid}';
         }
 
-        if(codecListString && allowCodecPref)
+        /*if(codecListString && allowCodecPref)
         {
             option = option + ', absolute_codec_string=\'' + codecListString + '\'';
-        }
+        }*/
 
         option = option + ']';
-
-
 
 
         var dnis = '';
