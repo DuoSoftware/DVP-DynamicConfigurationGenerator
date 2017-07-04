@@ -899,7 +899,7 @@ var CreateRouteUserDialplan = function(reqId, ep, context, profile, destinationP
             option = option + '{absolute_codec_string=\'' + codecListString + '\'}';
         }
 
-        option = util.format('[leg_timeout=%d, origination_caller_id_name=%s,origination_caller_id_number=%s', ep.LegTimeout, ep.Origination, ep.OriginationCallerIdNumber);
+        option = option + util.format('[leg_timeout=%d, origination_caller_id_name=%s,origination_caller_id_number=%s', ep.LegTimeout, ep.Origination, ep.OriginationCallerIdNumber);
 
         if (ep.LegStartDelay > 0)
         {
