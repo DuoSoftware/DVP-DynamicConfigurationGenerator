@@ -281,32 +281,13 @@ var HandleOutRequest = function(reqId, data, callerIdNum, contextTenant, appType
                                                             {
                                                                 if (balanceRes && balanceRes.IsSuccess)
                                                                 {
-                                                                    backendFactory.getBackendHandler().getContextPreferences(callerContext, 'public', rule.CompanyId, rule.TenantId).then(function(codecPrefs)
-                                                                    {
-                                                                        var tempCodecPref = null;
-                                                                        if(codecPrefs)
-                                                                        {
-                                                                            tempCodecPref = codecPrefs.Codecs;
-                                                                        }
+                                                                    var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, callerContext, profile, '[^\\s]*', false, null, 'outbound', rule.Codecs, null);
 
-                                                                        var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, callerContext, profile, '[^\\s]*', false, null, 'outbound', tempCodecPref, null);
+                                                                    RedisOperations(varUuid, rule.CompanyId, rule.TenantId, null, 'EMERGENCY', isDialPlanGiven, 'outbound');
 
-                                                                        RedisOperations(varUuid, rule.CompanyId, rule.TenantId, null, 'EMERGENCY', isDialPlanGiven, 'outbound');
+                                                                    logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
 
-                                                                        logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
-
-                                                                        res.end(xml);
-
-
-
-                                                                    }).catch(function(err)
-                                                                    {
-                                                                        var xml = xmlGen.createRejectResponse(callerContext);
-
-                                                                        logger.error('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, err);
-
-                                                                        res.end(xml);
-                                                                    });
+                                                                    res.end(xml);
 
 
                                                                 }
@@ -1183,24 +1164,11 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
 
                                                         if(NumLimitInfo)
                                                         {
-                                                            backendFactory.getBackendHandler().getContextPreferences(varUsrContext, 'public', ctxt.CompanyId, ctxt.TenantId).then(function(codecPrefs)
-                                                            {
-                                                                var tempCodecPref = null;
-                                                                if(codecPrefs)
-                                                                {
-                                                                    tempCodecPref = codecPrefs.Codecs;
-                                                                }
-                                                                var xml = xmlBuilder.CreatePbxFeaturesGateway(reqId, huntDestNum, outRule.TrunkNumber, outRule.GatewayCode, ctxt.CompanyId, ctxt.TenantId, null, huntContext, outRule.DNIS, outRule.Operator, outRule.IpUrl, NumLimitInfo, tempCodecPref);
+                                                            var xml = xmlBuilder.CreatePbxFeaturesGateway(reqId, huntDestNum, outRule.TrunkNumber, outRule.GatewayCode, ctxt.CompanyId, ctxt.TenantId, null, huntContext, outRule.DNIS, outRule.Operator, outRule.IpUrl, NumLimitInfo, outRule.Codecs);
 
-                                                                logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+                                                            logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
 
-                                                                res.end(xml);
-
-                                                            }).catch(function(err)
-                                                            {
-                                                                logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Limits not defined', reqId);
-                                                                res.end(xmlBuilder.createRejectResponse());
-                                                            });
+                                                            res.end(xml);
 
                                                         }
                                                         else
