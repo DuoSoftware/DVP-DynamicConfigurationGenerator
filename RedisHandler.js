@@ -194,48 +194,33 @@ var PublishToRedis = function(pattern, message, callback)
 {
     try
     {
-        if(client.connected)
-        {
-            var result = client.publish(pattern, message);
-            logger.debug('[DVP-DynamicConfigurationGenerator.SetObjectWithExpire] - REDIS SUCCESS');
-            callback(undefined, true);
-        }
-        else
-        {
-            callback(new Error('REDIS CLIENT DISCONNECTED'), false);
-        }
-
+        client.publish(pattern, message);
+        logger.debug('[DVP-DynamicConfigurationGenerator.SetObjectWithExpire] - REDIS SUCCESS');
+        callback(undefined, true);
 
     }
     catch(ex)
     {
         callback(ex, undefined);
     }
-}
+};
 
 var GetFromSet = function(setName, callback)
 {
     try
     {
-        if(client.connected)
+        client.smembers(setName).keys("*", function (err, setValues)
         {
-            client.smembers(setName).keys("*", function (err, setValues)
+            if(err)
             {
-                if(err)
-                {
-                    logger.error('[DVP-DynamicConfigurationGenerator.SetObjectWithExpire] - REDIS ERROR', err)
-                }
-                else
-                {
-                    logger.debug('[DVP-DynamicConfigurationGenerator.SetObjectWithExpire] - REDIS SUCCESS')
-                }
-                callback(err, setValues);
-            });
-        }
-        else
-        {
-            callback(new Error('REDIS CLIENT DISCONNECTED'), undefined);
-        }
+                logger.error('[DVP-DynamicConfigurationGenerator.SetObjectWithExpire] - REDIS ERROR', err)
+            }
+            else
+            {
+                logger.debug('[DVP-DynamicConfigurationGenerator.SetObjectWithExpire] - REDIS SUCCESS')
+            }
+            callback(err, setValues);
+        });
 
 
     }
@@ -260,23 +245,20 @@ var IncrementKey = function(key, callback)
 {
     try
     {
-        if(client.connected)
+        client.incr(key, function (err, reply)
         {
-            client.incr(key, function (err, reply)
+            if(err)
             {
-                if(err)
-                {
-                    logger.error('[DVP-DynamicConfigurationGenerator.IncrementKey] - [%s] - REDIS ERROR', err);
-                }
-                else
-                {
-                    logger.debug('[DVP-DynamicConfigurationGenerator.IncrementKey] - [%s] - REDIS SUCCESS');
+                logger.error('[DVP-DynamicConfigurationGenerator.IncrementKey] - [%s] - REDIS ERROR', err);
+            }
+            else
+            {
+                logger.debug('[DVP-DynamicConfigurationGenerator.IncrementKey] - [%s] - REDIS SUCCESS');
 
-                }
+            }
 
 
-            });
-        }
+        });
 
 
     }
@@ -290,27 +272,24 @@ var AddChannelIdToSet = function(uuid, setName)
 {
     try
     {
-        if(client.connected)
+        client.sismember(setName, uuid, function (err, reply)
         {
-            client.sismember(setName, uuid, function (err, reply)
+            if(err)
             {
-                if(err)
+                logger.error('[DVP-EventMonitor.handler] - [%s] - REDIS ERROR', err);
+            }
+            else
+            {
+                logger.debug('[DVP-EventMonitor.handler] - [%s] - REDIS SUCCESS');
+                if (reply === 0)
                 {
-                    logger.error('[DVP-EventMonitor.handler] - [%s] - REDIS ERROR', err);
-                }
-                else
-                {
-                    logger.debug('[DVP-EventMonitor.handler] - [%s] - REDIS SUCCESS');
-                    if (reply === 0)
-                    {
-                        client.sadd(setName, uuid);
-                    }
-
+                    client.sadd(setName, uuid);
                 }
 
+            }
 
-            });
-        }
+
+        });
 
 
     }
@@ -326,24 +305,21 @@ var AddToHash = function(hashId, key, value, callback)
 {
     try
     {
-        if(client.connected)
+        client.hset(hashId, key, value, function (err, reply)
         {
-            client.hset(hashId, key, value, function (err, reply)
+            if(err)
             {
-                if(err)
-                {
-                    logger.error('[DVP-DynamicConfigurationGenerator.AddToHash] - [%s] - REDIS ERROR', err);
-                }
-                else
-                {
-                    logger.debug('[DVP-DynamicConfigurationGenerator.AddToHash] - [%s] - REDIS SUCCESS');
+                logger.error('[DVP-DynamicConfigurationGenerator.AddToHash] - [%s] - REDIS ERROR', err);
+            }
+            else
+            {
+                logger.debug('[DVP-DynamicConfigurationGenerator.AddToHash] - [%s] - REDIS SUCCESS');
 
-                }
+            }
 
-                callback(err, reply);
+            callback(err, reply);
 
-            });
-        }
+        });
 
     }
     catch(ex)

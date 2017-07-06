@@ -98,11 +98,16 @@ var RedisOperations = function(callUuid, companyId, tenantId, appId, appType, is
 
             var pubMessage = util.format("EVENT:%s:%s:%s:%s:%s:%s:%s:%s:YYYY", tenantId, companyId, "CALLSERVER", "CHANNEL", "CREATE", "", "", callUuid);
 
-            redisHandler.PublishToRedis('events', pubMessage, function(err, redisRes){});
+            redisHandler.PublishToRedis('events', pubMessage, function(err, redisRes){
+                logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - Trying to find from user for outbound call');
+
+            });
 
             var pubMessageCalls = util.format("EVENT:%s:%s:%s:%s:%s:%s:%s:%s:YYYY", tenantId, companyId, "CALLSERVER", "CALL", "CREATE", callDirection, "", callUuid);
 
-            redisHandler.PublishToRedis('events', pubMessageCalls, function(err, redisRes){});
+            redisHandler.PublishToRedis('events', pubMessageCalls, function(err, redisRes){
+                logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - Trying to find from user for outbound call');
+            });
         }
 
 
