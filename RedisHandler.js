@@ -1,17 +1,86 @@
-var redis = require("redis");
+var redis = require("ioredis");
 var Config = require('config');
 var logger = require('dvp-common/LogHandler/CommonLogHandler.js').logger;
 
-var redisIp = Config.Redis.ip;
-var redisPort = Config.Redis.port;
-var redisPassword = Config.Redis.password;
+////////////////////////////////redis////////////////////////////////////////
+var redisip = Config.Redis.ip;
+var redisport = Config.Redis.port;
+var redispass = Config.Redis.password;
+var redismode = Config.Redis.mode;
+var redisdb = Config.Redis.db;
 
 
-var client = redis.createClient(redisPort, redisIp);
+//[redis:]//[user][:password@][host][:port][/db-number][?db=db-number[&password=bar[&option=value]]]
+//redis://user:secret@localhost:6379
+var redisSetting =  {
+    port:redisport,
+    host:redisip,
+    family: 4,
+    db: redisdb,
+    password: redispass,
+    retryStrategy: function (times) {
+        var delay = Math.min(times * 50, 2000);
+        return delay;
+    },
+    reconnectOnError: function (err) {
 
-client.auth(redisPassword, function (err) {
-    console.log("Error Authenticating Redis : " + err);
-});
+        return true;
+    }
+};
+
+if(redismode == 'sentinel'){
+
+    if(Config.Redis.sentinels && Config.Redis.sentinels.hosts && Config.Redis.sentinels.port, Config.Redis.sentinels.name){
+        var sentinelHosts = Config.Redis.sentinels.hosts.split(',');
+        if(Array.isArray(sentinelHosts) && sentinelHosts.length > 2){
+            var sentinelConnections = [];
+
+            sentinelHosts.forEach(function(item){
+
+                sentinelConnections.push({host: item, port:Config.Redis.sentinels.port})
+
+            })
+
+            redisSetting = {
+                sentinels:sentinelConnections,
+                name: Config.Redis.sentinels.name,
+                password: redispass
+            }
+
+        }else{
+
+            console.log("No enough sentinel servers found .........");
+        }
+
+    }
+}
+
+var client = undefined;
+
+if(redismode != "cluster") {
+    client = new redis(redisSetting);
+}else{
+
+    var redisHosts = redisip.split(",");
+    if(Array.isArray(redisHosts)){
+
+
+        redisSetting = [];
+        redisHosts.forEach(function(item){
+            redisSetting.push({
+                host: item,
+                port: redisport,
+                family: 4,
+                password: redispass});
+        });
+
+        var client = new redis.Cluster([redisSetting]);
+
+    }else{
+
+        client = new redis(redisSetting);
+    }
+}
 
 
 var SetObjectWithExpire = function(key, value, timeout, callback)
@@ -125,48 +194,33 @@ var PublishToRedis = function(pattern, message, callback)
 {
     try
     {
-        if(client.connected)
-        {
-            var result = client.publish(pattern, message);
-            logger.debug('[DVP-DynamicConfigurationGenerator.SetObjectWithExpire] - REDIS SUCCESS');
-            callback(undefined, true);
-        }
-        else
-        {
-            callback(new Error('REDIS CLIENT DISCONNECTED'), false);
-        }
-
+        client.publish(pattern, message);
+        logger.debug('[DVP-DynamicConfigurationGenerator.SetObjectWithExpire] - REDIS SUCCESS');
+        callback(undefined, true);
 
     }
     catch(ex)
     {
         callback(ex, undefined);
     }
-}
+};
 
 var GetFromSet = function(setName, callback)
 {
     try
     {
-        if(client.connected)
+        client.smembers(setName).keys("*", function (err, setValues)
         {
-            client.smembers(setName).keys("*", function (err, setValues)
+            if(err)
             {
-                if(err)
-                {
-                    logger.error('[DVP-DynamicConfigurationGenerator.SetObjectWithExpire] - REDIS ERROR', err)
-                }
-                else
-                {
-                    logger.debug('[DVP-DynamicConfigurationGenerator.SetObjectWithExpire] - REDIS SUCCESS')
-                }
-                callback(err, setValues);
-            });
-        }
-        else
-        {
-            callback(new Error('REDIS CLIENT DISCONNECTED'), undefined);
-        }
+                logger.error('[DVP-DynamicConfigurationGenerator.SetObjectWithExpire] - REDIS ERROR', err)
+            }
+            else
+            {
+                logger.debug('[DVP-DynamicConfigurationGenerator.SetObjectWithExpire] - REDIS SUCCESS')
+            }
+            callback(err, setValues);
+        });
 
 
     }
@@ -191,23 +245,20 @@ var IncrementKey = function(key, callback)
 {
     try
     {
-        if(client.connected)
+        client.incr(key, function (err, reply)
         {
-            client.incr(key, function (err, reply)
+            if(err)
             {
-                if(err)
-                {
-                    logger.error('[DVP-DynamicConfigurationGenerator.IncrementKey] - [%s] - REDIS ERROR', err);
-                }
-                else
-                {
-                    logger.debug('[DVP-DynamicConfigurationGenerator.IncrementKey] - [%s] - REDIS SUCCESS');
+                logger.error('[DVP-DynamicConfigurationGenerator.IncrementKey] - [%s] - REDIS ERROR', err);
+            }
+            else
+            {
+                logger.debug('[DVP-DynamicConfigurationGenerator.IncrementKey] - [%s] - REDIS SUCCESS');
 
-                }
+            }
 
 
-            });
-        }
+        });
 
 
     }
@@ -221,27 +272,24 @@ var AddChannelIdToSet = function(uuid, setName)
 {
     try
     {
-        if(client.connected)
+        client.sismember(setName, uuid, function (err, reply)
         {
-            client.sismember(setName, uuid, function (err, reply)
+            if(err)
             {
-                if(err)
+                logger.error('[DVP-EventMonitor.handler] - [%s] - REDIS ERROR', err);
+            }
+            else
+            {
+                logger.debug('[DVP-EventMonitor.handler] - [%s] - REDIS SUCCESS');
+                if (reply === 0)
                 {
-                    logger.error('[DVP-EventMonitor.handler] - [%s] - REDIS ERROR', err);
-                }
-                else
-                {
-                    logger.debug('[DVP-EventMonitor.handler] - [%s] - REDIS SUCCESS');
-                    if (reply === 0)
-                    {
-                        client.sadd(setName, uuid);
-                    }
-
+                    client.sadd(setName, uuid);
                 }
 
+            }
 
-            });
-        }
+
+        });
 
 
     }
@@ -257,24 +305,21 @@ var AddToHash = function(hashId, key, value, callback)
 {
     try
     {
-        if(client.connected)
+        client.hset(hashId, key, value, function (err, reply)
         {
-            client.hset(hashId, key, value, function (err, reply)
+            if(err)
             {
-                if(err)
-                {
-                    logger.error('[DVP-DynamicConfigurationGenerator.AddToHash] - [%s] - REDIS ERROR', err);
-                }
-                else
-                {
-                    logger.debug('[DVP-DynamicConfigurationGenerator.AddToHash] - [%s] - REDIS SUCCESS');
+                logger.error('[DVP-DynamicConfigurationGenerator.AddToHash] - [%s] - REDIS ERROR', err);
+            }
+            else
+            {
+                logger.debug('[DVP-DynamicConfigurationGenerator.AddToHash] - [%s] - REDIS SUCCESS');
 
-                }
+            }
 
-                callback(err, reply);
+            callback(err, reply);
 
-            });
-        }
+        });
 
     }
     catch(ex)
