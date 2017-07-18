@@ -213,7 +213,123 @@ var CreatePbxFeatures = function(reqId, destNum, pbxType, domain, trunkNumber, t
     }
 };
 
-var CreatePbxFeaturesGateway = function(reqId, destNum, trunkNumber, trunkCode, companyId, tenantId, appId, context, digits, operator, trunkIp, limitInfo)
+var CreatePbxFeaturesUser = function(reqId, destNum, pbxType, domain, trunkNumber, trunkCode, companyId, tenantId, appId, context, transferCodes, ardsClientUuid, digits, codecList)
+{
+    try
+    {
+
+        if (!destNum) {
+            destNum = "";
+        }
+
+        if (!pbxType) {
+            pbxType = "";
+        }
+
+        if (!domain) {
+            domain = "";
+        }
+
+        if (!companyId) {
+            companyId = -1;
+        }
+
+        if (!tenantId) {
+            tenantId = -1;
+        }
+
+        if (!appId) {
+            appId = -1;
+        }
+
+
+        var doc = xmlBuilder.create('document');
+
+        var cond = doc.att('type', 'freeswitch/xml')
+            .ele('section').att('name', 'dialplan').att('description', 'RE Dial Plan For FreeSwitch')
+            .ele('context').att('name', context)
+            .ele('extension').att('name', destNum)
+            .ele('condition').att('field', 'destination_number').att('expression', '^' + destNum + '$')
+
+
+        cond.ele('action').att('application', 'set').att('data', 'DVP_OPERATION_CAT=ATT_XFER_USER')
+            .up()
+
+        if(transferCodes)
+        {
+            if(transferCodes.InternalTransfer != null && transferCodes.InternalTransfer != undefined)
+            {
+                cond.ele('action').att('application', 'bind_meta_app').att('data', transferCodes.InternalTransfer + ' b s execute_extension::att_xfer XML PBXFeatures')
+                    .up()
+            }
+
+            if(transferCodes.ExternalTransfer != null && transferCodes.ExternalTransfer != undefined)
+            {
+                cond.ele('action').att('application', 'bind_meta_app').att('data', transferCodes.ExternalTransfer + ' b s execute_extension::att_xfer_outbound XML PBXFeatures')
+                    .up()
+            }
+
+            if(transferCodes.GroupTransfer != null && transferCodes.GroupTransfer != undefined)
+            {
+                cond.ele('action').att('application', 'bind_meta_app').att('data', transferCodes.GroupTransfer + ' b s execute_extension::att_xfer_group XML PBXFeatures')
+                    .up()
+            }
+
+            if(transferCodes.ConferenceTransfer != null && transferCodes.ConferenceTransfer != undefined)
+            {
+                cond.ele('action').att('application', 'bind_meta_app').att('data', transferCodes.ConferenceTransfer + ' b s execute_extension::att_xfer_conference XML PBXFeatures')
+                    .up()
+            }
+
+            if(transferCodes.IVRTransfer != null && transferCodes.IVRTransfer != undefined)
+            {
+                cond.ele('action').att('application', 'bind_meta_app').att('data', transferCodes.IVRTransfer + ' b s execute_extension::att_xfer_ivr XML PBXFeatures')
+                    .up()
+            }
+
+        }
+
+        var codecListString = null;
+
+        if(codecList)
+        {
+            codecList = JSON.parse(codecList);
+        }
+
+        if(codecList && codecList.length > 0)
+        {
+            codecListString = codecList.join();
+        }
+
+        var option = '{companyid=' + companyId + ',tenantid=' + tenantId + ',DVP_OPERATION_CAT=ATT_XFER_USER,dvp_app_id=' + appId;
+
+        if(ardsClientUuid)
+        {
+            option = option + ',ards_client_uuid=' + ardsClientUuid;
+        }
+
+        if(codecListString && allowCodecPref)
+        {
+            option = option + ',absolute_codec_string=\'' + codecListString + '\'';
+        }
+
+        option = option + '}';
+
+        cond.ele('action').att('application', 'att_xfer').att('data', option + pbxType + '/' + digits + '@' + domain)
+            .up()
+            .end({pretty: true});
+
+        return "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\r\n" + doc.toString({pretty: true});
+
+    }
+    catch(ex)
+    {
+        logger.error('[DVP-DynamicConfigurationGenerator.CreatePbxFeatures] - [%s] - Exception occurred creating xml', reqId, ex);
+        return createNotFoundResponse();
+    }
+};
+
+var CreatePbxFeaturesGateway = function(reqId, destNum, trunkNumber, trunkCode, companyId, tenantId, appId, context, digits, operator, trunkIp, limitInfo, codecList)
 {
     try
     {
@@ -304,10 +420,72 @@ var CreatePbxFeaturesGateway = function(reqId, destNum, trunkNumber, trunkCode, 
             }
         }
 
+        var codecListString = null;
 
-        cond.ele('action').att('application', 'att_xfer').att('data', '{leg_timeout=60, origination_caller_id_name=' + trunkNumber + ', origination_caller_id_number=' + trunkNumber + ',dvp_app_id=' + appId + ',sip_h_X-Gateway=' + trunkIp + '}sofia/gateway/' + trunkCode + '/' +digits)
+        if(codecList)
+        {
+            codecList = JSON.parse(codecList);
+        }
+
+        if(codecList && codecList.length > 0)
+        {
+            codecListString = codecList.join();
+        }
+
+        var option = '{leg_timeout=60, origination_caller_id_name=' + trunkNumber + ', origination_caller_id_number=' + trunkNumber + ',dvp_app_id=' + appId + ',sip_h_X-Gateway=' + trunkIp;
+
+        if(codecListString && allowCodecPref)
+        {
+            option = option + ',absolute_codec_string=\'' + codecListString + '\'';
+        }
+
+        option = option + '}';
+
+
+        cond.ele('action').att('application', 'att_xfer').att('data', option + 'sofia/gateway/' + trunkCode + '/' +digits)
             .up()
             .end({pretty: true});
+
+
+        return "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\r\n" + doc.toString({pretty: true});
+
+    }
+    catch(ex)
+    {
+        logger.error('[DVP-DynamicConfigurationGenerator.CreatePbxFeatures] - [%s] - Exception occurred creating xml', reqId, ex);
+        return createNotFoundResponse();
+    }
+};
+
+var CreateAttendantTransferUser = function(reqId, destNum, context)
+{
+    try
+    {
+
+        if (!destNum) {
+            destNum = "";
+        }
+
+
+        var doc = xmlBuilder.create('document');
+
+        var cond = doc.att('type', 'freeswitch/xml')
+            .ele('section').att('name', 'dialplan').att('description', 'RE Dial Plan For FreeSwitch')
+            .ele('context').att('name', context)
+            .ele('extension').att('name', destNum)
+            .ele('condition').att('field', 'destination_number').att('expression', '^' + destNum + '$');
+
+        cond.ele('action').att('application', 'read').att('data', "3 6 'tone_stream://%(10000,0,350,440)' digits 30000 #")
+            .up()
+            .ele('action').att('application', 'set').att('data', 'origination_cancel_key=#')
+            .up()
+            .ele('action').att('application', 'set').att('data', 'transfer_ringback=$${us-ring}')
+            .up()
+            .ele('action').att('application', 'execute_extension').att('data', 'usertransfer XML PBXFeatures')
+            .up();
+
+
+        cond.end({pretty: true});
 
 
         return "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\r\n" + doc.toString({pretty: true});
@@ -716,7 +894,12 @@ var CreateRouteUserDialplan = function(reqId, ep, context, profile, destinationP
             codecListString = codecList.join();
         }
 
-        option = util.format('[leg_timeout=%d, origination_caller_id_name=%s,origination_caller_id_number=%s', ep.LegTimeout, ep.Origination, ep.OriginationCallerIdNumber);
+        if(codecListString && allowCodecPref)
+        {
+            option = option + '{absolute_codec_string=\'' + codecListString + '\'}';
+        }
+
+        option = option + util.format('[leg_timeout=%d, origination_caller_id_name=%s,origination_caller_id_number=%s', ep.LegTimeout, ep.Origination, ep.OriginationCallerIdNumber);
 
         if (ep.LegStartDelay > 0)
         {
@@ -728,12 +911,14 @@ var CreateRouteUserDialplan = function(reqId, ep, context, profile, destinationP
             option = option + ', origination_uuid=${my_uuid}';
         }
 
-        if(codecListString && allowCodecPref)
+        /*if(codecListString && allowCodecPref)
         {
             option = option + ', absolute_codec_string=\'' + codecListString + '\'';
-        }
+        }*/
 
         option = option + ']';
+
+
 
         /*if(dvpCallDirection === 'outbound' && ep.Type !== 'GROUP')
         {
@@ -1884,16 +2069,17 @@ var CreateForwardingDialplan = function(reqId, endpoint, context, profile, desti
             codecListString = codecList.join();
         }
 
-        option = util.format('[leg_timeout=%d,origination_caller_id_name=%s,origination_caller_id_number=%s', endpoint.LegTimeout, endpoint.Origination, endpoint.OriginationCallerIdNumber);
+        if(codecListString && allowCodecPref)
+        {
+            option = option + '{absolute_codec_string=\'' + codecListString + '\'}';
+        }
+
+
+        option = option + util.format('[leg_timeout=%d,origination_caller_id_name=%s,origination_caller_id_number=%s', endpoint.LegTimeout, endpoint.Origination, endpoint.OriginationCallerIdNumber);
 
         if (endpoint.LegStartDelay > 0)
         {
             option = option + ', leg_delay_start=' + endpoint.LegStartDelay;
-        }
-
-        if(codecListString && allowCodecPref)
-        {
-            option = option + ', absolute_codec_string=\'' + codecListString + '\'';
         }
 
         option = option + ']';
@@ -2357,7 +2543,14 @@ var CreateRouteGatewayDialplan = function(reqId, ep, context, profile, destinati
             codecListString = codecList.join();
         }
 
-        option = util.format('[leg_timeout=%d, origination_caller_id_name=%s,origination_caller_id_number=%s,sip_h_X-Gateway=%s', ep.LegTimeout, ep.Origination, ep.OriginationCallerIdNumber, ep.Domain);
+        if(codecListString && allowCodecPref)
+        {
+            option = option + '{absolute_codec_string=\'' + codecListString + '\'}';
+        }
+
+
+
+        option = option + util.format('[leg_timeout=%d, origination_caller_id_name=%s,origination_caller_id_number=%s,sip_h_X-Gateway=%s', ep.LegTimeout, ep.Origination, ep.OriginationCallerIdNumber, ep.Domain);
 
         if (ep.LegStartDelay > 0)
         {
@@ -2369,14 +2562,12 @@ var CreateRouteGatewayDialplan = function(reqId, ep, context, profile, destinati
             option = option + ', origination_uuid=${my_uuid}';
         }
 
-        if(codecListString && allowCodecPref)
+        /*if(codecListString && allowCodecPref)
         {
             option = option + ', absolute_codec_string=\'' + codecListString + '\'';
-        }
+        }*/
 
         option = option + ']';
-
-
 
 
         var dnis = '';
@@ -2805,3 +2996,5 @@ module.exports.CreateAttendantTransferGW = CreateAttendantTransferGW;
 module.exports.CreatePbxFeaturesGateway = CreatePbxFeaturesGateway;
 module.exports.CreateOutboundDeniedMessageDialplan = CreateOutboundDeniedMessageDialplan;
 module.exports.FaxReceiveUpload = FaxReceiveUpload;
+module.exports.CreatePbxFeaturesUser = CreatePbxFeaturesUser;
+module.exports.CreateAttendantTransferUser = CreateAttendantTransferUser;

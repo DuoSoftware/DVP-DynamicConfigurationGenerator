@@ -431,55 +431,37 @@ var ProcessCallForwarding = function(reqId, aniNum, dnisNum, callerDomain, conte
                                         {
                                             if (balanceRes && balanceRes.IsSuccess)
                                             {
-                                                backendFactory.getBackendHandler().getContextPreferences(context, 'public', companyId, tenantId).then(function(codecPrefs)
+                                                backendFactory.getBackendHandler().GetCompanyLimits(companyId, tenantId).then(function(compLimits)
                                                 {
-                                                    var tempCodecPref = null;
-                                                    if(codecPrefs)
+                                                    var limits = {
+                                                        NumberOutboundLimit: rule.OutLimit,
+                                                        NumberBothLimit: rule.BothLimit,
+                                                        CompanyOutboundLimit: compLimits.OutboundLimit,
+                                                        CompanyBothLimit: compLimits.BothLimit
+                                                    };
+
+                                                    var NumLimitInfo = LimitValidator(limits, rule.TrunkNumber, 'outbound');
+
+                                                    if(NumLimitInfo)
                                                     {
-                                                        tempCodecPref = codecPrefs.Codecs;
+                                                        ep.Limits = NumLimitInfo;
+                                                        var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, null, null, rule.Codecs, null);
+
+                                                        callback(null, xml);
                                                     }
-
-                                                    backendFactory.getBackendHandler().GetCompanyLimits(companyId, tenantId).then(function(compLimits)
+                                                    else
                                                     {
-                                                        var limits = {
-                                                            NumberOutboundLimit: rule.OutLimit,
-                                                            NumberBothLimit: rule.BothLimit,
-                                                            CompanyOutboundLimit: compLimits.OutboundLimit,
-                                                            CompanyBothLimit: compLimits.BothLimit
-                                                        };
-
-                                                        var NumLimitInfo = LimitValidator(limits, rule.TrunkNumber, 'outbound');
-
-                                                        if(NumLimitInfo)
-                                                        {
-                                                            ep.Limits = NumLimitInfo;
-                                                            var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, null, null, tempCodecPref, null);
-
-                                                            callback(null, xml);
-                                                        }
-                                                        else
-                                                        {
-                                                            logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Limits not defined', reqId);
-                                                            callback(err, xmlBuilder.createRejectResponse());
-                                                        }
-
-
-
-                                                    }).catch(function(err)
-                                                    {
-                                                        logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Error getting company limits', reqId);
+                                                        logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Limits not defined', reqId);
                                                         callback(err, xmlBuilder.createRejectResponse());
-
-                                                    });
-
-
+                                                    }
 
 
 
                                                 }).catch(function(err)
                                                 {
-                                                    logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Error Occurred getting context prefs', reqId);
+                                                    logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Error getting company limits', reqId);
                                                     callback(err, xmlBuilder.createRejectResponse());
+
                                                 });
 
                                             }
@@ -1223,53 +1205,37 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                         {
                                                                             if (balanceRes && balanceRes.IsSuccess)
                                                                             {
-                                                                                backendFactory.getBackendHandler().getContextPreferences(context, 'public', companyId, tenantId).then(function(codecPrefs)
+                                                                                backendFactory.getBackendHandler().GetCompanyLimits(companyId, tenantId).then(function(compLimits)
                                                                                 {
-                                                                                    var tempCodecPref = null;
-                                                                                    if(codecPrefs)
+                                                                                    var limits = {
+                                                                                        NumberOutboundLimit: rule.OutLimit,
+                                                                                        NumberBothLimit: rule.BothLimit,
+                                                                                        CompanyOutboundLimit: compLimits.OutboundLimit,
+                                                                                        CompanyBothLimit: compLimits.BothLimit
+                                                                                    };
+
+                                                                                    var NumLimitInfo = LimitValidator(limits, rule.TrunkNumber, 'outbound');
+
+                                                                                    if(NumLimitInfo)
                                                                                     {
-                                                                                        tempCodecPref = codecPrefs.Codecs;
+                                                                                        ep.Limits = NumLimitInfo;
+                                                                                        var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, rule.Codecs, numLimitInfo);
+
+                                                                                        callback(null, xml);
                                                                                     }
-
-                                                                                    backendFactory.getBackendHandler().GetCompanyLimits(companyId, tenantId).then(function(compLimits)
+                                                                                    else
                                                                                     {
-                                                                                        var limits = {
-                                                                                            NumberOutboundLimit: rule.OutLimit,
-                                                                                            NumberBothLimit: rule.BothLimit,
-                                                                                            CompanyOutboundLimit: compLimits.OutboundLimit,
-                                                                                            CompanyBothLimit: compLimits.BothLimit
-                                                                                        };
-
-                                                                                        var NumLimitInfo = LimitValidator(limits, rule.TrunkNumber, 'outbound');
-
-                                                                                        if(NumLimitInfo)
-                                                                                        {
-                                                                                            ep.Limits = NumLimitInfo;
-                                                                                            var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, tempCodecPref, numLimitInfo);
-
-                                                                                            callback(null, xml);
-                                                                                        }
-                                                                                        else
-                                                                                        {
-                                                                                            logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Limits not defined', reqId);
-                                                                                            callback(err, xmlBuilder.createRejectResponse());
-                                                                                        }
-
-
-
-                                                                                    }).catch(function(err)
-                                                                                    {
-                                                                                        logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Error getting company limits', reqId);
+                                                                                        logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Limits not defined', reqId);
                                                                                         callback(err, xmlBuilder.createRejectResponse());
-
-                                                                                    });
+                                                                                    }
 
 
 
                                                                                 }).catch(function(err)
                                                                                 {
-                                                                                    logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Error Occurred getting context prefs', reqId);
+                                                                                    logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Error getting company limits', reqId);
                                                                                     callback(err, xmlBuilder.createRejectResponse());
+
                                                                                 });
 
 
@@ -2214,56 +2180,37 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                             {
                                                                                 if (balanceRes && balanceRes.IsSuccess)
                                                                                 {
-                                                                                    backendFactory.getBackendHandler().getContextPreferences(context, 'public', companyId, tenantId).then(function(codecPrefs)
+                                                                                    backendFactory.getBackendHandler().GetCompanyLimits(companyId, tenantId).then(function(compLimits)
                                                                                     {
-                                                                                        var tempCodecPref = null;
-                                                                                        if(codecPrefs)
+                                                                                        var limits = {
+                                                                                            NumberOutboundLimit: rule.OutLimit,
+                                                                                            NumberBothLimit: rule.BothLimit,
+                                                                                            CompanyOutboundLimit: compLimits.OutboundLimit,
+                                                                                            CompanyBothLimit: compLimits.BothLimit
+                                                                                        };
+
+                                                                                        var NumLimitInfo = LimitValidator(limits, rule.TrunkNumber, 'outbound');
+
+                                                                                        if(NumLimitInfo)
                                                                                         {
-                                                                                            tempCodecPref = codecPrefs.Codecs;
+                                                                                            ep.Limits = NumLimitInfo;
+                                                                                            var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, rule.Codecs, null);
+
+                                                                                            callback(null, xml);
                                                                                         }
-
-
-                                                                                        backendFactory.getBackendHandler().GetCompanyLimits(companyId, tenantId).then(function(compLimits)
+                                                                                        else
                                                                                         {
-                                                                                            var limits = {
-                                                                                                NumberOutboundLimit: rule.OutLimit,
-                                                                                                NumberBothLimit: rule.BothLimit,
-                                                                                                CompanyOutboundLimit: compLimits.OutboundLimit,
-                                                                                                CompanyBothLimit: compLimits.BothLimit
-                                                                                            };
-
-                                                                                            var NumLimitInfo = LimitValidator(limits, rule.TrunkNumber, 'outbound');
-
-                                                                                            if(NumLimitInfo)
-                                                                                            {
-                                                                                                ep.Limits = NumLimitInfo;
-                                                                                                var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, tempCodecPref, null);
-
-                                                                                                callback(null, xml);
-                                                                                            }
-                                                                                            else
-                                                                                            {
-                                                                                                logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Limits not defined', reqId);
-                                                                                                callback(err, xmlBuilder.createRejectResponse());
-                                                                                            }
-
-
-
-                                                                                        }).catch(function(err)
-                                                                                        {
-                                                                                            logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Error getting company limits', reqId);
+                                                                                            logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Limits not defined', reqId);
                                                                                             callback(err, xmlBuilder.createRejectResponse());
-
-                                                                                        });
-
-
+                                                                                        }
 
 
 
                                                                                     }).catch(function(err)
                                                                                     {
-                                                                                        logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Error Occurred getting context prefs', reqId);
+                                                                                        logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Error getting company limits', reqId);
                                                                                         callback(err, xmlBuilder.createRejectResponse());
+
                                                                                     });
 
 
@@ -2860,55 +2807,37 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                     {
                                                                         if (balanceRes && balanceRes.IsSuccess)
                                                                         {
-                                                                            backendFactory.getBackendHandler().getContextPreferences(context, 'public', companyId, tenantId).then(function(codecPrefs)
+                                                                            backendFactory.getBackendHandler().GetCompanyLimits(companyId, tenantId).then(function(compLimits)
                                                                             {
-                                                                                var tempCodecPref = null;
-                                                                                if(codecPrefs)
+                                                                                var limits = {
+                                                                                    NumberOutboundLimit: rule.OutLimit,
+                                                                                    NumberBothLimit: rule.BothLimit,
+                                                                                    CompanyOutboundLimit: compLimits.OutboundLimit,
+                                                                                    CompanyBothLimit: compLimits.BothLimit
+                                                                                };
+
+                                                                                var NumLimitInfo = LimitValidator(limits, rule.TrunkNumber, 'outbound');
+
+                                                                                if(NumLimitInfo)
                                                                                 {
-                                                                                    tempCodecPref = codecPrefs.Codecs;
+                                                                                    ep.Limits = NumLimitInfo;
+                                                                                    var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, rule.Codecs, null);
+
+                                                                                    callback(null, xml);
                                                                                 }
-
-                                                                                backendFactory.getBackendHandler().GetCompanyLimits(companyId, tenantId).then(function(compLimits)
+                                                                                else
                                                                                 {
-                                                                                    var limits = {
-                                                                                        NumberOutboundLimit: rule.OutLimit,
-                                                                                        NumberBothLimit: rule.BothLimit,
-                                                                                        CompanyOutboundLimit: compLimits.OutboundLimit,
-                                                                                        CompanyBothLimit: compLimits.BothLimit
-                                                                                    };
-
-                                                                                    var NumLimitInfo = LimitValidator(limits, rule.TrunkNumber, 'outbound');
-
-                                                                                    if(NumLimitInfo)
-                                                                                    {
-                                                                                        ep.Limits = NumLimitInfo;
-                                                                                        var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, tempCodecPref, null);
-
-                                                                                        callback(null, xml);
-                                                                                    }
-                                                                                    else
-                                                                                    {
-                                                                                        logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Limits not defined', reqId);
-                                                                                        callback(err, xmlBuilder.createRejectResponse());
-                                                                                    }
-
-
-
-                                                                                }).catch(function(err)
-                                                                                {
-                                                                                    logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Error getting company limits', reqId);
+                                                                                    logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Limits not defined', reqId);
                                                                                     callback(err, xmlBuilder.createRejectResponse());
-
-                                                                                });
-
-
+                                                                                }
 
 
 
                                                                             }).catch(function(err)
                                                                             {
-                                                                                logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Error Occurred getting context prefs', reqId);
+                                                                                logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Error getting company limits', reqId);
                                                                                 callback(err, xmlBuilder.createRejectResponse());
+
                                                                             });
 
 
@@ -3171,55 +3100,37 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                             {
                                                                 if (balanceRes && balanceRes.IsSuccess)
                                                                 {
-                                                                    backendFactory.getBackendHandler().getContextPreferences(context, 'public', companyId, tenantId).then(function(codecPrefs)
+                                                                    backendFactory.getBackendHandler().GetCompanyLimits(companyId, tenantId).then(function(compLimits)
                                                                     {
-                                                                        var tempCodecPref = null;
-                                                                        if(codecPrefs)
+                                                                        var limits = {
+                                                                            NumberOutboundLimit: rule.OutLimit,
+                                                                            NumberBothLimit: rule.BothLimit,
+                                                                            CompanyOutboundLimit: compLimits.OutboundLimit,
+                                                                            CompanyBothLimit: compLimits.BothLimit
+                                                                        };
+
+                                                                        var NumLimitInfo = LimitValidator(limits, rule.TrunkNumber, 'outbound');
+
+                                                                        if(NumLimitInfo)
                                                                         {
-                                                                            tempCodecPref = codecPrefs.Codecs;
+                                                                            ep.Limits = NumLimitInfo;
+                                                                            var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, rule.Codecs, null);
+
+                                                                            callback(null, xml);
                                                                         }
-
-                                                                        backendFactory.getBackendHandler().GetCompanyLimits(companyId, tenantId).then(function(compLimits)
+                                                                        else
                                                                         {
-                                                                            var limits = {
-                                                                                NumberOutboundLimit: rule.OutLimit,
-                                                                                NumberBothLimit: rule.BothLimit,
-                                                                                CompanyOutboundLimit: compLimits.OutboundLimit,
-                                                                                CompanyBothLimit: compLimits.BothLimit
-                                                                            };
-
-                                                                            var NumLimitInfo = LimitValidator(limits, rule.TrunkNumber, 'outbound');
-
-                                                                            if(NumLimitInfo)
-                                                                            {
-                                                                                ep.Limits = NumLimitInfo;
-                                                                                var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, tempCodecPref, null);
-
-                                                                                callback(null, xml);
-                                                                            }
-                                                                            else
-                                                                            {
-                                                                                logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Limits not defined', reqId);
-                                                                                callback(err, xmlBuilder.createRejectResponse());
-                                                                            }
-
-
-
-                                                                        }).catch(function(err)
-                                                                        {
-                                                                            logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Error getting company limits', reqId);
+                                                                            logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Limits not defined', reqId);
                                                                             callback(err, xmlBuilder.createRejectResponse());
-
-                                                                        });
-
-
+                                                                        }
 
 
 
                                                                     }).catch(function(err)
                                                                     {
-                                                                        logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Error Occurred getting context prefs', reqId);
+                                                                        logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Error getting company limits', reqId);
                                                                         callback(err, xmlBuilder.createRejectResponse());
+
                                                                     });
 
 
@@ -3333,55 +3244,37 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                 {
                                                     if (balanceRes && balanceRes.IsSuccess)
                                                     {
-                                                        backendFactory.getBackendHandler().getContextPreferences(context, 'public', companyId, tenantId).then(function(codecPrefs)
+                                                        backendFactory.getBackendHandler().GetCompanyLimits(companyId, tenantId).then(function(compLimits)
                                                         {
-                                                            var tempCodecPref = null;
-                                                            if(codecPrefs)
+                                                            var limits = {
+                                                                NumberOutboundLimit: rule.OutLimit,
+                                                                NumberBothLimit: rule.BothLimit,
+                                                                CompanyOutboundLimit: compLimits.OutboundLimit,
+                                                                CompanyBothLimit: compLimits.BothLimit
+                                                            };
+
+                                                            var NumLimitInfo = LimitValidator(limits, rule.TrunkNumber, 'outbound');
+
+                                                            if(NumLimitInfo)
                                                             {
-                                                                tempCodecPref = codecPrefs.Codecs;
+                                                                ep.Limits = NumLimitInfo;
+                                                                var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, rule.Codecs, null);
+
+                                                                callback(null, xml);
                                                             }
-
-                                                            backendFactory.getBackendHandler().GetCompanyLimits(companyId, tenantId).then(function(compLimits)
+                                                            else
                                                             {
-                                                                var limits = {
-                                                                    NumberOutboundLimit: rule.OutLimit,
-                                                                    NumberBothLimit: rule.BothLimit,
-                                                                    CompanyOutboundLimit: compLimits.OutboundLimit,
-                                                                    CompanyBothLimit: compLimits.BothLimit
-                                                                };
-
-                                                                var NumLimitInfo = LimitValidator(limits, rule.TrunkNumber, 'outbound');
-
-                                                                if(NumLimitInfo)
-                                                                {
-                                                                    ep.Limits = NumLimitInfo;
-                                                                    var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, tempCodecPref, null);
-
-                                                                    callback(null, xml);
-                                                                }
-                                                                else
-                                                                {
-                                                                    logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Limits not defined', reqId);
-                                                                    callback(err, xmlBuilder.createRejectResponse());
-                                                                }
-
-
-
-                                                            }).catch(function(err)
-                                                            {
-                                                                logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Error getting company limits', reqId);
+                                                                logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Limits not defined', reqId);
                                                                 callback(err, xmlBuilder.createRejectResponse());
-
-                                                            });
-
-
+                                                            }
 
 
 
                                                         }).catch(function(err)
                                                         {
-                                                            logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Error Occurred getting context prefs', reqId);
+                                                            logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Error getting company limits', reqId);
                                                             callback(err, xmlBuilder.createRejectResponse());
+
                                                         });
 
 
@@ -3848,55 +3741,37 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                                 {
                                                                                     if (balanceRes && balanceRes.IsSuccess)
                                                                                     {
-                                                                                        backendFactory.getBackendHandler().getContextPreferences(context, 'public', companyId, tenantId).then(function(codecPrefs)
+                                                                                        backendFactory.getBackendHandler().GetCompanyLimits(companyId, tenantId).then(function(compLimits)
                                                                                         {
-                                                                                            var tempCodecPref = null;
-                                                                                            if(codecPrefs)
+                                                                                            var limits = {
+                                                                                                NumberOutboundLimit: rule.OutLimit,
+                                                                                                NumberBothLimit: rule.BothLimit,
+                                                                                                CompanyOutboundLimit: compLimits.OutboundLimit,
+                                                                                                CompanyBothLimit: compLimits.BothLimit
+                                                                                            };
+
+                                                                                            var NumLimitInfo = LimitValidator(limits, rule.TrunkNumber, 'outbound');
+
+                                                                                            if(NumLimitInfo)
                                                                                             {
-                                                                                                tempCodecPref = codecPrefs.Codecs;
+                                                                                                ep.Limits = NumLimitInfo;
+                                                                                                var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, rule.Codecs, null);
+
+                                                                                                callback(null, xml);
                                                                                             }
-
-                                                                                            backendFactory.getBackendHandler().GetCompanyLimits(companyId, tenantId).then(function(compLimits)
+                                                                                            else
                                                                                             {
-                                                                                                var limits = {
-                                                                                                    NumberOutboundLimit: rule.OutLimit,
-                                                                                                    NumberBothLimit: rule.BothLimit,
-                                                                                                    CompanyOutboundLimit: compLimits.OutboundLimit,
-                                                                                                    CompanyBothLimit: compLimits.BothLimit
-                                                                                                };
-
-                                                                                                var NumLimitInfo = LimitValidator(limits, rule.TrunkNumber, 'outbound');
-
-                                                                                                if(NumLimitInfo)
-                                                                                                {
-                                                                                                    ep.Limits = NumLimitInfo;
-                                                                                                    var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, tempCodecPref, null);
-
-                                                                                                    callback(null, xml);
-                                                                                                }
-                                                                                                else
-                                                                                                {
-                                                                                                    logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Limits not defined', reqId);
-                                                                                                    callback(err, xmlBuilder.createRejectResponse());
-                                                                                                }
-
-
-
-                                                                                            }).catch(function(err)
-                                                                                            {
-                                                                                                logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Error getting company limits', reqId);
+                                                                                                logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Limits not defined', reqId);
                                                                                                 callback(err, xmlBuilder.createRejectResponse());
-
-                                                                                            });
-
-
+                                                                                            }
 
 
 
                                                                                         }).catch(function(err)
                                                                                         {
-                                                                                            logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Error Occurred getting context prefs', reqId);
+                                                                                            logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Error getting company limits', reqId);
                                                                                             callback(err, xmlBuilder.createRejectResponse());
+
                                                                                         });
 
 
@@ -4393,55 +4268,37 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                 {
                                                     if (balanceRes && balanceRes.IsSuccess)
                                                     {
-                                                        backendFactory.getBackendHandler().getContextPreferences(context, 'public', companyId, tenantId).then(function(codecPrefs)
+                                                        backendFactory.getBackendHandler().GetCompanyLimits(companyId, tenantId).then(function(compLimits)
                                                         {
-                                                            var tempCodecPref = null;
-                                                            if(codecPrefs)
+                                                            var limits = {
+                                                                NumberOutboundLimit: rule.OutLimit,
+                                                                NumberBothLimit: rule.BothLimit,
+                                                                CompanyOutboundLimit: compLimits.OutboundLimit,
+                                                                CompanyBothLimit: compLimits.BothLimit
+                                                            };
+
+                                                            var NumLimitInfo = LimitValidator(limits, rule.TrunkNumber, 'outbound');
+
+                                                            if(NumLimitInfo)
                                                             {
-                                                                tempCodecPref = codecPrefs.Codecs;
+                                                                ep.Limits = NumLimitInfo;
+                                                                var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, rule.Codecs, null);
+
+                                                                callback(null, xml);
                                                             }
-
-                                                            backendFactory.getBackendHandler().GetCompanyLimits(companyId, tenantId).then(function(compLimits)
+                                                            else
                                                             {
-                                                                var limits = {
-                                                                    NumberOutboundLimit: rule.OutLimit,
-                                                                    NumberBothLimit: rule.BothLimit,
-                                                                    CompanyOutboundLimit: compLimits.OutboundLimit,
-                                                                    CompanyBothLimit: compLimits.BothLimit
-                                                                };
-
-                                                                var NumLimitInfo = LimitValidator(limits, rule.TrunkNumber, 'outbound');
-
-                                                                if(NumLimitInfo)
-                                                                {
-                                                                    ep.Limits = NumLimitInfo;
-                                                                    var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, tempCodecPref, null);
-
-                                                                    callback(null, xml);
-                                                                }
-                                                                else
-                                                                {
-                                                                    logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Limits not defined', reqId);
-                                                                    callback(err, xmlBuilder.createRejectResponse());
-                                                                }
-
-
-
-                                                            }).catch(function(err)
-                                                            {
-                                                                logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Error getting company limits', reqId);
+                                                                logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Limits not defined', reqId);
                                                                 callback(err, xmlBuilder.createRejectResponse());
-
-                                                            });
-
-
+                                                            }
 
 
 
                                                         }).catch(function(err)
                                                         {
-                                                            logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Error Occurred getting context prefs', reqId);
+                                                            logger.debug('DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - Error getting company limits', reqId);
                                                             callback(err, xmlBuilder.createRejectResponse());
+
                                                         });
 
 

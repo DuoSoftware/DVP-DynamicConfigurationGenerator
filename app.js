@@ -98,11 +98,16 @@ var RedisOperations = function(callUuid, companyId, tenantId, appId, appType, is
 
             var pubMessage = util.format("EVENT:%s:%s:%s:%s:%s:%s:%s:%s:YYYY", tenantId, companyId, "CALLSERVER", "CHANNEL", "CREATE", "", "", callUuid);
 
-            redisHandler.PublishToRedis('events', pubMessage, function(err, redisRes){});
+            redisHandler.PublishToRedis('events', pubMessage, function(err, redisRes){
+                logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - Trying to find from user for outbound call');
+
+            });
 
             var pubMessageCalls = util.format("EVENT:%s:%s:%s:%s:%s:%s:%s:%s:YYYY", tenantId, companyId, "CALLSERVER", "CALL", "CREATE", callDirection, "", callUuid);
 
-            redisHandler.PublishToRedis('events', pubMessageCalls, function(err, redisRes){});
+            redisHandler.PublishToRedis('events', pubMessageCalls, function(err, redisRes){
+                logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - Trying to find from user for outbound call');
+            });
         }
 
 
@@ -281,32 +286,13 @@ var HandleOutRequest = function(reqId, data, callerIdNum, contextTenant, appType
                                                             {
                                                                 if (balanceRes && balanceRes.IsSuccess)
                                                                 {
-                                                                    backendFactory.getBackendHandler().getContextPreferences(callerContext, 'public', rule.CompanyId, rule.TenantId).then(function(codecPrefs)
-                                                                    {
-                                                                        var tempCodecPref = null;
-                                                                        if(codecPrefs)
-                                                                        {
-                                                                            tempCodecPref = codecPrefs.Codecs;
-                                                                        }
+                                                                    var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, callerContext, profile, '[^\\s]*', false, null, 'outbound', rule.Codecs, null);
 
-                                                                        var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, callerContext, profile, '[^\\s]*', false, null, 'outbound', tempCodecPref, null);
+                                                                    RedisOperations(varUuid, rule.CompanyId, rule.TenantId, null, 'EMERGENCY', isDialPlanGiven, 'outbound');
 
-                                                                        RedisOperations(varUuid, rule.CompanyId, rule.TenantId, null, 'EMERGENCY', isDialPlanGiven, 'outbound');
+                                                                    logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
 
-                                                                        logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
-
-                                                                        res.end(xml);
-
-
-
-                                                                    }).catch(function(err)
-                                                                    {
-                                                                        var xml = xmlGen.createRejectResponse(callerContext);
-
-                                                                        logger.error('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, err);
-
-                                                                        res.end(xml);
-                                                                    });
+                                                                    res.end(xml);
 
 
                                                                 }
@@ -765,17 +751,29 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
 
             var destNum = (huntDestNum) ? huntDestNum:cdnum;
 
-            if (huntContext == 'PBXFeatures' && huntDestNum == 'att_xfer')
+            if ((ardsFeaturesPattern.test(huntContext) || huntContext == 'PBXFeatures') && huntDestNum == 'att_xfer')
             {
                 logger.debug('[DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Attendant Transfer User ------------', reqId);
 
-                backendFactory.getBackendHandler().GetContext(varUsrContext, function(err, ctxt)
+                var tempHuntCtxt = decodeURIComponent(huntContext);
+
+                var xml = xmlBuilder.CreateAttendantTransferUser(reqId, huntDestNum, tempHuntCtxt);
+                logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+                res.end(xml);
+
+                /*backendFactory.getBackendHandler().GetContext(varUsrContext, function(err, ctxt)
                 {
                     if(ctxt)
                     {
                         backendFactory.getBackendHandler().GetCacheObject(ctxt.TenantId, ctxt.CompanyId, function(err, cacheInfo)
                         {
-                            if(err)
+                            var tempHuntCtxt = decodeURIComponent(huntContext);
+
+                            var xml = xmlBuilder.CreateAttendantTransferUser(reqId, huntDestNum, tempHuntCtxt);
+                            logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+                            res.end(xml);
+
+                            /!*if(err)
                             {
                                 var xml = xmlBuilder.CreatePbxFeatures(reqId, huntDestNum, 'user', varDomain, null, null, ctxt.CompanyId, ctxt.TenantId, null, huntContext, null, ardsClientUuid);
 
@@ -785,7 +783,7 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
                             }
                             else
                             {
-                                backendFactory.getBackendHandler().GetTransferCodesForTenantDB(reqId, ctxt.CompanyId, ctxt.TenantId, cacheInfo, function(err, transCodes)
+                                /!*backendFactory.getBackendHandler().GetTransferCodesForTenantDB(reqId, ctxt.CompanyId, ctxt.TenantId, cacheInfo, function(err, transCodes)
                                 {
                                     var xml = xmlBuilder.CreatePbxFeatures(reqId, huntDestNum, 'user', varDomain, null, null, ctxt.CompanyId, ctxt.TenantId, null, huntContext, transCodes, ardsClientUuid);
 
@@ -793,8 +791,9 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
 
                                     res.end(xml);
 
-                                })
-                            }
+                                })*!/
+
+                            }*!/
 
                         });
 
@@ -809,7 +808,7 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
 
                     }
 
-                });
+                });*/
 
             }
             else if (huntContext == 'PBXFeatures' && huntDestNum == 'att_xfer_ivr')
@@ -869,7 +868,7 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
 
 
             }
-            else if (ardsFeaturesPattern.test(huntContext) && huntDestNum == 'att_xfer')
+            /*else if (ardsFeaturesPattern.test(huntContext) && huntDestNum == 'att_xfer')
             {
                 logger.debug('[DVP-DynamicConfigurationGenerator.CallApp] - [%s] - ARDS Attendant Transfer User ------------', reqId);
 
@@ -916,7 +915,7 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
                 }
 
 
-            }
+            }*/
             else if ((ardsFeaturesPattern.test(huntContext) || huntContext == 'PBXFeatures') && huntDestNum == 'att_xfer_outbound')
             {
                 logger.debug('[DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Attendant Transfer Gateway ------------', reqId);
@@ -960,6 +959,164 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
                     }
 
                 });
+
+            }
+            else if(huntDestNum === 'usertransfer')
+            {
+                logger.debug('[DVP-DynamicConfigurationGenerator.CallApp] - [%s] - ARDS Attendant Transfer User ------------', reqId);
+
+                destNum = data["variable_digits"];
+
+                destNum = decodeURIComponent(destNum);
+
+                if(ardsFeaturesPattern.test(huntContext))
+                {
+                    var tempHuntCtxt = decodeURIComponent(huntContext);
+
+                    var huntCtxtSplit = tempHuntCtxt.split('|');
+
+                    if(huntCtxtSplit.length === 3)
+                    {
+                        backendFactory.getBackendHandler().GetCacheObject(huntCtxtSplit[1], huntCtxtSplit[2], function(err, cacheInfo)
+                        {
+                            if(err)
+                            {
+                                var xml = xmlBuilder.CreatePbxFeatures(reqId, huntDestNum, 'user', varDomain, null, null, huntCtxtSplit[2], huntCtxtSplit[1], null, tempHuntCtxt, null, ardsClientUuid);
+
+                                logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+
+                                res.end(xml);
+                            }
+                            else
+                            {
+                                backendFactory.getBackendHandler().GetTransferCodesForTenantDB(reqId, huntCtxtSplit[2], huntCtxtSplit[1], cacheInfo, function(err, transCodes)
+                                {
+                                    backendFactory.getBackendHandler().GetAllDataForExt(reqId, destNum, huntCtxtSplit[2], huntCtxtSplit[1], 'USER', null, null, function(err, ext)
+                                    {
+                                        if(ext && ext.SipUACEndpoint)
+                                        {
+                                            backendFactory.getBackendHandler().getContextPreferences(varUsrContext, ext.SipUACEndpoint.ContextId, huntCtxtSplit[2], huntCtxtSplit[1]).then(function(codecPrefs)
+                                            {
+                                                var tempCodecPref = null;
+                                                if(codecPrefs)
+                                                {
+                                                    tempCodecPref = codecPrefs.Codecs;
+                                                }
+                                                var xml = xmlBuilder.CreatePbxFeaturesUser(reqId, huntDestNum, 'user', varDomain, null, null, huntCtxtSplit[2], huntCtxtSplit[1], null, tempHuntCtxt, transCodes, ardsClientUuid, destNum, tempCodecPref);
+
+                                                logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+
+                                                res.end(xml);
+
+                                            }).catch(function(err)
+                                            {
+                                                logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Limits not defined', reqId);
+                                                res.end(xmlBuilder.createRejectResponse());
+                                            });
+                                        }
+                                        else
+                                        {
+                                            logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Limits not defined', reqId);
+                                            res.end(xmlBuilder.createRejectResponse());
+                                        }
+
+                                    })
+
+
+
+
+                                })
+                            }
+
+                        });
+
+
+                    }
+                    else
+                    {
+                        var xml = xmlGen.createRejectResponse(callerContext);
+
+                        logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+
+                        res.end(xml);
+                    }
+                }
+                else
+                {
+                    backendFactory.getBackendHandler().GetContext(varUsrContext, function (err, ctxt)
+                    {
+                        if (ctxt)
+                        {
+                            backendFactory.getBackendHandler().GetCacheObject(ctxt.TenantId, ctxt.CompanyId, function (err, cacheInfo)
+                            {
+                                var tempHuntCtxt = decodeURIComponent(huntContext);
+
+
+                                if (err)
+                                {
+                                    var xml = xmlGen.createRejectResponse(varUsrContext);
+
+                                    logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+
+                                    res.end(xml);
+                                }
+                                else
+                                {
+                                    backendFactory.getBackendHandler().GetTransferCodesForTenantDB(reqId, ctxt.CompanyId, ctxt.TenantId, cacheInfo, function (err, transCodes)
+                                    {
+                                        backendFactory.getBackendHandler().GetAllDataForExt(reqId, destNum, ctxt.CompanyId, ctxt.TenantId, 'USER', null, null, function(err, ext)
+                                        {
+                                            if(ext && ext.SipUACEndpoint)
+                                            {
+                                                backendFactory.getBackendHandler().getContextPreferences(varUsrContext, ext.SipUACEndpoint.ContextId, ctxt.CompanyId, ctxt.TenantId).then(function(codecPrefs)
+                                                {
+                                                    var tempCodecPref = null;
+                                                    if(codecPrefs)
+                                                    {
+                                                        tempCodecPref = codecPrefs.Codecs;
+                                                    }
+                                                    var xml = xmlBuilder.CreatePbxFeaturesUser(reqId, huntDestNum, 'user', varDomain, null, null, ctxt.CompanyId, ctxt.TenantId, null, huntContext, transCodes, ardsClientUuid, destNum, tempCodecPref);
+
+                                                    logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+
+                                                    res.end(xml);
+
+                                                }).catch(function(err)
+                                                {
+                                                    logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Get codec preferences error', reqId);
+                                                    res.end(xmlBuilder.createRejectResponse());
+                                                });
+                                            }
+                                            else
+                                            {
+                                                logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Extension not found', reqId);
+                                                res.end(xmlBuilder.createRejectResponse());
+                                            }
+
+                                        })
+
+
+                                    })
+
+                                }
+
+                            });
+
+                        }
+                        else
+                        {
+                            var xml = xmlGen.createRejectResponse(varUsrContext);
+
+                            logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+
+                            res.end(xml);
+
+                        }
+
+                    });
+                }
+
+
 
             }
             else if(huntDestNum === 'gwtransfer')
@@ -1012,11 +1169,12 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
 
                                                         if(NumLimitInfo)
                                                         {
-                                                            var xml = xmlBuilder.CreatePbxFeaturesGateway(reqId, huntDestNum, outRule.TrunkNumber, outRule.GatewayCode, ctxt.CompanyId, ctxt.TenantId, null, huntContext, outRule.DNIS, outRule.Operator, outRule.IpUrl, NumLimitInfo);
+                                                            var xml = xmlBuilder.CreatePbxFeaturesGateway(reqId, huntDestNum, outRule.TrunkNumber, outRule.GatewayCode, ctxt.CompanyId, ctxt.TenantId, null, huntContext, outRule.DNIS, outRule.Operator, outRule.IpUrl, NumLimitInfo, outRule.Codecs);
 
                                                             logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
 
                                                             res.end(xml);
+
                                                         }
                                                         else
                                                         {

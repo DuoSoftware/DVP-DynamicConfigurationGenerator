@@ -8,11 +8,27 @@ module.exports = {
     "Database":"duo"
   },
 
-  "Redis": {
+  //"Redis": {
+  //  "ip": "45.55.142.207",
+  //  "port": 6389,
+  //  "db": 9,
+  //  "password": "DuoS123"
+  //},
+
+  "Redis":
+  {
+    "mode":"instance",//instance, cluster, sentinel
     "ip": "45.55.142.207",
     "port": 6389,
-    "db": 9,
-    "password": "DuoS123"
+    "user": "duo",
+    "password": "DuoS123",
+    "db": 0,
+    "sentinels":{
+      "hosts": "138.197.90.92,45.55.205.92,162.243.81.39",
+      "port":16389,
+      "name":"redis-cluster"
+    }
+
   },
 
   "Host":{
