@@ -317,6 +317,8 @@ var CreatePbxFeaturesUser = function(reqId, destNum, pbxType, domain, trunkNumbe
 
         cond.ele('action').att('application', 'att_xfer').att('data', option + pbxType + '/' + digits + '@' + domain)
             .up()
+            .ele('action').att('application', 'speak').att('data', 'flite|slt|transfer disconnected')
+            .up()
             .end({pretty: true});
 
         return "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\r\n" + doc.toString({pretty: true});
