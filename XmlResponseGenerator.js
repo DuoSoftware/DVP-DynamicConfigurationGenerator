@@ -192,6 +192,7 @@ var CreateGatewayProfile = function(gwList, reqId)
     {
         var expireSec = 60;
         var retrySec = 3600;
+        var pingSec = 60;
 
 
         /*var doc = xmlBuilder.create('document').att('type', 'freeswitch/xml');
@@ -326,6 +327,10 @@ var CreateGatewayProfile = function(gwList, reqId)
                         '@value': retrySec
                     },
                     {
+                        '@name': 'ping',
+                        '@value': pingSec
+                    },
+                    {
                         '@name': 'auth-calls',
                         '@value': 'false'
                     },
@@ -377,6 +382,10 @@ var CreateGatewayProfile = function(gwList, reqId)
                     {
                         '@name': 'extension-in-contact',
                         '@value': 'true'
+                    },
+                    {
+                        '@name': 'ping',
+                        '@value': pingSec
                     },
                     {
                         '@name': 'retry-seconds',
