@@ -213,7 +213,7 @@ var CreatePbxFeatures = function(reqId, destNum, pbxType, domain, trunkNumber, t
     }
 };
 
-var CreatePbxFeaturesUser = function(reqId, destNum, pbxType, domain, trunkNumber, trunkCode, companyId, tenantId, appId, context, transferCodes, ardsClientUuid, digits, codecList)
+var CreatePbxFeaturesUser = function(reqId, destNum, pbxType, domain, companyId, tenantId, appId, context, transferCodes, ardsClientUuid, digits, codecList, transferCallerName, transferedParty)
 {
     try
     {
@@ -317,6 +317,8 @@ var CreatePbxFeaturesUser = function(reqId, destNum, pbxType, domain, trunkNumbe
 
         cond.ele('action').att('application', 'att_xfer').att('data', option + pbxType + '/' + digits + '@' + domain)
             .up()
+            .ele('action').att('application', 'event').att('data', 'Event-Name=TRANSFER_DISCONECT,caller=' + transferCallerName + ',companyId=' + companyId + ',tenantId=' + tenantId + ',digits=' + transferedParty)
+            .up()
             .ele('action').att('application', 'speak').att('data', 'flite|slt|transfer line disconnected')
             .up()
             .end({pretty: true});
@@ -331,7 +333,7 @@ var CreatePbxFeaturesUser = function(reqId, destNum, pbxType, domain, trunkNumbe
     }
 };
 
-var CreatePbxFeaturesGateway = function(reqId, destNum, trunkNumber, trunkCode, companyId, tenantId, appId, context, digits, operator, trunkIp, limitInfo, codecList)
+var CreatePbxFeaturesGateway = function(reqId, destNum, trunkNumber, trunkCode, companyId, tenantId, appId, context, digits, operator, trunkIp, limitInfo, codecList, transferCallerName)
 {
     try
     {
@@ -445,6 +447,8 @@ var CreatePbxFeaturesGateway = function(reqId, destNum, trunkNumber, trunkCode, 
 
 
         cond.ele('action').att('application', 'att_xfer').att('data', option + 'sofia/gateway/' + trunkCode + '/' +digits)
+            .up()
+            .ele('action').att('application', 'event').att('data', 'Event-Name=TRANSFER_DISCONECT,caller=' + transferCallerName + ',companyId=' + companyId + ',tenantId=' + tenantId + ',digits=' + digits)
             .up()
             .ele('action').att('application', 'speak').att('data', 'flite|slt|transfer line disconnected')
             .up()

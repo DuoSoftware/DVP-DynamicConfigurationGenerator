@@ -730,6 +730,7 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
         var opCat = data["variable_DVP_OPERATION_CAT"];
         var isDialplanGiven = data["variable_companyid"];
         var ardsClientUuid = data['variable_ards_client_uuid'];
+        var transferCallerName = data['Caller-Callee-ID-Number'];
 
 
 
@@ -1002,7 +1003,7 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
                                                 {
                                                     tempCodecPref = codecPrefs.Codecs;
                                                 }
-                                                var xml = xmlBuilder.CreatePbxFeaturesUser(reqId, huntDestNum, 'user', varDomain, null, null, huntCtxtSplit[2], huntCtxtSplit[1], null, tempHuntCtxt, transCodes, ardsClientUuid, destNum, tempCodecPref);
+                                                var xml = xmlBuilder.CreatePbxFeaturesUser(reqId, huntDestNum, 'user', varDomain, huntCtxtSplit[2], huntCtxtSplit[1], null, tempHuntCtxt, transCodes, ardsClientUuid, destNum, tempCodecPref, transferCallerName, ext.SipUACEndpoint.SipUsername);
 
                                                 logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
 
@@ -1075,7 +1076,7 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
                                                     {
                                                         tempCodecPref = codecPrefs.Codecs;
                                                     }
-                                                    var xml = xmlBuilder.CreatePbxFeaturesUser(reqId, huntDestNum, 'user', varDomain, null, null, ctxt.CompanyId, ctxt.TenantId, null, huntContext, transCodes, ardsClientUuid, destNum, tempCodecPref);
+                                                    var xml = xmlBuilder.CreatePbxFeaturesUser(reqId, huntDestNum, 'user', varDomain, ctxt.CompanyId, ctxt.TenantId, null, huntContext, transCodes, ardsClientUuid, destNum, tempCodecPref, transferCallerName, ext.SipUACEndpoint.SipUsername);
 
                                                     logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
 
@@ -1169,7 +1170,7 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
 
                                                         if(NumLimitInfo)
                                                         {
-                                                            var xml = xmlBuilder.CreatePbxFeaturesGateway(reqId, huntDestNum, outRule.TrunkNumber, outRule.GatewayCode, ctxt.CompanyId, ctxt.TenantId, null, huntContext, outRule.DNIS, outRule.Operator, outRule.IpUrl, NumLimitInfo, outRule.Codecs);
+                                                            var xml = xmlBuilder.CreatePbxFeaturesGateway(reqId, huntDestNum, outRule.TrunkNumber, outRule.GatewayCode, ctxt.CompanyId, ctxt.TenantId, null, huntContext, outRule.DNIS, outRule.Operator, outRule.IpUrl, NumLimitInfo, outRule.Codecs, transferCallerName);
 
                                                             logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
 
