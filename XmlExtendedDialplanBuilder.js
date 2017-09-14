@@ -78,8 +78,6 @@ var createTransferRejectResponse = function(context, transferCallerName, company
 
         cond.ele('action').att('application', 'speak').att('data', 'flite|slt|transfer line disconnected')
             .up()
-            .ele('action').att('application', 'hangup').att('data', 'CALL_REJECTED')
-            .up()
             .end({pretty: true});
 
 
