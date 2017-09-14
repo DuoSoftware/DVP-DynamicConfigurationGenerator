@@ -317,7 +317,7 @@ var CreatePbxFeaturesUser = function(reqId, destNum, pbxType, domain, companyId,
 
         cond.ele('action').att('application', 'att_xfer').att('data', option + pbxType + '/' + digits + '@' + domain)
             .up()
-            .ele('action').att('application', 'event').att('data', 'Event-Name=TRANSFER_DISCONECT,caller=' + transferCallerName + ',companyId=' + companyId + ',tenantId=' + tenantId + ',digits=' + transferedParty)
+            .ele('action').att('application', 'event').att('data', 'Event-Name=TRANSFER_DISCONNECT,caller=' + transferCallerName + ',companyId=' + companyId + ',tenantId=' + tenantId + ',digits=' + transferedParty)
             .up()
             .ele('action').att('application', 'speak').att('data', 'flite|slt|transfer line disconnected')
             .up()
@@ -448,7 +448,7 @@ var CreatePbxFeaturesGateway = function(reqId, destNum, trunkNumber, trunkCode, 
 
         cond.ele('action').att('application', 'att_xfer').att('data', option + 'sofia/gateway/' + trunkCode + '/' +digits)
             .up()
-            .ele('action').att('application', 'event').att('data', 'Event-Name=TRANSFER_DISCONECT,caller=' + transferCallerName + ',companyId=' + companyId + ',tenantId=' + tenantId + ',digits=' + digits)
+            .ele('action').att('application', 'event').att('data', 'Event-Name=TRANSFER_DISCONNECT,caller=' + transferCallerName + ',companyId=' + companyId + ',tenantId=' + tenantId + ',digits=' + digits)
             .up()
             .ele('action').att('application', 'speak').att('data', 'flite|slt|transfer line disconnected')
             .up()
