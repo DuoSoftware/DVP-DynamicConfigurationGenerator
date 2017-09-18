@@ -730,6 +730,7 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
         var opCat = data["variable_DVP_OPERATION_CAT"];
         var isDialplanGiven = data["variable_companyid"];
         var ardsClientUuid = data['variable_ards_client_uuid'];
+        var transferCallerName = data['Caller-Callee-ID-Number'];
 
 
 
@@ -981,7 +982,7 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
                         {
                             if(err)
                             {
-                                var xml = xmlBuilder.CreatePbxFeatures(reqId, huntDestNum, 'user', varDomain, null, null, huntCtxtSplit[2], huntCtxtSplit[1], null, tempHuntCtxt, null, ardsClientUuid);
+                                var xml = xmlBuilder.createTransferRejectResponse(tempHuntCtxt, transferCallerName, huntCtxtSplit[2], huntCtxtSplit[1], destNum);
 
                                 logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
 
@@ -1002,7 +1003,7 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
                                                 {
                                                     tempCodecPref = codecPrefs.Codecs;
                                                 }
-                                                var xml = xmlBuilder.CreatePbxFeaturesUser(reqId, huntDestNum, 'user', varDomain, null, null, huntCtxtSplit[2], huntCtxtSplit[1], null, tempHuntCtxt, transCodes, ardsClientUuid, destNum, tempCodecPref);
+                                                var xml = xmlBuilder.CreatePbxFeaturesUser(reqId, huntDestNum, 'user', varDomain, huntCtxtSplit[2], huntCtxtSplit[1], null, tempHuntCtxt, transCodes, ardsClientUuid, destNum, tempCodecPref, transferCallerName, ext.SipUACEndpoint.SipUsername);
 
                                                 logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
 
@@ -1010,19 +1011,17 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
 
                                             }).catch(function(err)
                                             {
-                                                logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Limits not defined', reqId);
-                                                res.end(xmlBuilder.createRejectResponse());
+                                                logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - error getting codec preferences', reqId);
+                                                res.end(xmlBuilder.createTransferRejectResponse(tempHuntCtxt, transferCallerName, huntCtxtSplit[2], huntCtxtSplit[1], ext.SipUACEndpoint.SipUsername));
                                             });
                                         }
                                         else
                                         {
-                                            logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Limits not defined', reqId);
-                                            res.end(xmlBuilder.createRejectResponse());
+                                            logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - User not not found', reqId);
+                                            res.end(xmlBuilder.createTransferRejectResponse(tempHuntCtxt, transferCallerName, huntCtxtSplit[2], huntCtxtSplit[1], destNum));
                                         }
 
                                     })
-
-
 
 
                                 })
@@ -1034,7 +1033,7 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
                     }
                     else
                     {
-                        var xml = xmlGen.createRejectResponse(callerContext);
+                        var xml = xmlBuilder.createTransferRejectResponse(tempHuntCtxt, transferCallerName, huntCtxtSplit[2], huntCtxtSplit[1], destNum);
 
                         logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
 
@@ -1043,18 +1042,17 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
                 }
                 else
                 {
+                    var tempHuntCtxt = decodeURIComponent(huntContext);
                     backendFactory.getBackendHandler().GetContext(varUsrContext, function (err, ctxt)
                     {
                         if (ctxt)
                         {
                             backendFactory.getBackendHandler().GetCacheObject(ctxt.TenantId, ctxt.CompanyId, function (err, cacheInfo)
                             {
-                                var tempHuntCtxt = decodeURIComponent(huntContext);
-
 
                                 if (err)
                                 {
-                                    var xml = xmlGen.createRejectResponse(varUsrContext);
+                                    var xml = xmlBuilder.createTransferRejectResponse(tempHuntCtxt, transferCallerName, ctxt.CompanyId, ctxt.TenantId, destNum);
 
                                     logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
 
@@ -1075,7 +1073,7 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
                                                     {
                                                         tempCodecPref = codecPrefs.Codecs;
                                                     }
-                                                    var xml = xmlBuilder.CreatePbxFeaturesUser(reqId, huntDestNum, 'user', varDomain, null, null, ctxt.CompanyId, ctxt.TenantId, null, huntContext, transCodes, ardsClientUuid, destNum, tempCodecPref);
+                                                    var xml = xmlBuilder.CreatePbxFeaturesUser(reqId, huntDestNum, 'user', varDomain, ctxt.CompanyId, ctxt.TenantId, null, tempHuntCtxt, transCodes, ardsClientUuid, destNum, tempCodecPref, transferCallerName, ext.SipUACEndpoint.SipUsername);
 
                                                     logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
 
@@ -1083,14 +1081,20 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
 
                                                 }).catch(function(err)
                                                 {
-                                                    logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Get codec preferences error', reqId);
-                                                    res.end(xmlBuilder.createRejectResponse());
+                                                    var xml = xmlBuilder.createTransferRejectResponse(tempHuntCtxt, transferCallerName, ctxt.CompanyId, ctxt.TenantId, ext.SipUACEndpoint.SipUsername);
+
+                                                    logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+
+                                                    res.end(xml);
                                                 });
                                             }
                                             else
                                             {
-                                                logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Extension not found', reqId);
-                                                res.end(xmlBuilder.createRejectResponse());
+                                                var xml = xmlBuilder.createTransferRejectResponse(tempHuntCtxt, transferCallerName, ctxt.CompanyId, ctxt.TenantId, destNum);
+
+                                                logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+
+                                                res.end(xml);
                                             }
 
                                         })
@@ -1105,7 +1109,7 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
                         }
                         else
                         {
-                            var xml = xmlGen.createRejectResponse(varUsrContext);
+                            var xml = xmlBuilder.createTransferRejectResponse(tempHuntCtxt, transferCallerName, null, null, destNum);
 
                             logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
 
@@ -1137,7 +1141,7 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
                         {
                             if(err)
                             {
-                                var xml = xmlGen.createRejectResponse(varUsrContext);
+                                var xml = xmlBuilder.createTransferRejectResponse(huntContext, transferCallerName, ctxt.CompanyId, ctxt.TenantId, destNum);
 
                                 logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
 
@@ -1169,7 +1173,7 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
 
                                                         if(NumLimitInfo)
                                                         {
-                                                            var xml = xmlBuilder.CreatePbxFeaturesGateway(reqId, huntDestNum, outRule.TrunkNumber, outRule.GatewayCode, ctxt.CompanyId, ctxt.TenantId, null, huntContext, outRule.DNIS, outRule.Operator, outRule.IpUrl, NumLimitInfo, outRule.Codecs);
+                                                            var xml = xmlBuilder.CreatePbxFeaturesGateway(reqId, huntDestNum, outRule.TrunkNumber, outRule.GatewayCode, ctxt.CompanyId, ctxt.TenantId, null, huntContext, outRule.DNIS, outRule.Operator, outRule.IpUrl, NumLimitInfo, outRule.Codecs, transferCallerName);
 
                                                             logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
 
@@ -1178,16 +1182,22 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
                                                         }
                                                         else
                                                         {
-                                                            logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Limits not defined', reqId);
-                                                            res.end(xmlBuilder.createRejectResponse());
+                                                            var xml = xmlBuilder.createTransferRejectResponse(huntContext, transferCallerName, ctxt.CompanyId, ctxt.TenantId, destNum);
+
+                                                            logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+
+                                                            res.end(xml);
                                                         }
 
 
 
                                                     }).catch(function(err)
                                                     {
-                                                        logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Error getting company limits', reqId);
-                                                        res.end(xmlBuilder.createRejectResponse());
+                                                        var xml = xmlBuilder.createTransferRejectResponse(huntContext, transferCallerName, ctxt.CompanyId, ctxt.TenantId, destNum);
+
+                                                        logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+
+                                                        res.end(xml);
 
                                                     });
 
@@ -1197,7 +1207,7 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
                                                 {
                                                     logger.error('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Insufficient balance', reqId);
 
-                                                    var xml = xmlGen.createRejectResponse(huntContext);
+                                                    var xml = xmlBuilder.createTransferRejectResponse(huntContext, transferCallerName, ctxt.CompanyId, ctxt.TenantId, destNum);
 
                                                     logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
 
@@ -1209,7 +1219,7 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
                                             {
                                                 logger.error('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Insufficient balance', reqId, err);
 
-                                                var xml = xmlGen.createRejectResponse(huntContext);
+                                                var xml = xmlBuilder.createTransferRejectResponse(huntContext, transferCallerName, ctxt.CompanyId, ctxt.TenantId, destNum);
 
                                                 logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
 
@@ -1221,7 +1231,7 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
                                     else
                                     {
                                         logger.error('[DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Outbound Rule Not Found', reqId, err);
-                                        var xml = xmlGen.createRejectResponse(huntContext);
+                                        var xml = xmlBuilder.createTransferRejectResponse(huntContext, transferCallerName, ctxt.CompanyId, ctxt.TenantId, destNum);
 
                                         logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
 
@@ -1237,7 +1247,7 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
                     else
                     {
                         logger.error('[DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Context not found', reqId, err);
-                        var xml = xmlGen.createRejectResponse(callerContext);
+                        var xml = xmlBuilder.createTransferRejectResponse(huntContext, transferCallerName, null, null, destNum);
 
                         logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
 

@@ -50,6 +50,48 @@ var createRejectResponse = function(context)
     }
 }
 
+var createTransferRejectResponse = function(context, transferCallerName, companyId, tenantId, transferedParty)
+{
+    try
+    {
+        var tempContext = 'public';
+
+        if(context)
+        {
+            tempContext = context;
+        }
+        var doc = xmlBuilder.create('document');
+
+        var cond = doc.att('type', 'freeswitch/xml')
+            .ele('section').att('name', 'dialplan').att('description', 'RE Dial Plan For FreeSwitch')
+            .ele('context').att('name', tempContext)
+            .ele('extension').att('name', 'test')
+            .ele('condition').att('field', 'destination_number').att('expression', '[^\\s]*')
+            .ele('action').att('application', 'set').att('data', 'DVP_OPERATION_CAT=REJECTED')
+            .up()
+
+            if(companyId && tenantId)
+            {
+                cond.ele('action').att('application', 'event').att('data', 'Event-Name=TRANSFER_DISCONNECT,caller=' + transferCallerName + ',companyId=' + companyId + ',tenantId=' + tenantId + ',digits=' + transferedParty)
+                .up()
+            }
+
+        cond.ele('action').att('application', 'speak').att('data', 'flite|slt|transfer line disconnected')
+            .up()
+            .end({pretty: true});
+
+
+        return "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\r\n" + doc.toString({pretty: true});
+
+
+    }
+    catch(ex)
+    {
+        logger.error('[DVP-DynamicConfigurationGenerator.CreateSendBusyMessageDialplan] - [%s] - Exception occurred creating xml', ex);
+        return createNotFoundResponse();
+    }
+}
+
 var createNotFoundResponse = function()
 {
     try
@@ -213,7 +255,7 @@ var CreatePbxFeatures = function(reqId, destNum, pbxType, domain, trunkNumber, t
     }
 };
 
-var CreatePbxFeaturesUser = function(reqId, destNum, pbxType, domain, trunkNumber, trunkCode, companyId, tenantId, appId, context, transferCodes, ardsClientUuid, digits, codecList)
+var CreatePbxFeaturesUser = function(reqId, destNum, pbxType, domain, companyId, tenantId, appId, context, transferCodes, ardsClientUuid, digits, codecList, transferCallerName, transferedParty)
 {
     try
     {
@@ -317,6 +359,8 @@ var CreatePbxFeaturesUser = function(reqId, destNum, pbxType, domain, trunkNumbe
 
         cond.ele('action').att('application', 'att_xfer').att('data', option + pbxType + '/' + digits + '@' + domain)
             .up()
+            .ele('action').att('application', 'event').att('data', 'Event-Name=TRANSFER_DISCONNECT,caller=' + transferCallerName + ',companyId=' + companyId + ',tenantId=' + tenantId + ',digits=' + transferedParty)
+            .up()
             .ele('action').att('application', 'speak').att('data', 'flite|slt|transfer line disconnected')
             .up()
             .end({pretty: true});
@@ -331,7 +375,7 @@ var CreatePbxFeaturesUser = function(reqId, destNum, pbxType, domain, trunkNumbe
     }
 };
 
-var CreatePbxFeaturesGateway = function(reqId, destNum, trunkNumber, trunkCode, companyId, tenantId, appId, context, digits, operator, trunkIp, limitInfo, codecList)
+var CreatePbxFeaturesGateway = function(reqId, destNum, trunkNumber, trunkCode, companyId, tenantId, appId, context, digits, operator, trunkIp, limitInfo, codecList, transferCallerName)
 {
     try
     {
@@ -445,6 +489,8 @@ var CreatePbxFeaturesGateway = function(reqId, destNum, trunkNumber, trunkCode, 
 
 
         cond.ele('action').att('application', 'att_xfer').att('data', option + 'sofia/gateway/' + trunkCode + '/' +digits)
+            .up()
+            .ele('action').att('application', 'event').att('data', 'Event-Name=TRANSFER_DISCONNECT,caller=' + transferCallerName + ',companyId=' + companyId + ',tenantId=' + tenantId + ',digits=' + digits)
             .up()
             .ele('action').att('application', 'speak').att('data', 'flite|slt|transfer line disconnected')
             .up()
@@ -3002,3 +3048,4 @@ module.exports.CreateOutboundDeniedMessageDialplan = CreateOutboundDeniedMessage
 module.exports.FaxReceiveUpload = FaxReceiveUpload;
 module.exports.CreatePbxFeaturesUser = CreatePbxFeaturesUser;
 module.exports.CreateAttendantTransferUser = CreateAttendantTransferUser;
+module.exports.createTransferRejectResponse = createTransferRejectResponse;
