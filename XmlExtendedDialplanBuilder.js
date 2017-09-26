@@ -13,6 +13,8 @@ var fileServiceVersion = config.Services.fileServiceVersion;
 
 var allowCodecPref = config.Host.AllowCodecConfigure;
 
+var recordingPath = config.RecordingPath;
+
 var createRejectResponse = function(context)
 {
     try
@@ -1016,6 +1018,11 @@ var CreateRouteUserDialplan = function(reqId, ep, context, profile, destinationP
 
                 var fileSavePath = '$${base_dir}/recordings/${my_uuid}.mp3';
 
+                if(recordingPath)
+                {
+                    fileSavePath = recordingPath + '${my_uuid}.mp3';
+                }
+
                 var playFileDetails = 'record_post_process_exec_api=curl_sendfile:' + fileUploadUrl + ' file=${dvpRecFile} class=CALLSERVER&type=CALL&category=CONVERSATION&referenceid=${my_uuid}&mediatype=audio&filetype=wav&sessionid=${my_uuid}&display=' + ep.Destination + '-${caller_id_number}';
 
 
@@ -1037,6 +1044,11 @@ var CreateRouteUserDialplan = function(reqId, ep, context, profile, destinationP
                 }
 
                 var fileSavePath = '$${base_dir}/recordings/${uuid}.mp3';
+
+                if(recordingPath)
+                {
+                    fileSavePath = recordingPath + '${my_uuid}.mp3';
+                }
 
                 var playFileDetails = 'record_post_process_exec_api=curl_sendfile:' + fileUploadUrl + ' file=${dvpRecFile} class=CALLSERVER&type=CALL&category=CONVERSATION&referenceid=${uuid}&mediatype=audio&filetype=wav&sessionid=${uuid}&display=' + ep.Destination + '-${caller_id_number}';
 
@@ -2346,6 +2358,11 @@ var FaxReceiveUpload = function(reqId, context, destinationPattern, numLimitInfo
 
         var fileSavePath = '$${base_dir}/recordings/${uuid}.tif';
 
+        if(recordingPath)
+        {
+            fileSavePath = recordingPath + '${my_uuid}.mp3';
+        }
+
         cond.ele('action').att('application', 'set').att('data', 'dvpUploadFaxFile=' + fileSavePath)
         .up()
 
@@ -2453,6 +2470,11 @@ var CreateRouteGatewayDialplan = function(reqId, ep, context, profile, destinati
 
                 var fileSavePath = '$${base_dir}/recordings/${my_uuid}.mp3';
 
+                if(recordingPath)
+                {
+                    fileSavePath = recordingPath + '${my_uuid}.mp3';
+                }
+
                 var playFileDetails = 'record_post_process_exec_api=curl_sendfile:' + fileUploadUrl + ' file=${dvpRecFile} class=CALLSERVER&type=CALL&category=CONVERSATION&referenceid=${my_uuid}&mediatype=audio&filetype=wav&sessionid=${my_uuid}&display=' + ep.Destination + '-${caller_id_number}';
 
                 cond.ele('action').att('application', 'set').att('data', 'dvpRecFile=' + fileSavePath)
@@ -2472,6 +2494,11 @@ var CreateRouteGatewayDialplan = function(reqId, ep, context, profile, destinati
                 }
 
                 var fileSavePath = '$${base_dir}/recordings/${uuid}.mp3';
+
+                if(recordingPath)
+                {
+                    fileSavePath = recordingPath + '${my_uuid}.mp3';
+                }
 
                 var playFileDetails = 'record_post_process_exec_api=curl_sendfile:' + fileUploadUrl + ' file=${dvpRecFile} class=CALLSERVER&type=CALL&category=CONVERSATION&referenceid=${uuid}&mediatype=audio&filetype=wav&sessionid=${uuid}&display=' + ep.Destination + '-${caller_id_number}';
 
