@@ -56,5 +56,6 @@ module.exports = {
     },
 
     "Token": "HOST_TOKEN",
-    "billingEnabled": "SYS_BILLING_ENABLED"
+    "billingEnabled": "SYS_BILLING_ENABLED",
+    "RecordingPath": "SYS_CALL_RECORD_PATH"
 };
