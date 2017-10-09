@@ -979,7 +979,9 @@ var CreateRouteUserDialplan = function(reqId, ep, context, profile, destinationP
                 .up()
         }
 
-        cond.ele('action').att('application', 'set').att('data', 'ringback=${us-ring}')
+        /*cond.ele('action').att('application', 'set').att('data', 'ringback=${us-ring}')
+         .up()*/
+        cond.ele('action').att('application', 'set').att('data', 'bridge_early_media=true')
             .up()
             .ele('action').att('application', 'set').att('data', 'continue_on_fail=true')
             .up()
