@@ -981,13 +981,13 @@ var CreateRouteUserDialplan = function(reqId, ep, context, profile, destinationP
 
         /*cond.ele('action').att('application', 'set').att('data', 'ringback=${us-ring}')
          .up()*/
-        cond.ele('action').att('application', 'set').att('data', 'bridge_early_media=true')
-            .up()
-            .ele('action').att('application', 'set').att('data', 'continue_on_fail=true')
+        /*cond.ele('action').att('application', 'set').att('data', 'bridge_early_media=true')
+            .up()*/
+        cond.ele('action').att('application', 'set').att('data', 'continue_on_fail=true')
             .up()
             .ele('action').att('application', 'set').att('data', 'hangup_after_bridge=true')
             .up()
-            .ele('action').att('application', 'set').att('data', ignoreEarlyM)
+            .ele('action').att('application', 'set').att('data', 'true')
             .up()
             .ele('action').att('application', 'set').att('data', bypassMedia)
             .up()
