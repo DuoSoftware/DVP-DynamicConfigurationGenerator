@@ -345,7 +345,7 @@ var CreatePbxFeaturesUser = function(reqId, destNum, pbxType, domain, companyId,
             codecListString = codecList.join();
         }
 
-        var option = '{companyid=' + companyId + ',tenantid=' + tenantId + ',DVP_OPERATION_CAT=ATT_XFER_USER,dvp_app_id=' + appId;
+        var option = '{companyid=' + companyId + ',tenantid=' + tenantId + ',DVP_OPERATION_CAT=ATT_XFER_USER,dvp_app_id=' + appId + ',origination_caller_id_name=rrrrrr,origination_caller_id_number=989898';
 
         if(ardsClientUuid)
         {
