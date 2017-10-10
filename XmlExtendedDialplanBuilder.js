@@ -873,7 +873,7 @@ var CreateRouteUserDialplan = function(reqId, ep, context, profile, destinationP
             bypassMedia = "bypass_media=false";
         }
 
-        var ignoreEarlyM = "ignore_early_media=false";
+        var ignoreEarlyM = "ignore_early_media=true";
         if (ignoreEarlyMedia && ep.Type != 'GROUP')
         {
             ignoreEarlyM = "ignore_early_media=true";
@@ -987,7 +987,7 @@ var CreateRouteUserDialplan = function(reqId, ep, context, profile, destinationP
             .up()
             .ele('action').att('application', 'set').att('data', 'hangup_after_bridge=true')
             .up()
-            .ele('action').att('application', 'set').att('data', 'true')
+            .ele('action').att('application', 'set').att('data', ignoreEarlyM)
             .up()
             .ele('action').att('application', 'set').att('data', bypassMedia)
             .up()
