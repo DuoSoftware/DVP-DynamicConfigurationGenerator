@@ -730,7 +730,7 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
         var opCat = data["variable_DVP_OPERATION_CAT"];
         var isDialplanGiven = data["variable_companyid"];
         var ardsClientUuid = data['variable_ards_client_uuid'];
-        var transferCallerName = data['Caller-Callee-ID-Number'];
+        var transferCallerName = data['variable_user_id'];
 
 
 
