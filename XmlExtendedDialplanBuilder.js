@@ -345,7 +345,7 @@ var CreatePbxFeaturesUser = function(reqId, destNum, pbxType, domain, companyId,
             codecListString = codecList.join();
         }
 
-        var option = '{companyid=' + companyId + ',tenantid=' + tenantId + ',DVP_OPERATION_CAT=ATT_XFER_USER,dvp_app_id=' + appId;
+        var option = '{companyid=' + companyId + ',tenantid=' + tenantId + ',DVP_OPERATION_CAT=ATT_XFER_USER,dvp_app_id=' + appId + ',dvp_trans_caller=' + transferCallerName + ',dvp_trans_party=' + transferedParty + ',dvp_trans_orig_caller=' + origCaller;
 
         if(ardsClientUuid)
         {
@@ -359,9 +359,9 @@ var CreatePbxFeaturesUser = function(reqId, destNum, pbxType, domain, companyId,
 
         option = option + '}';
 
-        cond.ele('action').att('application', 'event').att('data', 'Event-Name=TRANSFER_TRYING,caller=' + transferCallerName + ',companyId=' + companyId + ',tenantId=' + tenantId + ',digits=' + transferedParty + ',origCaller=' + origCaller)
-            .up()
-            .ele('action').att('application', 'att_xfer').att('data', option + pbxType + '/' + digits + '@' + domain)
+        /*cond.ele('action').att('application', 'event').att('data', 'Event-Name=TRANSFER_TRYING,caller=' + transferCallerName + ',companyId=' + companyId + ',tenantId=' + tenantId + ',digits=' + transferedParty + ',origCaller=' + origCaller)
+            .up()*/
+        cond.ele('action').att('application', 'att_xfer').att('data', option + pbxType + '/' + digits + '@' + domain)
             .up()
             .ele('action').att('application', 'event').att('data', 'Event-Name=TRANSFER_DISCONNECT,caller=' + transferCallerName + ',companyId=' + companyId + ',tenantId=' + tenantId + ',digits=' + transferedParty)
             .up()
