@@ -972,6 +972,15 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
             {
                 logger.debug('[DVP-DynamicConfigurationGenerator.CallApp] - [%s] - ARDS Attendant Transfer User ------------', reqId);
 
+                if(data['variable_DVP_CALL_DIRECTION'] === 'outbound')
+                {
+                    if(data['variable_DVP_OPERATION_CAT'] === 'GATEWAY')
+                    {
+                        preTransCaller = data['Other-Leg-Destination-Number'];
+                    }
+
+                }
+
                 destNum = data["variable_digits"];
 
                 destNum = decodeURIComponent(destNum);
