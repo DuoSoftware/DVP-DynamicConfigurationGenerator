@@ -974,7 +974,7 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
 
                 if(data['variable_DVP_CALL_DIRECTION'] === 'outbound')
                 {
-                    if(data['variable_DVP_OPERATION_CAT'] === 'GATEWAY')
+                    if(data['variable_DVP_OPERATION_CAT'] === 'GATEWAY' || data['variable_DVP_OPERATION_CAT'] === 'ATT_XFER_USER')
                     {
                         preTransCaller = data['Other-Leg-Destination-Number'];
                     }
