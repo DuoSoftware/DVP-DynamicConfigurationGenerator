@@ -741,13 +741,14 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
             appType = extraData['variable_dvp_app_type'];
 
             var opCat = extraData["variable_DVP_OPERATION_CAT"];
+            var actionCat = extraData["variable_DVP_ACTION_CAT"];
             var currentApp = extraData["variable_current_application"];
 
             if(opCat === 'AUTO_ATTENDANT')
             {
                 appType = 'AUTO_ATTENDANT';
             }
-            else if(opCat == 'DIALER')
+            else if(actionCat == 'DIALER')
             {
                 appType = 'DIALER';
             }
