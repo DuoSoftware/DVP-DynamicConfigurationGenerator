@@ -13,6 +13,8 @@ var fileServiceVersion = config.Services.fileServiceVersion;
 
 var allowCodecPref = config.Host.AllowCodecConfigure;
 
+var recordingPath = config.RecordingPath;
+
 var createRejectResponse = function(context)
 {
     try
@@ -255,7 +257,7 @@ var CreatePbxFeatures = function(reqId, destNum, pbxType, domain, trunkNumber, t
     }
 };
 
-var CreatePbxFeaturesUser = function(reqId, destNum, pbxType, domain, companyId, tenantId, appId, context, transferCodes, ardsClientUuid, digits, codecList, transferCallerName, transferedParty)
+var CreatePbxFeaturesUser = function(reqId, destNum, pbxType, domain, companyId, tenantId, appId, context, transferCodes, ardsClientUuid, digits, codecList, transferCallerName, transferedParty, origCaller)
 {
     try
     {
@@ -343,7 +345,7 @@ var CreatePbxFeaturesUser = function(reqId, destNum, pbxType, domain, companyId,
             codecListString = codecList.join();
         }
 
-        var option = '{companyid=' + companyId + ',tenantid=' + tenantId + ',DVP_OPERATION_CAT=ATT_XFER_USER,dvp_app_id=' + appId;
+        var option = '{companyid=' + companyId + ',tenantid=' + tenantId + ',DVP_OPERATION_CAT=ATT_XFER_USER,dvp_app_id=' + appId + ',dvp_trans_caller=' + transferCallerName + ',dvp_trans_party=' + transferedParty + ',dvp_trans_orig_caller=' + origCaller;
 
         if(ardsClientUuid)
         {
@@ -357,6 +359,8 @@ var CreatePbxFeaturesUser = function(reqId, destNum, pbxType, domain, companyId,
 
         option = option + '}';
 
+        /*cond.ele('action').att('application', 'event').att('data', 'Event-Name=TRANSFER_TRYING,caller=' + transferCallerName + ',companyId=' + companyId + ',tenantId=' + tenantId + ',digits=' + transferedParty + ',origCaller=' + origCaller)
+            .up()*/
         cond.ele('action').att('application', 'att_xfer').att('data', option + pbxType + '/' + digits + '@' + domain)
             .up()
             .ele('action').att('application', 'event').att('data', 'Event-Name=TRANSFER_DISCONNECT,caller=' + transferCallerName + ',companyId=' + companyId + ',tenantId=' + tenantId + ',digits=' + transferedParty)
@@ -1029,13 +1033,15 @@ var CreateRouteUserDialplan = function(reqId, ep, context, profile, destinationP
                 .up()
         }
 
-        cond.ele('action').att('application', 'set').att('data', 'ringback=${us-ring}')
+        /*cond.ele('action').att('application', 'set').att('data', 'ringback=${us-ring}')
+         .up()*/
+        cond.ele('action').att('application', 'set').att('data', 'bridge_early_media=true')
             .up()
             .ele('action').att('application', 'set').att('data', 'continue_on_fail=true')
             .up()
             .ele('action').att('application', 'set').att('data', 'hangup_after_bridge=true')
             .up()
-            .ele('action').att('application', 'set').att('data', ignoreEarlyM)
+            .ele('action').att('application', 'set').att('data', 'false')
             .up()
             .ele('action').att('application', 'set').att('data', bypassMedia)
             .up()
@@ -1066,6 +1072,11 @@ var CreateRouteUserDialplan = function(reqId, ep, context, profile, destinationP
 
                 var fileSavePath = '$${base_dir}/recordings/${my_uuid}.mp3';
 
+                if(recordingPath)
+                {
+                    fileSavePath = recordingPath + '${my_uuid}.mp3';
+                }
+
                 var playFileDetails = 'record_post_process_exec_api=curl_sendfile:' + fileUploadUrl + ' file=${dvpRecFile} class=CALLSERVER&type=CALL&category=CONVERSATION&referenceid=${my_uuid}&mediatype=audio&filetype=wav&sessionid=${my_uuid}&display=' + ep.Destination + '-${caller_id_number}';
 
 
@@ -1087,6 +1098,11 @@ var CreateRouteUserDialplan = function(reqId, ep, context, profile, destinationP
                 }
 
                 var fileSavePath = '$${base_dir}/recordings/${uuid}.mp3';
+
+                if(recordingPath)
+                {
+                    fileSavePath = recordingPath + '${my_uuid}.mp3';
+                }
 
                 var playFileDetails = 'record_post_process_exec_api=curl_sendfile:' + fileUploadUrl + ' file=${dvpRecFile} class=CALLSERVER&type=CALL&category=CONVERSATION&referenceid=${uuid}&mediatype=audio&filetype=wav&sessionid=${uuid}&display=' + ep.Destination + '-${caller_id_number}';
 
@@ -2396,6 +2412,11 @@ var FaxReceiveUpload = function(reqId, context, destinationPattern, numLimitInfo
 
         var fileSavePath = '$${base_dir}/recordings/${uuid}.tif';
 
+        if(recordingPath)
+        {
+            fileSavePath = recordingPath + '${my_uuid}.mp3';
+        }
+
         cond.ele('action').att('application', 'set').att('data', 'dvpUploadFaxFile=' + fileSavePath)
         .up()
 
@@ -2503,6 +2524,11 @@ var CreateRouteGatewayDialplan = function(reqId, ep, context, profile, destinati
 
                 var fileSavePath = '$${base_dir}/recordings/${my_uuid}.mp3';
 
+                if(recordingPath)
+                {
+                    fileSavePath = recordingPath + '${my_uuid}.mp3';
+                }
+
                 var playFileDetails = 'record_post_process_exec_api=curl_sendfile:' + fileUploadUrl + ' file=${dvpRecFile} class=CALLSERVER&type=CALL&category=CONVERSATION&referenceid=${my_uuid}&mediatype=audio&filetype=wav&sessionid=${my_uuid}&display=' + ep.Destination + '-${caller_id_number}';
 
                 cond.ele('action').att('application', 'set').att('data', 'dvpRecFile=' + fileSavePath)
@@ -2522,6 +2548,11 @@ var CreateRouteGatewayDialplan = function(reqId, ep, context, profile, destinati
                 }
 
                 var fileSavePath = '$${base_dir}/recordings/${uuid}.mp3';
+
+                if(recordingPath)
+                {
+                    fileSavePath = recordingPath + '${my_uuid}.mp3';
+                }
 
                 var playFileDetails = 'record_post_process_exec_api=curl_sendfile:' + fileUploadUrl + ' file=${dvpRecFile} class=CALLSERVER&type=CALL&category=CONVERSATION&referenceid=${uuid}&mediatype=audio&filetype=wav&sessionid=${uuid}&display=' + ep.Destination + '-${caller_id_number}';
 
