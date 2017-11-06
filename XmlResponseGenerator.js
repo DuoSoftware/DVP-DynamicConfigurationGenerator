@@ -685,7 +685,7 @@ var CreateHttpApiDialplan = function(destinationPattern, context, httApiUrl, req
 
 };
 
-var CreateHttpApiDialplanTransfer = function(destinationPattern, context, httApiUrl, reqId, numLimitInfo, appId, companyId, tenantId, dvpCallDirection, ani)
+var CreateHttpApiDialplanTransfer = function(destinationPattern, context, httApiUrl, reqId, numLimitInfo, appId, companyId, tenantId, dvpCallDirection, ani, appType)
 {
     try
     {
@@ -763,8 +763,11 @@ var CreateHttpApiDialplanTransfer = function(destinationPattern, context, httApi
                 .up()
         }
 
-        cond.ele('action').att('application', 'set').att('data', 'DVP_OPERATION_CAT=HTTAPI')
-            .up();
+        if(appType != 'DIALER')
+        {
+            cond.ele('action').att('application', 'set').att('data', 'DVP_OPERATION_CAT=HTTAPI')
+                .up();
+        }
 
 
         cond.ele('action').att('application', 'export').att('data', 'dvp_app_type=HTTAPI')

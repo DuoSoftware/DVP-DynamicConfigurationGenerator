@@ -625,7 +625,7 @@ var ProcessCallForwarding = function(reqId, aniNum, dnisNum, callerDomain, conte
     }
 };
 
-var handleIVRExt = function(reqId, companyId, tenantId, uuid, context, extDetails, isTransfer, ani)
+var handleIVRExt = function(reqId, companyId, tenantId, uuid, context, extDetails, isTransfer, ani, appType)
 {
 
     return new Promise(function(fulfill, reject)
@@ -672,7 +672,7 @@ var handleIVRExt = function(reqId, companyId, tenantId, uuid, context, extDetail
 
                             if(isTransfer)
                             {
-                                xml = xmlRespBuilder.CreateHttpApiDialplanTransfer('[^\\s]*', context, masterUrl, reqId, null, app.id, companyId, tenantId, 'outbound', ani);
+                                xml = xmlRespBuilder.CreateHttpApiDialplanTransfer('[^\\s]*', context, masterUrl, reqId, null, app.id, companyId, tenantId, 'outbound', ani, appType);
                             }
                             else
                             {
@@ -741,13 +741,14 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
             appType = extraData['variable_dvp_app_type'];
 
             var opCat = extraData["variable_DVP_OPERATION_CAT"];
+            var actionCat = extraData["variable_DVP_ACTION_CAT"];
             var currentApp = extraData["variable_current_application"];
 
             if(opCat === 'AUTO_ATTENDANT')
             {
                 appType = 'AUTO_ATTENDANT';
             }
-            else if(opCat == 'DIALER')
+            else if(actionCat == 'DIALER')
             {
                 appType = 'DIALER';
             }
@@ -1633,7 +1634,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                             else if(extDetails.ObjCategory === 'IVR')
                             {
 
-                                handleIVRExt(reqId, companyId, tenantId, uuid, context, extDetails, false, callerIdNum)
+                                handleIVRExt(reqId, companyId, tenantId, uuid, context, extDetails, false, callerIdNum, appType)
                                     .then(function(ivrResp)
                                     {
                                         callback(null, ivrResp);
@@ -2618,7 +2619,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                 else if(extDetails.ObjCategory === 'IVR')
                                 {
 
-                                    handleIVRExt(reqId, companyId, tenantId, uuid, context, extDetails, false, null)
+                                    handleIVRExt(reqId, companyId, tenantId, uuid, context, extDetails, false, null, appType)
                                         .then(function(ivrResp)
                                         {
                                             callback(null, ivrResp);
@@ -4161,7 +4162,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                     else if(extDetails.ObjCategory === 'IVR' || extDetails.ObjCategory === 'CAMPAIGN')
                                     {
 
-                                        handleIVRExt(reqId, companyId, tenantId, uuid, context, extDetails, true, null)
+                                        handleIVRExt(reqId, companyId, tenantId, uuid, context, extDetails, true, null, appType)
                                             .then(function(ivrResp)
                                             {
                                                 callback(null, ivrResp);
