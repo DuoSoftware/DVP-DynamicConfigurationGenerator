@@ -6,7 +6,7 @@ module.exports = {
     "Port":5432,
     "Host":"104.236.231.11",
     "Database":"duo",
-    "Cluster": false
+    "Cluster": true
   },
 
   //"Redis": {
