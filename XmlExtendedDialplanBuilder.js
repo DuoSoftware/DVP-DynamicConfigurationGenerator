@@ -35,6 +35,8 @@ var createRejectResponse = function(context)
 
         cond.ele('action').att('application', 'set').att('data', 'DVP_OPERATION_CAT=REJECTED')
             .up()
+            .ele('action').att('application', 'playback').att('data', 'tone_stream://L=3;%(500,500,480,620)')
+            .up()
         cond.ele('action').att('application', 'hangup').att('data', 'CALL_REJECTED')
             .up()
 
@@ -79,6 +81,8 @@ var createTransferRejectResponse = function(context, transferCallerName, company
             }
 
         cond.ele('action').att('application', 'speak').att('data', 'flite|slt|transfer line disconnected')
+            .up()
+            .ele('action').att('application', 'playback').att('data', 'tone_stream://L=3;%(500,500,480,620)')
             .up()
             .end({pretty: true});
 
@@ -509,9 +513,11 @@ var CreatePbxFeaturesGateway = function(reqId, destNum, trunkNumber, trunkCode, 
 
         cond.ele('action').att('application', 'att_xfer').att('data', option + 'sofia/gateway/' + trunkCode + '/' +digits)
             .up()
-            .ele('action').att('application', 'event').att('data', 'Event-Name=TRANSFER_DISCONNECT,caller=' + transferCallerName + ',companyId=' + companyId + ',tenantId=' + tenantId + ',digits=' + digits)
+            .ele('action').att('application', 'event').att('data', 'Event-Name=TRANSFER_DISCONNECT,caller=' + transferCallerName + ',companyId=' + companyId + ',tenantId=' + tenantId + ',digits=' + digits + ',reason=${originate_disposition}')
             .up()
             .ele('action').att('application', 'speak').att('data', 'flite|slt|transfer line disconnected')
+            .up()
+            .ele('action').att('application', 'playback').att('data', 'tone_stream://L=3;%(500,500,480,620)')
             .up()
             .end({pretty: true});
 
@@ -687,7 +693,9 @@ var CreateSendBusyMessageDialplan = function(reqId, destinationPattern, context,
 
 
 
-        cond.ele('action').att('application', 'hangup').att('data', 'USER_BUSY')
+        cond.ele('action').att('application', 'playback').att('data', 'tone_stream://L=3;%(500,500,480,620)')
+            .up()
+            .ele('action').att('application', 'hangup').att('data', 'USER_BUSY')
             .up()
 
             .end({pretty: true});
@@ -750,6 +758,8 @@ var CreateOutboundDeniedMessageDialplan = function(reqId, destinationPattern, co
         }
 
         cond.ele('action').att('application', 'set').att('data', 'DVP_ACTION_CAT=OUTBOUND_DENIED')
+            .up()
+            .ele('action').att('application', 'playback').att('data', 'tone_stream://L=3;%(500,500,480,620)')
             .up()
             .ele('action').att('application', 'hangup').att('data', 'OUTGOING_CALL_BARRED')
             .up()
@@ -1261,6 +1271,12 @@ var CreateRouteUserDialplan = function(reqId, ep, context, profile, destinationP
 
             cond.ele('action').att('application', 'voicemail').att('data', util.format('default %s %s', ep.Domain, ep.Destination))
                 .up()
+        }
+
+        if(dvpCallDirection === 'outbound')
+        {
+            cond.ele('action').att('application', 'playback').att('data', 'tone_stream://L=3;%(500,500,480,620)')
+            .up()
         }
 
         cond.ele('action').att('application', 'hangup')
@@ -2817,7 +2833,14 @@ var CreateRouteGatewayDialplan = function(reqId, ep, context, profile, destinati
 
         cond.ele('action').att('application', 'bridge').att('data', calling)
             .up()
-            .ele('action').att('application', 'hangup')
+
+        if(dvpCallDirection === 'outbound')
+        {
+            cond.ele('action').att('application', 'playback').att('data', 'tone_stream://L=3;%(500,500,480,620)')
+                .up()
+        }
+
+        cond.ele('action').att('application', 'hangup')
             .up()
 
         cond.end({pretty: true});
