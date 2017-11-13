@@ -374,7 +374,7 @@ var CreatePbxFeaturesUser = function(reqId, destNum, pbxType, domain, companyId,
             .up()
             .ele('action').att('application', 'speak').att('data', 'flite|slt|transfer line disconnected')
             .up()
-            .ele('action').att('application', 'playback').att('data', 'tone_stream://%(500,500,480,620)')
+            .ele('action').att('application', 'playback').att('data', 'tone_stream://L=3;%(500,500,480,620)')
             .up()
             /*.ele('condition').att('field', '${originate_disposition}').att('expression', '^CALL_REJECTED$')
                 .ele('action').att('application', 'speak').att('data', 'flite|slt|transfer line disconnected ${originate_disposition}')
