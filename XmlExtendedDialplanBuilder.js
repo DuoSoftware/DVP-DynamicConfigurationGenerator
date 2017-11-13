@@ -293,7 +293,7 @@ var CreatePbxFeaturesUser = function(reqId, destNum, pbxType, domain, companyId,
             .ele('section').att('name', 'dialplan').att('description', 'RE Dial Plan For FreeSwitch')
             .ele('context').att('name', context)
             .ele('extension').att('name', destNum)
-            .ele('condition').att('field', 'destination_number').att('expression', '^' + destNum + '$').att('require_nested', 'false')
+            .ele('condition').att('field', 'destination_number').att('expression', '^' + destNum + '$')
 
 
         cond.ele('action').att('application', 'set').att('data', 'DVP_OPERATION_CAT=ATT_XFER_USER')
@@ -365,7 +365,7 @@ var CreatePbxFeaturesUser = function(reqId, destNum, pbxType, domain, companyId,
             .up()
             .ele('action').att('application', 'event').att('data', 'Event-Name=TRANSFER_DISCONNECT,caller=' + transferCallerName + ',companyId=' + companyId + ',tenantId=' + tenantId + ',digits=' + transferedParty + ',reason=${originate_disposition}')
             .up()
-            .ele('condition').att('field', '${originate_disposition}').att('expression', '^USER_BUSY$')
+            .ele('condition').att('field', '${DVP_OPERATION_CAT}').att('expression', '^ATT_XFER_USER$')
                 .ele('action').att('application', 'playback').att('data', 'tone_stream://%(500,500,480,620)')
                 .up()
             .up()
