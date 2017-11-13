@@ -359,17 +359,22 @@ var CreatePbxFeaturesUser = function(reqId, destNum, pbxType, domain, companyId,
 
         option = option + '}';
 
+    /*.ele('condition').att('field', '${originate_disposition}').att('expression', '^CALL_REJECTED$')
+        .ele('action').att('application', 'speak').att('data', 'flite|slt|jellyfish')
+        .up()
+        .ele('anti-action').att('application', 'speak').att('data', 'flite|slt|transfer line disconnected ${originate_disposition}')
+        .up()
+        .up()*/
+
         /*cond.ele('action').att('application', 'event').att('data', 'Event-Name=TRANSFER_TRYING,caller=' + transferCallerName + ',companyId=' + companyId + ',tenantId=' + tenantId + ',digits=' + transferedParty + ',origCaller=' + origCaller)
             .up()*/
         cond.ele('action').att('application', 'att_xfer').att('data', option + pbxType + '/' + digits + '@' + domain)
             .up()
             .ele('action').att('application', 'event').att('data', 'Event-Name=TRANSFER_DISCONNECT,caller=' + transferCallerName + ',companyId=' + companyId + ',tenantId=' + tenantId + ',digits=' + transferedParty + ',reason=${originate_disposition}')
             .up()
-            .ele('condition').att('field', '${originate_disposition}').att('expression', '^CALL_REJECTED$')
-                .ele('action').att('application', 'speak').att('data', 'flite|slt|jellyfish')
-                .up()
-                .ele('anti-action').att('application', 'speak').att('data', 'flite|slt|transfer line disconnected ${originate_disposition}')
-                .up()
+            .ele('action').att('application', 'speak').att('data', 'flite|slt|transfer line disconnected')
+            .up()
+            .ele('action').att('application', 'playback').att('data', 'tone_stream://%(500,500,480,620)')
             .up()
             /*.ele('condition').att('field', '${originate_disposition}').att('expression', '^CALL_REJECTED$')
                 .ele('action').att('application', 'speak').att('data', 'flite|slt|transfer line disconnected ${originate_disposition}')
