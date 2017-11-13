@@ -293,7 +293,7 @@ var CreatePbxFeaturesUser = function(reqId, destNum, pbxType, domain, companyId,
             .ele('section').att('name', 'dialplan').att('description', 'RE Dial Plan For FreeSwitch')
             .ele('context').att('name', context)
             .ele('extension').att('name', destNum)
-            .ele('condition').att('field', 'destination_number').att('expression', '^' + destNum + '$')
+            .ele('condition').att('field', 'destination_number').att('expression', '^' + destNum + '$').att('require_nested', 'false')
 
 
         cond.ele('action').att('application', 'set').att('data', 'DVP_OPERATION_CAT=ATT_XFER_USER')
