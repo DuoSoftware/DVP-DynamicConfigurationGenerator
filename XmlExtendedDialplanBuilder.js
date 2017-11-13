@@ -1273,12 +1273,6 @@ var CreateRouteUserDialplan = function(reqId, ep, context, profile, destinationP
                 .up()
         }
 
-        if(dvpCallDirection === 'outbound')
-        {
-            cond.ele('action').att('application', 'playback').att('data', 'tone_stream://L=3;%(500,500,480,620)')
-            .up()
-        }
-
         cond.ele('action').att('application', 'hangup')
         .up()
 
@@ -2833,14 +2827,7 @@ var CreateRouteGatewayDialplan = function(reqId, ep, context, profile, destinati
 
         cond.ele('action').att('application', 'bridge').att('data', calling)
             .up()
-
-        if(dvpCallDirection === 'outbound')
-        {
-            cond.ele('action').att('application', 'playback').att('data', 'tone_stream://L=3;%(500,500,480,620)')
-                .up()
-        }
-
-        cond.ele('action').att('application', 'hangup')
+            .ele('action').att('application', 'hangup')
             .up()
 
         cond.end({pretty: true});
