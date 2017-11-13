@@ -292,7 +292,7 @@ var CreatePbxFeaturesUser = function(reqId, destNum, pbxType, domain, companyId,
         var cond = doc.att('type', 'freeswitch/xml')
             .ele('section').att('name', 'dialplan').att('description', 'RE Dial Plan For FreeSwitch')
             .ele('context').att('name', context)
-            .ele('extension').att('name', destNum)
+            .ele('extension').att('name', destNum).att('continue', 'true')
             .ele('condition').att('field', 'destination_number').att('expression', '^' + destNum + '$')
 
 
@@ -365,7 +365,7 @@ var CreatePbxFeaturesUser = function(reqId, destNum, pbxType, domain, companyId,
             .up()
             .ele('action').att('application', 'event').att('data', 'Event-Name=TRANSFER_DISCONNECT,caller=' + transferCallerName + ',companyId=' + companyId + ',tenantId=' + tenantId + ',digits=' + transferedParty + ',reason=${originate_disposition}')
             .up()
-            .ele('condition').att('field', '${DVP_OPERATION_CAT}').att('expression', '^ATT_XFER_USER$')
+            .ele('condition').att('field', '${originate_disposition}').att('expression', '^USER_BUSY$')
                 .ele('action').att('application', 'playback').att('data', 'tone_stream://%(500,500,480,620)')
                 .up()
             .up()
