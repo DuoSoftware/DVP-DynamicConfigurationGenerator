@@ -365,14 +365,16 @@ var CreatePbxFeaturesUser = function(reqId, destNum, pbxType, domain, companyId,
             .up()
             .ele('action').att('application', 'event').att('data', 'Event-Name=TRANSFER_DISCONNECT,caller=' + transferCallerName + ',companyId=' + companyId + ',tenantId=' + tenantId + ',digits=' + transferedParty + ',reason=${originate_disposition}')
             .up()
-            .ele('condition').att('field', '${originate_disposition}').att('expression', '^USER_BUSY$').att('break', 'never')
-                .ele('action').att('application', 'playback').att('data', 'tone_stream://%(500,500,480,620)')
+            .ele('condition').att('field', '${originate_disposition}').att('expression', '^USER_BUSY$')
+                .ele('action').att('application', 'speak').att('data', 'flite|slt|jellyfish')
+                .up()
+                .ele('anti-action').att('application', 'speak').att('data', 'flite|slt|transfer line disconnected ${originate_disposition}')
                 .up()
             .up()
-            .ele('condition').att('field', '${originate_disposition}').att('expression', '^CALL_REJECTED$').att('break', 'never')
+            /*.ele('condition').att('field', '${originate_disposition}').att('expression', '^CALL_REJECTED$')
                 .ele('action').att('application', 'speak').att('data', 'flite|slt|transfer line disconnected ${originate_disposition}')
                 .up()
-            .up()
+            .up()*/
             /*.ele('action').att('application', 'speak').att('data', 'flite|slt|transfer line disconnected ${originate_disposition}')
             .up()*/
             .end({pretty: true});
