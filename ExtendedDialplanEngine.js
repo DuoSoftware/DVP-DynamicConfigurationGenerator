@@ -4244,7 +4244,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                             TenantId: rule.TenantId,
                                             Action: 'DEFAULT',
                                             AppId: appId,
-                                            RecordEnable: recEnabled,
+                                            RecordEnabled: recEnabled,
                                             Operator: rule.Operator
                                         };
 
@@ -4256,7 +4256,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
 
                                         if(toFaxType)
                                         {
-                                            //gateway fax dialplan
+                                            //Gateway Fax Dialplan
                                             var xml = xmlBuilder.CreateRouteFaxGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, fromFaxType, toFaxType);
                                             callback(undefined, xml);
                                         }
