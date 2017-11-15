@@ -2858,7 +2858,7 @@ var CreateRouteGatewayDialplan = function(reqId, ep, context, profile, destinati
 
 };
 
-var CreateRouteGatewayCampaignDialplan = function(reqId, ep, context, profile, destinationPattern, ignoreEarlyMedia, transferLegInfo, dvpCallDirection, codecList, inbLimitInfo)
+var CreateRouteGatewayCampaignDialplan = function(reqId, ep, context, profile, destinationPattern, ignoreEarlyMedia, transferLegInfo, dvpCallDirection, codecList, inbLimitInfo, customPubId)
 {
     try
     {
@@ -3033,6 +3033,11 @@ var CreateRouteGatewayCampaignDialplan = function(reqId, ep, context, profile, d
         if(dvpCallDirection === 'outbound')
         {
             option = option + ', origination_uuid=${my_uuid}';
+        }
+
+        if(customPubId)
+        {
+            option = option + ', DVP_CUSTOM_PUBID=' + customPubId;
         }
 
         option = option + ']';

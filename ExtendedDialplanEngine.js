@@ -4287,7 +4287,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
 
                                                                 if(appType === 'DIALER')
                                                                 {
-                                                                    var xml = xmlBuilder.CreateRouteGatewayCampaignDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, rule.Codecs, null);
+                                                                    var xml = xmlBuilder.CreateRouteGatewayCampaignDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, rule.Codecs, null, extraData['variable_nolocal:DVP_CUSTOM_PUBID']);
 
                                                                     callback(null, xml);
                                                                 }
