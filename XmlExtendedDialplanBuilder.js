@@ -2533,12 +2533,7 @@ var CreateRouteGatewayDialplan = function(reqId, ep, context, profile, destinati
             .ele('action').att('application', 'set').att('data', 'sip_h_DVP-DESTINATION-TYPE=GATEWAY')
             .up()
 
-        if(ep.IsDialer)
-        {
-            cond.ele('action').att('application', 'set').att('data', 'nolocal:DVP_OPERATION_CAT=CUSTOMER')
-                .up()
-        }
-        else
+        if(!ep.IsDialer)
         {
             cond.ele('action').att('application', 'export').att('data', 'DVP_OPERATION_CAT=GATEWAY')
                 .up()
@@ -2674,6 +2669,11 @@ var CreateRouteGatewayDialplan = function(reqId, ep, context, profile, destinati
         if(dvpCallDirection === 'outbound')
         {
             option = option + ', origination_uuid=${my_uuid}';
+        }
+
+        if(ep.IsDialer)
+        {
+            option = option + ', DVP_OPERATION_CAT=CUSTOMER';
         }
 
         /*if(codecListString && allowCodecPref)
