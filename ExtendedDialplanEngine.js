@@ -4248,11 +4248,6 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                             Operator: rule.Operator
                                         };
 
-                                        if(appType === 'DIALER')
-                                        {
-                                            ep.IsDialer = true;
-                                            ep.Action = null;
-                                        }
 
                                         if(dodActive && dodNumber)
                                         {
@@ -4289,9 +4284,20 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                             if(NumLimitInfo)
                                                             {
                                                                 ep.Limits = NumLimitInfo;
-                                                                var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, rule.Codecs, null);
 
-                                                                callback(null, xml);
+                                                                if(appType === 'DIALER')
+                                                                {
+                                                                    var xml = xmlBuilder.CreateRouteGatewayCampaignDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, rule.Codecs, null);
+
+                                                                    callback(null, xml);
+                                                                }
+                                                                else
+                                                                {
+                                                                    var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, rule.Codecs, null);
+
+                                                                    callback(null, xml);
+                                                                }
+
                                                             }
                                                             else
                                                             {
