@@ -2532,9 +2532,17 @@ var CreateRouteGatewayDialplan = function(reqId, ep, context, profile, destinati
             .up()
             .ele('action').att('application', 'set').att('data', 'sip_h_DVP-DESTINATION-TYPE=GATEWAY')
             .up()
-            .ele('action').att('application', 'export').att('data', 'DVP_OPERATION_CAT=GATEWAY')
-            .up()
-            .up()
+
+        if(ep.IsDialer)
+        {
+            cond.ele('action').att('application', 'set').att('data', 'DVP_OPERATION_CAT=CUSTOMER')
+                .up()
+        }
+        else
+        {
+            cond.ele('action').att('application', 'export').att('data', 'DVP_OPERATION_CAT=GATEWAY')
+                .up()
+        }
 
         if(ep.RecordEnabled)
         {

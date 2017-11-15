@@ -4248,6 +4248,12 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                             Operator: rule.Operator
                                         };
 
+                                        if(appType === 'DIALER')
+                                        {
+                                            ep.IsDialer = true;
+                                            ep.Action = null;
+                                        }
+
                                         if(dodActive && dodNumber)
                                         {
                                             ep.Origination = dodNumber;
