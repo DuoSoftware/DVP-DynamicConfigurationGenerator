@@ -2535,7 +2535,7 @@ var CreateRouteGatewayDialplan = function(reqId, ep, context, profile, destinati
 
         if(ep.IsDialer)
         {
-            cond.ele('action').att('application', 'set').att('data', 'DVP_OPERATION_CAT=CUSTOMER')
+            cond.ele('action').att('application', 'set').att('data', 'nolocal:DVP_OPERATION_CAT=CUSTOMER')
                 .up()
         }
         else
