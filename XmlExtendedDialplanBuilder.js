@@ -3040,6 +3040,11 @@ var CreateRouteGatewayCampaignDialplan = function(reqId, ep, context, profile, d
             option = option + ', DVP_CUSTOM_PUBID=' + customPubId;
         }
 
+        if(ep.CampaignId)
+        {
+            option = option + ', CampaignId=' + ep.CampaignId;
+        }
+
         option = option + ']';
 
 
