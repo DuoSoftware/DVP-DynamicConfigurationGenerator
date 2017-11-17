@@ -3045,6 +3045,11 @@ var CreateRouteGatewayCampaignDialplan = function(reqId, ep, context, profile, d
             option = option + ', CampaignId=' + ep.CampaignId;
         }
 
+        if(ep.ArdsUuid)
+        {
+            option = option + ', ards_client_uuid=' + ep.ArdsUuid;
+        }
+
         option = option + ']';
 
 
