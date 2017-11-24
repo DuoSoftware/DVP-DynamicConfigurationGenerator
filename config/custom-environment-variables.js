@@ -19,6 +19,15 @@ module.exports = {
         "AllowCodecConfigure": "HOST_DYNAMICCONFIGGEN_CODECCONFIG"
     },
 
+    "RabbitMQ":
+    {
+        "ip": "SYS_RABBITMQ_HOST",
+        "port": "SYS_RABBITMQ_PORT",
+        "user": "SYS_RABBITMQ_USER",
+        "password": "SYS_RABBITMQ_PASSWORD",
+        "vhost":"SYS_RABBITMQ_VHOST"
+    },
+
     //"Redis":
     //{
     //    "ip": "SYS_REDIS_HOST",
@@ -57,5 +66,6 @@ module.exports = {
 
     "Token": "HOST_TOKEN",
     "billingEnabled": "SYS_BILLING_ENABLED",
-    "RecordingPath": "SYS_CALL_RECORD_PATH"
+    "RecordingPath": "SYS_CALL_RECORD_PATH",
+    "UseDashboardAMQP": "HOST_USE_DASHBOARD_MSG_QUEUE"
 };
