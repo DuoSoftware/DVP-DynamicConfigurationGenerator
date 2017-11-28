@@ -150,7 +150,7 @@ var PublishDashboardMessage = function(tenantId, companyId, eventClass, eventTyp
 
             var sendObj =
             {
-                Tenent: tenantInt,
+                Tenant: tenantInt,
                 Company: companyInt,
                 EventClass: eventClass,
                 EventType: eventType,
