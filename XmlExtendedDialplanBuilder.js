@@ -398,7 +398,7 @@ var CreatePbxFeaturesUser = function(reqId, destNum, pbxType, domain, companyId,
     }
 };
 
-var CreatePbxFeaturesGateway = function(reqId, destNum, trunkNumber, trunkCode, companyId, tenantId, appId, context, digits, operator, trunkIp, limitInfo, codecList, transferCallerName)
+var CreatePbxFeaturesGateway = function(reqId, destNum, trunkNumber, trunkCode, companyId, tenantId, appId, context, digits, operator, trunkIp, limitInfo, codecList, transferCallerName, bUnit)
 {
     try
     {
@@ -510,6 +510,11 @@ var CreatePbxFeaturesGateway = function(reqId, destNum, trunkNumber, trunkCode, 
 
         option = option + '}';
 
+        if(bUnit)
+        {
+            option = '[business_unit=' + bUnit + ']';
+        }
+
 
         cond.ele('action').att('application', 'att_xfer').att('data', option + 'sofia/gateway/' + trunkCode + '/' +digits)
             .up()
@@ -617,7 +622,7 @@ var CreateAttendantTransferGW = function(reqId, destNum, context)
     }
 };
 
-var CreateSendBusyMessageDialplan = function(reqId, destinationPattern, context, numLimitInfo, companyId, tenantId, appId, dvpCallDirection)
+var CreateSendBusyMessageDialplan = function(reqId, destinationPattern, context, numLimitInfo, companyId, tenantId, appId, dvpCallDirection, bUnit)
 {
     try
     {
@@ -647,6 +652,11 @@ var CreateSendBusyMessageDialplan = function(reqId, destinationPattern, context,
         if(tenantId)
         {
             cond.ele('action').att('application', 'export').att('data', 'tenantid=' + tenantId)
+                .up()
+        }
+        if(bUnit)
+        {
+            cond.ele('action').att('application', 'export').att('data', 'business_unit=' + bUnit)
                 .up()
         }
         if(appId)
@@ -713,7 +723,7 @@ var CreateSendBusyMessageDialplan = function(reqId, destinationPattern, context,
 
 };
 
-var CreateOutboundDeniedMessageDialplan = function(reqId, destinationPattern, context, companyId, tenantId, appId, dvpCallDirection)
+var CreateOutboundDeniedMessageDialplan = function(reqId, destinationPattern, context, companyId, tenantId, appId, dvpCallDirection, bUnit)
 {
     try
     {
@@ -743,6 +753,11 @@ var CreateOutboundDeniedMessageDialplan = function(reqId, destinationPattern, co
         if(tenantId)
         {
             cond.ele('action').att('application', 'export').att('data', 'tenantid=' + tenantId)
+                .up()
+        }
+        if(bUnit)
+        {
+            cond.ele('action').att('application', 'export').att('data', 'business_unit=' + bUnit)
                 .up()
         }
         if(appId)
@@ -779,7 +794,7 @@ var CreateOutboundDeniedMessageDialplan = function(reqId, destinationPattern, co
 
 };
 
-var CreateConferenceDialplan = function(reqId, epList, context, destinationPattern, ignoreEarlyMedia, confName, domain, pin, mode, companyId, tenantId, appId, dvpCallDirection, template)
+var CreateConferenceDialplan = function(reqId, epList, context, destinationPattern, ignoreEarlyMedia, confName, domain, pin, mode, companyId, tenantId, appId, dvpCallDirection, template, bUnit)
 {
     try
     {
@@ -824,6 +839,11 @@ var CreateConferenceDialplan = function(reqId, epList, context, destinationPatte
         if(tenantId)
         {
             cond.ele('action').att('application', 'export').att('data', 'tenantid=' + tenantId)
+                .up()
+        }
+        if(bUnit)
+        {
+            cond.ele('action').att('application', 'export').att('data', 'business_unit=' + bUnit)
                 .up()
         }
         if(appId)
@@ -934,7 +954,7 @@ var CreateConferenceDialplan = function(reqId, epList, context, destinationPatte
 
 };
 
-var CreateRouteUserDialplan = function(reqId, ep, context, profile, destinationPattern, ignoreEarlyMedia, numLimitInfo, transferLegInfo, dvpCallDirection, codecList)
+var CreateRouteUserDialplan = function(reqId, ep, context, profile, destinationPattern, ignoreEarlyMedia, numLimitInfo, transferLegInfo, dvpCallDirection, codecList, bUnit)
 {
     try
     {
@@ -1171,6 +1191,13 @@ var CreateRouteUserDialplan = function(reqId, ep, context, profile, destinationP
             cond.ele('action').att('application', 'export').att('data', 'tenantid=' + ep.TenantId)
                 .up()
         }
+
+        if(bUnit)
+        {
+            cond.ele('action').att('application', 'export').att('data', 'business_unit=' + bUnit)
+                .up()
+        }
+
         if(ep.AppId)
         {
             cond.ele('action').att('application', 'export').att('data', 'dvp_app_id=' + ep.AppId)
@@ -1739,6 +1766,7 @@ var CreatePickUpDialplan = function(reqId, extension, context, destinationPatter
             cond.ele('action').att('application', 'set').att('data', 'tenantid=' + tenantId)
                 .up()
         }
+
         if(appId)
         {
             cond.ele('action').att('application', 'export').att('data', 'dvp_app_id=' + appId)
@@ -1993,7 +2021,7 @@ var CreateBargeDialplan = function(reqId, uuid, context, destinationPattern, cal
 
 };
 
-var CreateAutoAttendantDialplan = function(reqId, endpoint, context, toContext, destinationPattern, ignoreEarlyMedia, dvpCallDirection, numLimitInfo)
+var CreateAutoAttendantDialplan = function(reqId, endpoint, context, toContext, destinationPattern, ignoreEarlyMedia, dvpCallDirection, numLimitInfo, bUnit)
 {
     try
     {
@@ -2060,6 +2088,11 @@ var CreateAutoAttendantDialplan = function(reqId, endpoint, context, toContext, 
             cond.ele('action').att('application', 'export').att('data', 'tenantid=' + endpoint.TenantId)
                 .up()
         }
+        if(bUnit)
+        {
+            cond.ele('action').att('application', 'export').att('data', 'business_unit=' + bUnit)
+                .up()
+        }
         if(endpoint.AppId)
         {
             cond.ele('action').att('application', 'export').att('data', 'dvp_app_id=' + endpoint.AppId)
@@ -2122,7 +2155,7 @@ var CreateAutoAttendantDialplan = function(reqId, endpoint, context, toContext, 
 
 };
 
-var CreateForwardingDialplan = function(reqId, endpoint, context, profile, destinationPattern, ignoreEarlyMedia, fwdKey, numLimitInfo, transferLegInfo, dvpCallDirection, codecList)
+var CreateForwardingDialplan = function(reqId, endpoint, context, profile, destinationPattern, ignoreEarlyMedia, fwdKey, numLimitInfo, transferLegInfo, dvpCallDirection, codecList, bUnit)
 {
     try
     {
@@ -2259,6 +2292,11 @@ var CreateForwardingDialplan = function(reqId, endpoint, context, profile, desti
             cond.ele('action').att('application', 'export').att('data', 'tenantid=' + endpoint.TenantId)
                 .up()
         }
+        if(bUnit)
+        {
+            cond.ele('action').att('application', 'export').att('data', 'business_unit=' + bUnit)
+                .up()
+        }
         if(endpoint.AppId)
         {
             cond.ele('action').att('application', 'export').att('data', 'dvp_app_id=' + endpoint.AppId)
@@ -2358,7 +2396,7 @@ var CreateForwardingDialplan = function(reqId, endpoint, context, profile, desti
 
 };
 
-var FaxReceiveUpload = function(reqId, context, destinationPattern, numLimitInfo, dvpCallDirection, companyId, tenantId, trunkNum)
+var FaxReceiveUpload = function(reqId, context, destinationPattern, numLimitInfo, dvpCallDirection, companyId, tenantId, trunkNum, bUnit)
 {
     try
     {
@@ -2395,6 +2433,11 @@ var FaxReceiveUpload = function(reqId, context, destinationPattern, numLimitInfo
         if(tenantId)
         {
             cond.ele('action').att('application', 'export').att('data', 'tenantid=' + tenantId)
+                .up()
+        }
+        if(bUnit)
+        {
+            cond.ele('action').att('application', 'export').att('data', 'business_unit=' + bUnit)
                 .up()
         }
 
@@ -2483,7 +2526,7 @@ var FaxReceiveUpload = function(reqId, context, destinationPattern, numLimitInfo
 
 };
 
-var CreateRouteGatewayDialplan = function(reqId, ep, context, profile, destinationPattern, ignoreEarlyMedia, transferLegInfo, dvpCallDirection, codecList, inbLimitInfo)
+var CreateRouteGatewayDialplan = function(reqId, ep, context, profile, destinationPattern, ignoreEarlyMedia, transferLegInfo, dvpCallDirection, codecList, inbLimitInfo, bUnit)
 {
     try
     {
@@ -2611,6 +2654,11 @@ var CreateRouteGatewayDialplan = function(reqId, ep, context, profile, destinati
         if(ep.TenantId)
         {
             cond.ele('action').att('application', 'export').att('data', 'tenantid=' + ep.TenantId)
+                .up()
+        }
+        if(bUnit)
+        {
+            cond.ele('action').att('application', 'export').att('data', 'business_unit=' + bUnit)
                 .up()
         }
         if(ep.AppId)
@@ -2858,7 +2906,7 @@ var CreateRouteGatewayDialplan = function(reqId, ep, context, profile, destinati
 
 };
 
-var CreateRouteGatewayCampaignDialplan = function(reqId, ep, context, profile, destinationPattern, ignoreEarlyMedia, transferLegInfo, dvpCallDirection, codecList, inbLimitInfo, customPubId)
+var CreateRouteGatewayCampaignDialplan = function(reqId, ep, context, profile, destinationPattern, ignoreEarlyMedia, transferLegInfo, dvpCallDirection, codecList, inbLimitInfo, customPubId, bUnit)
 {
     try
     {
@@ -2981,6 +3029,11 @@ var CreateRouteGatewayCampaignDialplan = function(reqId, ep, context, profile, d
         if(ep.TenantId)
         {
             cond.ele('action').att('application', 'export').att('data', 'tenantid=' + ep.TenantId)
+                .up()
+        }
+        if(bUnit)
+        {
+            cond.ele('action').att('application', 'export').att('data', 'business_unit=' + bUnit)
                 .up()
         }
         if(ep.AppId)
@@ -3227,7 +3280,7 @@ var CreateRouteGatewayCampaignDialplan = function(reqId, ep, context, profile, d
 
 };
 
-var CreateFollowMeDialplan = function(reqId, fmEndpoints, context, profile, destinationPattern, ignoreEarlyMedia, numLimitInfo, companyId, tenantId, appId, dvpCallDirection)
+var CreateFollowMeDialplan = function(reqId, fmEndpoints, context, profile, destinationPattern, ignoreEarlyMedia, numLimitInfo, companyId, tenantId, appId, dvpCallDirection, bUnit)
 {
     try
     {
@@ -3283,6 +3336,11 @@ var CreateFollowMeDialplan = function(reqId, fmEndpoints, context, profile, dest
         if(tenantId)
         {
             cond.ele('action').att('application', 'export').att('data', 'tenantid=' + tenantId)
+                .up()
+        }
+        if(bUnit)
+        {
+            cond.ele('action').att('application', 'export').att('data', 'business_unit=' + bUnit)
                 .up()
         }
         if(appId)

@@ -334,7 +334,7 @@ var CheckIddValidity = function(dnis, trNum)
 };
 
 
-var ProcessCallForwarding = function(reqId, aniNum, dnisNum, callerDomain, context, direction, extraData, companyId, tenantId, disconReason, fwdId, dodNumber, securityToken, origName, origNum, csId, cacheData, callback)
+var ProcessCallForwarding = function(reqId, aniNum, dnisNum, callerDomain, context, direction, extraData, companyId, tenantId, disconReason, fwdId, dodNumber, securityToken, origName, origNum, csId, cacheData, bUnit, callback)
 {
     try
     {
@@ -445,7 +445,7 @@ var ProcessCallForwarding = function(reqId, aniNum, dnisNum, callerDomain, conte
                                                     if(NumLimitInfo)
                                                     {
                                                         ep.Limits = NumLimitInfo;
-                                                        var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, null, null, rule.Codecs, null);
+                                                        var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, null, null, rule.Codecs, null, bUnit);
 
                                                         callback(null, xml);
                                                     }
@@ -559,7 +559,7 @@ var ProcessCallForwarding = function(reqId, aniNum, dnisNum, callerDomain, conte
                                                     {
                                                         tempCodecPref = codecPrefs.Codecs;
                                                     }
-                                                    var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, undefined, attTransInfo, null, tempCodecPref);
+                                                    var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, undefined, attTransInfo, null, tempCodecPref, bUnit);
 
                                                     callback(undefined, xml);
 
@@ -625,7 +625,7 @@ var ProcessCallForwarding = function(reqId, aniNum, dnisNum, callerDomain, conte
     }
 };
 
-var handleIVRExt = function(reqId, companyId, tenantId, uuid, context, extDetails, isTransfer, ani, appType)
+var handleIVRExt = function(reqId, companyId, tenantId, uuid, context, extDetails, isTransfer, ani, appType, bUnit)
 {
 
     return new Promise(function(fulfill, reject)
@@ -672,11 +672,11 @@ var handleIVRExt = function(reqId, companyId, tenantId, uuid, context, extDetail
 
                             if(isTransfer)
                             {
-                                xml = xmlRespBuilder.CreateHttpApiDialplanTransfer('[^\\s]*', context, masterUrl, reqId, null, app.id, companyId, tenantId, 'outbound', ani, appType);
+                                xml = xmlRespBuilder.CreateHttpApiDialplanTransfer('[^\\s]*', context, masterUrl, reqId, null, app.id, companyId, tenantId, 'outbound', ani, appType, bUnit);
                             }
                             else
                             {
-                                xml = xmlRespBuilder.CreateHttpApiDialplan('[^\\s]*', context, masterUrl, reqId, null, app.id, companyId, tenantId, 'outbound', ani);
+                                xml = xmlRespBuilder.CreateHttpApiDialplan('[^\\s]*', context, masterUrl, reqId, null, app.id, companyId, tenantId, 'outbound', ani, bUnit);
                             }
 
                             fulfill(xml);
@@ -702,7 +702,7 @@ var handleIVRExt = function(reqId, companyId, tenantId, uuid, context, extDetail
 };
 
 
-var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, extraData, fromUserData, companyId, tenantId, securityToken, numLimitInfo, dvpCallDirection, ctxt, cacheData, callback)
+var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, extraData, fromUserData, companyId, tenantId, securityToken, numLimitInfo, dvpCallDirection, ctxt, cacheData, bUnit, callback)
 {
 
     try
@@ -881,7 +881,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                 tempCodecPref = codecPrefs.Codecs;
                                                             }
 
-                                                            var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, numLimitInfo, attTransInfo, dvpCallDirection, tempCodecPref);
+                                                            var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, numLimitInfo, attTransInfo, dvpCallDirection, tempCodecPref, bUnit);
 
                                                             callback(undefined, xml);
 
@@ -905,7 +905,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
 
                                                 if(pbxDetails.OperationType === 'DENY')
                                                 {
-                                                    callback(null, xmlBuilder.CreateOutboundDeniedMessageDialplan(reqId, '[^\\s]*', context, companyId, tenantId, appId, dvpCallDirection));
+                                                    callback(null, xmlBuilder.CreateOutboundDeniedMessageDialplan(reqId, '[^\\s]*', context, companyId, tenantId, appId, dvpCallDirection, bUnit));
                                                 }
                                                 else
                                                 {
@@ -990,7 +990,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                     {
                                                                         tempCodecPref = codecPrefs.Codecs;
                                                                     }
-                                                                    var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, numLimitInfo, attTransInfo, dvpCallDirection, tempCodecPref);
+                                                                    var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, numLimitInfo, attTransInfo, dvpCallDirection, tempCodecPref, bUnit);
 
                                                                     callback(undefined, xml);
 
@@ -1020,7 +1020,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                 }
                                                                 else if(epList && epList.length > 0)
                                                                 {
-                                                                    var xml = xmlBuilder.CreateFollowMeDialplan(reqId, epList, context, profile, '[^\\s]*', false, numLimitInfo, companyId, tenantId, appId, dvpCallDirection);
+                                                                    var xml = xmlBuilder.CreateFollowMeDialplan(reqId, epList, context, profile, '[^\\s]*', false, numLimitInfo, companyId, tenantId, appId, dvpCallDirection, bUnit);
 
                                                                     callback(undefined, xml);
                                                                 }
@@ -1088,7 +1088,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                             tempCodecPref = codecPrefs.Codecs;
                                                                         }
 
-                                                                        var xml = xmlBuilder.CreateForwardingDialplan(reqId, ep, context, profile, '[^\\s]*', false, pbxFwdKey, numLimitInfo, attTransInfo, dvpCallDirection, tempCodecPref);
+                                                                        var xml = xmlBuilder.CreateForwardingDialplan(reqId, ep, context, profile, '[^\\s]*', false, pbxFwdKey, numLimitInfo, attTransInfo, dvpCallDirection, tempCodecPref, bUnit);
 
                                                                         callback(undefined, xml);
 
@@ -1147,7 +1147,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                         {
                                                                             tempCodecPref = codecPrefs.Codecs;
                                                                         }
-                                                                        var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, numLimitInfo, attTransInfo, dvpCallDirection, tempCodecPref);
+                                                                        var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, numLimitInfo, attTransInfo, dvpCallDirection, tempCodecPref, bUnit);
 
                                                                         callback(undefined, xml);
 
@@ -1220,7 +1220,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                                     if(NumLimitInfo)
                                                                                     {
                                                                                         ep.Limits = NumLimitInfo;
-                                                                                        var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, rule.Codecs, numLimitInfo);
+                                                                                        var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, rule.Codecs, numLimitInfo, bUnit);
 
                                                                                         callback(null, xml);
                                                                                     }
@@ -1301,7 +1301,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                             {
                                                                                 tempCodecPref = codecPrefs.Codecs;
                                                                             }
-                                                                            var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, numLimitInfo, attTransInfo, tempCodecPref);
+                                                                            var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, numLimitInfo, attTransInfo, tempCodecPref, bUnit);
                                                                             callback(undefined, xml);
 
                                                                         }).catch(function(err)
@@ -1398,7 +1398,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                     {
                                                                         tempCodecPref = codecPrefs.Codecs;
                                                                     }
-                                                                    var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, numLimitInfo, attTransInfo, dvpCallDirection, tempCodecPref);
+                                                                    var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, numLimitInfo, attTransInfo, dvpCallDirection, tempCodecPref, bUnit);
 
                                                                     callback(undefined, xml);
 
@@ -1483,7 +1483,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                     {
                                                         tempCodecPref = codecPrefs.Codecs;
                                                     }
-                                                    var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, numLimitInfo, attTransInfo, dvpCallDirection, tempCodecPref);
+                                                    var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, numLimitInfo, attTransInfo, dvpCallDirection, tempCodecPref, bUnit);
 
                                                     callback(undefined, xml);
 
@@ -1574,7 +1574,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                         if (!err && redisResult)
                                         {
                                             var attTransInfo = AttendantTransferLegInfoHandler(reqId, null, extDetails.SipUACEndpoint);
-                                            var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, numLimitInfo, attTransInfo, dvpCallDirection, null);
+                                            var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, numLimitInfo, attTransInfo, dvpCallDirection, null, bUnit);
                                             callback(undefined, xml);
                                         }
                                         else
@@ -1595,7 +1595,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                             else if(extDetails.ObjCategory === 'CONFERENCE')
                             {
                                 //call conference handler
-                                conferenceHandler.ConferenceHandlerOperation(reqId, extDetails, direction, '', context, profile, companyId, tenantId, appId, dvpCallDirection, cacheData, function(err, confXml)
+                                conferenceHandler.ConferenceHandlerOperation(reqId, extDetails, direction, '', context, profile, companyId, tenantId, appId, dvpCallDirection, cacheData, bUnit, function(err, confXml)
                                 {
                                     callback(err, confXml);
                                 })
@@ -1626,7 +1626,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                     toContext = extDetails.Context.Context;
                                 }
 
-                                var xml = xmlBuilder.CreateAutoAttendantDialplan(reqId, ep, context, toContext, '[^\\s]*', false, dvpCallDirection, numLimitInfo);
+                                var xml = xmlBuilder.CreateAutoAttendantDialplan(reqId, ep, context, toContext, '[^\\s]*', false, dvpCallDirection, numLimitInfo, bUnit);
 
                                 callback(null, xml);
 
@@ -1634,7 +1634,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                             else if(extDetails.ObjCategory === 'IVR')
                             {
 
-                                handleIVRExt(reqId, companyId, tenantId, uuid, context, extDetails, false, callerIdNum, appType)
+                                handleIVRExt(reqId, companyId, tenantId, uuid, context, extDetails, false, callerIdNum, appType, bUnit)
                                     .then(function(ivrResp)
                                     {
                                         callback(null, ivrResp);
@@ -1753,7 +1753,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                 {
                                                     if(fromUserData.DenyOutboundFor === 'ALL')
                                                     {
-                                                        callback(null, xmlBuilder.CreateOutboundDeniedMessageDialplan(reqId, '[^\\s]*', context, companyId, tenantId, appId, dvpCallDirection));
+                                                        callback(null, xmlBuilder.CreateOutboundDeniedMessageDialplan(reqId, '[^\\s]*', context, companyId, tenantId, appId, dvpCallDirection, bUnit));
                                                     }
                                                     else
                                                     {
@@ -1821,7 +1821,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                     {
                                                                         tempCodecPref = codecPrefs.Codecs;
                                                                     }
-                                                                    var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, undefined, attTransInfo, dvpCallDirection, tempCodecPref);
+                                                                    var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, undefined, attTransInfo, dvpCallDirection, tempCodecPref, bUnit);
 
                                                                     callback(undefined, xml);
 
@@ -1846,7 +1846,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
 
                                                     if(pbxDetails.OperationType === 'DENY')
                                                     {
-                                                        callback(null, xmlBuilder.CreateOutboundDeniedMessageDialplan(reqId, '[^\\s]*', context, companyId, tenantId, appId, dvpCallDirection));
+                                                        callback(null, xmlBuilder.CreateOutboundDeniedMessageDialplan(reqId, '[^\\s]*', context, companyId, tenantId, appId, dvpCallDirection, bUnit));
                                                     }
                                                     else
                                                     {
@@ -1935,7 +1935,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                         {
                                                                             tempCodecPref = codecPrefs.Codecs;
                                                                         }
-                                                                        var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, undefined, attTransInfo, dvpCallDirection, tempCodecPref);
+                                                                        var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, undefined, attTransInfo, dvpCallDirection, tempCodecPref, bUnit);
 
                                                                         callback(undefined, xml);
 
@@ -1965,7 +1965,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                     }
                                                                     else if(epList && epList.length > 0)
                                                                     {
-                                                                        var xml = xmlBuilder.CreateFollowMeDialplan(reqId, epList, context, profile, '[^\\s]*', false, undefined, companyId, tenantId, appId, dvpCallDirection);
+                                                                        var xml = xmlBuilder.CreateFollowMeDialplan(reqId, epList, context, profile, '[^\\s]*', false, undefined, companyId, tenantId, appId, dvpCallDirection, bUnit);
 
                                                                         callback(undefined, xml);
                                                                     }
@@ -2037,7 +2037,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                                 tempCodecPref = codecPrefs.Codecs;
                                                                             }
 
-                                                                            var xml = xmlBuilder.CreateForwardingDialplan(reqId, ep, context, profile, '[^\\s]*', false, pbxFwdKey, null, attTransInfo, dvpCallDirection, tempCodecPref);
+                                                                            var xml = xmlBuilder.CreateForwardingDialplan(reqId, ep, context, profile, '[^\\s]*', false, pbxFwdKey, null, attTransInfo, dvpCallDirection, tempCodecPref, bUnit);
                                                                             callback(undefined, xml);
 
                                                                         }).catch(function(err)
@@ -2115,7 +2115,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                             {
                                                                                 tempCodecPref = codecPrefs.Codecs;
                                                                             }
-                                                                            var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, undefined, attTransInfo, dvpCallDirection, tempCodecPref);
+                                                                            var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, undefined, attTransInfo, dvpCallDirection, tempCodecPref, bUnit);
 
                                                                             callback(undefined, xml);
 
@@ -2195,7 +2195,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                                         if(NumLimitInfo)
                                                                                         {
                                                                                             ep.Limits = NumLimitInfo;
-                                                                                            var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, rule.Codecs, null);
+                                                                                            var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, rule.Codecs, null, bUnit);
 
                                                                                             callback(null, xml);
                                                                                         }
@@ -2278,7 +2278,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                                 {
                                                                                     tempCodecPref = codecPrefs.Codecs;
                                                                                 }
-                                                                                var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, numLimitInfo, attTransInfo, dvpCallDirection, codecPrefs);
+                                                                                var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, numLimitInfo, attTransInfo, dvpCallDirection, codecPrefs, bUnit);
 
                                                                                 callback(undefined, xml);
 
@@ -2372,7 +2372,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                         {
                                                                             tempCodecPref = codecPrefs.Codecs;
                                                                         }
-                                                                        var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, undefined, attTransInfo, dvpCallDirection, tempCodecPref);
+                                                                        var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, undefined, attTransInfo, dvpCallDirection, tempCodecPref, bUnit);
 
                                                                         callback(undefined, xml);
 
@@ -2399,7 +2399,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                         {
                                             if(fromUserData.DenyOutboundFor === 'ALL')
                                             {
-                                                callback(null, xmlBuilder.CreateOutboundDeniedMessageDialplan(reqId, '[^\\s]*', context, companyId, tenantId, appId, dvpCallDirection));
+                                                callback(null, xmlBuilder.CreateOutboundDeniedMessageDialplan(reqId, '[^\\s]*', context, companyId, tenantId, appId, dvpCallDirection, bUnit));
                                             }
                                             else
                                             {
@@ -2465,7 +2465,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                             {
                                                                 tempCodecPref = codecPrefs.Codecs;
                                                             }
-                                                            var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, undefined, attTransInfo, dvpCallDirection, tempCodecPref);
+                                                            var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, undefined, attTransInfo, dvpCallDirection, tempCodecPref, bUnit);
 
                                                             callback(undefined, xml);
 
@@ -2508,7 +2508,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                 {
                                     if(fromUserData.DenyOutboundFor === 'ALL')
                                     {
-                                        callback(null, xmlBuilder.CreateOutboundDeniedMessageDialplan(reqId, '[^\\s]*', context, companyId, tenantId, appId, dvpCallDirection));
+                                        callback(null, xmlBuilder.CreateOutboundDeniedMessageDialplan(reqId, '[^\\s]*', context, companyId, tenantId, appId, dvpCallDirection, bUnit));
                                     }
                                     else
                                     {
@@ -2558,7 +2558,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                 if (!err && redisResult)
                                                 {
                                                     var attTransInfo = AttendantTransferLegInfoHandler(reqId, fromUserData, null);
-                                                    var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, undefined, attTransInfo, dvpCallDirection, null);
+                                                    var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, undefined, attTransInfo, dvpCallDirection, null, bUnit);
                                                     callback(undefined, xml);
                                                 }
                                                 else
@@ -2582,11 +2582,11 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                 {
                                     if(fromUserData.DenyOutboundFor === 'ALL')
                                     {
-                                        callback(null, xmlBuilder.CreateOutboundDeniedMessageDialplan(reqId, '[^\\s]*', context, companyId, tenantId, appId, dvpCallDirection));
+                                        callback(null, xmlBuilder.CreateOutboundDeniedMessageDialplan(reqId, '[^\\s]*', context, companyId, tenantId, appId, dvpCallDirection, bUnit));
                                     }
                                     else
                                     {
-                                        conferenceHandler.ConferenceHandlerOperation(reqId, extDetails, direction, fromUserUuid, context, profile, companyId, tenantId, appId, dvpCallDirection, cacheData, function(err, confXml)
+                                        conferenceHandler.ConferenceHandlerOperation(reqId, extDetails, direction, fromUserUuid, context, profile, companyId, tenantId, appId, dvpCallDirection, cacheData, bUnit, function(err, confXml)
                                         {
                                             callback(err, confXml);
                                         })
@@ -2619,7 +2619,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                 else if(extDetails.ObjCategory === 'IVR')
                                 {
 
-                                    handleIVRExt(reqId, companyId, tenantId, uuid, context, extDetails, false, null, appType)
+                                    handleIVRExt(reqId, companyId, tenantId, uuid, context, extDetails, false, null, appType, bUnit)
                                         .then(function(ivrResp)
                                         {
                                             callback(null, ivrResp);
@@ -2657,7 +2657,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                         toContext = extDetails.Context.Context;
                                     }
 
-                                    var xml = xmlBuilder.CreateAutoAttendantDialplan(reqId, ep, context, toContext, '[^\\s]*', false, dvpCallDirection, null);
+                                    var xml = xmlBuilder.CreateAutoAttendantDialplan(reqId, ep, context, toContext, '[^\\s]*', false, dvpCallDirection, null, bUnit);
 
                                     callback(undefined, xml);
 
@@ -2696,7 +2696,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                     {
                                         if(pbxObj.OperationType === 'DENY')
                                         {
-                                            callback(null, xmlBuilder.CreateOutboundDeniedMessageDialplan(reqId, '[^\\s]*', context, companyId, tenantId, appId, dvpCallDirection));
+                                            callback(null, xmlBuilder.CreateOutboundDeniedMessageDialplan(reqId, '[^\\s]*', context, companyId, tenantId, appId, dvpCallDirection, bUnit));
                                         }
                                         else
                                         {
@@ -2822,7 +2822,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                                 if(NumLimitInfo)
                                                                                 {
                                                                                     ep.Limits = NumLimitInfo;
-                                                                                    var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, rule.Codecs, null);
+                                                                                    var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, rule.Codecs, null, bUnit);
 
                                                                                     callback(null, xml);
                                                                                 }
@@ -2891,7 +2891,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
 
                                                                 if(usrRec)
                                                                 {
-                                                                    var xml = xmlBuilder.CreatePickUpDialplan(reqId, extraData, context, '[^\\s]*', companyId, tenantId, appId, dvpCallDirection);
+                                                                    var xml = xmlBuilder.CreatePickUpDialplan(reqId, extraData, context, '[^\\s]*', companyId, tenantId, appId, dvpCallDirection, bUnit);
                                                                     callback(undefined, xml);
                                                                 }
                                                                 else
@@ -3025,7 +3025,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                     {
                                         if(fromUserData.DenyOutboundFor === 'ALL' || fromUserData.DenyOutboundFor === 'GATEWAY')
                                         {
-                                            callback(null, xmlBuilder.CreateOutboundDeniedMessageDialplan(reqId, '[^\\s]*', context, companyId, tenantId, appId, dvpCallDirection));
+                                            callback(null, xmlBuilder.CreateOutboundDeniedMessageDialplan(reqId, '[^\\s]*', context, companyId, tenantId, appId, dvpCallDirection, bUnit));
                                         }
                                         else
                                         {
@@ -3115,7 +3115,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                         if(NumLimitInfo)
                                                                         {
                                                                             ep.Limits = NumLimitInfo;
-                                                                            var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, rule.Codecs, null);
+                                                                            var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, rule.Codecs, null, bUnit);
 
                                                                             callback(null, xml);
                                                                         }
@@ -3166,7 +3166,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                         {
                             if(fromUserData.DenyOutboundFor === 'ALL' || fromUserData.DenyOutboundFor === 'GATEWAY')
                             {
-                                callback(null, xmlBuilder.CreateOutboundDeniedMessageDialplan(reqId, '[^\\s]*', context, companyId, tenantId, appId, dvpCallDirection));
+                                callback(null, xmlBuilder.CreateOutboundDeniedMessageDialplan(reqId, '[^\\s]*', context, companyId, tenantId, appId, dvpCallDirection, bUnit));
                             }
                             else
                             {
@@ -3259,7 +3259,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                             if(NumLimitInfo)
                                                             {
                                                                 ep.Limits = NumLimitInfo;
-                                                                var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, rule.Codecs, null);
+                                                                var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, rule.Codecs, null, bUnit);
 
                                                                 callback(null, xml);
                                                             }
@@ -3369,7 +3369,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                     {
                                                         if(fromUserData && fromUserData.DenyOutboundFor === 'ALL')
                                                         {
-                                                            callback(null, xmlBuilder.CreateOutboundDeniedMessageDialplan(reqId, '[^\\s]*', context, companyId, tenantId, appId, dvpCallDirection));
+                                                            callback(null, xmlBuilder.CreateOutboundDeniedMessageDialplan(reqId, '[^\\s]*', context, companyId, tenantId, appId, dvpCallDirection, bUnit));
                                                         }
                                                         else
                                                         {
@@ -3419,7 +3419,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                         {
                                                                             tempCodecPref = codecPrefs.Codecs;
                                                                         }
-                                                                        var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, undefined, attTransInfo, dvpCallDirection, tempCodecPref);
+                                                                        var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, undefined, attTransInfo, dvpCallDirection, tempCodecPref, bUnit);
 
                                                                         callback(undefined, xml);
 
@@ -3443,7 +3443,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                     {
                                                         if(pbxDetails.OperationType === 'DENY')
                                                         {
-                                                            callback(null, xmlBuilder.CreateOutboundDeniedMessageDialplan(reqId, '[^\\s]*', context, companyId, tenantId, appId, dvpCallDirection));
+                                                            callback(null, xmlBuilder.CreateOutboundDeniedMessageDialplan(reqId, '[^\\s]*', context, companyId, tenantId, appId, dvpCallDirection, bUnit));
                                                         }
                                                         else
                                                         {
@@ -3516,7 +3516,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                             {
                                                                                 tempCodecPref = codecPrefs.Codecs;
                                                                             }
-                                                                            var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, undefined, attTransInfo, dvpCallDirection, tempCodecPref);
+                                                                            var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, undefined, attTransInfo, dvpCallDirection, tempCodecPref, bUnit);
 
                                                                             callback(undefined, xml);
 
@@ -3546,7 +3546,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                         }
                                                                         else if(epList && epList.length > 0)
                                                                         {
-                                                                            var xml = xmlBuilder.CreateFollowMeDialplan(reqId, epList, context, profile, '[^\\s]*', false, undefined, companyId, tenantId, appId, dvpCallDirection);
+                                                                            var xml = xmlBuilder.CreateFollowMeDialplan(reqId, epList, context, profile, '[^\\s]*', false, undefined, companyId, tenantId, appId, dvpCallDirection, bUnit);
 
                                                                             callback(undefined, xml);
                                                                         }
@@ -3614,7 +3614,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                                     tempCodecPref = codecPrefs.Codecs;
                                                                                 }
 
-                                                                                var xml = xmlBuilder.CreateForwardingDialplan(reqId, ep, context, profile, '[^\\s]*', false, pbxFwdKey, null, attTransInfo, dvpCallDirection, tempCodecPref);
+                                                                                var xml = xmlBuilder.CreateForwardingDialplan(reqId, ep, context, profile, '[^\\s]*', false, pbxFwdKey, null, attTransInfo, dvpCallDirection, tempCodecPref, bUnit);
 
                                                                                 callback(undefined, xml);
 
@@ -3676,7 +3676,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                                 {
                                                                                     tempCodecPref = codecPrefs.Codecs;
                                                                                 }
-                                                                                var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, undefined, attTransInfo, dvpCallDirection, tempCodecPref);
+                                                                                var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, undefined, attTransInfo, dvpCallDirection, tempCodecPref, bUnit);
 
                                                                                 callback(undefined, xml);
 
@@ -3756,7 +3756,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                                             if(NumLimitInfo)
                                                                                             {
                                                                                                 ep.Limits = NumLimitInfo;
-                                                                                                var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, rule.Codecs, null);
+                                                                                                var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, rule.Codecs, null, bUnit);
 
                                                                                                 callback(null, xml);
                                                                                             }
@@ -3839,7 +3839,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                                     {
                                                                                         tempCodecPref = codecPrefs.Codecs;
                                                                                     }
-                                                                                    var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, numLimitInfo, attTransInfo, dvpCallDirection, tempCodecPref);
+                                                                                    var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, numLimitInfo, attTransInfo, dvpCallDirection, tempCodecPref, bUnit);
 
                                                                                     callback(undefined, xml);
 
@@ -3919,7 +3919,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                             {
                                                                                 tempCodecPref = codecPrefs.Codecs;
                                                                             }
-                                                                            var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, undefined, attTransInfo, dvpCallDirection, tempCodecPref);
+                                                                            var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, undefined, attTransInfo, dvpCallDirection, tempCodecPref, bUnit);
 
                                                                             callback(undefined, xml);
 
@@ -3946,7 +3946,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                             {
                                                 if(fromUserData && fromUserData.DenyOutboundFor === 'ALL')
                                                 {
-                                                    callback(null, xmlBuilder.CreateOutboundDeniedMessageDialplan(reqId, '[^\\s]*', context, companyId, tenantId, appId, dvpCallDirection));
+                                                    callback(null, xmlBuilder.CreateOutboundDeniedMessageDialplan(reqId, '[^\\s]*', context, companyId, tenantId, appId, dvpCallDirection, bUnit));
                                                 }
                                                 else
                                                 {
@@ -3996,7 +3996,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                 {
                                                                     tempCodecPref = codecPrefs.Codecs;
                                                                 }
-                                                                var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, undefined, attTransInfo, dvpCallDirection, tempCodecPref);
+                                                                var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, undefined, attTransInfo, dvpCallDirection, tempCodecPref, bUnit);
 
                                                                 callback(undefined, xml);
 
@@ -4039,7 +4039,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                     {
                                         if(fromUserData && fromUserData.DenyOutboundFor === 'ALL')
                                         {
-                                            callback(null, xmlBuilder.CreateOutboundDeniedMessageDialplan(reqId, '[^\\s]*', context, companyId, tenantId, appId, dvpCallDirection));
+                                            callback(null, xmlBuilder.CreateOutboundDeniedMessageDialplan(reqId, '[^\\s]*', context, companyId, tenantId, appId, dvpCallDirection, bUnit));
                                         }
                                         else
                                         {
@@ -4070,7 +4070,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                     if (!err && redisResult)
                                                     {
                                                         var attTransInfo = AttendantTransferLegInfoHandler(reqId, null, null);
-                                                        var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, undefined, attTransInfo, dvpCallDirection, null);
+                                                        var xml = xmlBuilder.CreateRouteUserDialplan(reqId, ep, context, profile, '[^\\s]*', false, undefined, attTransInfo, dvpCallDirection, null, bUnit);
                                                         callback(undefined, xml);
                                                     }
                                                     else
@@ -4094,11 +4094,11 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                     {
                                         if(fromUserData && fromUserData.DenyOutboundFor === 'ALL')
                                         {
-                                            callback(null, xmlBuilder.CreateOutboundDeniedMessageDialplan(reqId, '[^\\s]*', context, companyId, tenantId, appId, dvpCallDirection));
+                                            callback(null, xmlBuilder.CreateOutboundDeniedMessageDialplan(reqId, '[^\\s]*', context, companyId, tenantId, appId, dvpCallDirection, bUnit));
                                         }
                                         else
                                         {
-                                            conferenceHandler.ConferenceHandlerOperation(reqId, extDetails, direction, fromUserUuid, context, profile, companyId, tenantId, appId, dvpCallDirection, cacheData, function(err, confXml)
+                                            conferenceHandler.ConferenceHandlerOperation(reqId, extDetails, direction, fromUserUuid, context, profile, companyId, tenantId, appId, dvpCallDirection, cacheData, bUnit, function(err, confXml)
                                             {
                                                 callback(err, confXml);
                                             })
@@ -4154,7 +4154,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                             toContext = extDetails.Context.Context;
                                         }
 
-                                        var xml = xmlBuilder.CreateAutoAttendantDialplan(reqId, ep, context, toContext, '[^\\s]*', false, dvpCallDirection, null);
+                                        var xml = xmlBuilder.CreateAutoAttendantDialplan(reqId, ep, context, toContext, '[^\\s]*', false, dvpCallDirection, null, bUnit);
 
                                         callback(undefined, xml);
 
@@ -4162,7 +4162,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                     else if(extDetails.ObjCategory === 'IVR' || extDetails.ObjCategory === 'CAMPAIGN')
                                     {
 
-                                        handleIVRExt(reqId, companyId, tenantId, uuid, context, extDetails, true, null, appType)
+                                        handleIVRExt(reqId, companyId, tenantId, uuid, context, extDetails, true, null, appType, bUnit)
                                             .then(function(ivrResp)
                                             {
                                                 callback(null, ivrResp);
@@ -4193,7 +4193,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
 
                             if(fromUserData && (fromUserData.DenyOutboundFor === 'ALL' || fromUserData.DenyOutboundFor === 'GATEWAY'))
                             {
-                                callback(null, xmlBuilder.CreateOutboundDeniedMessageDialplan(reqId, '[^\\s]*', context, companyId, tenantId, appId, dvpCallDirection));
+                                callback(null, xmlBuilder.CreateOutboundDeniedMessageDialplan(reqId, '[^\\s]*', context, companyId, tenantId, appId, dvpCallDirection, bUnit));
                             }
                             else
                             {
@@ -4289,13 +4289,13 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                 {
                                                                     ep.CampaignId = extraData['variable_CampaignId'];
                                                                     ep.ArdsUuid = extraData['variable_ards_client_uuid'];
-                                                                    var xml = xmlBuilder.CreateRouteGatewayCampaignDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, rule.Codecs, null, extraData['variable_nolocal:DVP_CUSTOM_PUBID']);
+                                                                    var xml = xmlBuilder.CreateRouteGatewayCampaignDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, rule.Codecs, null, extraData['variable_nolocal:DVP_CUSTOM_PUBID'], bUnit);
 
                                                                     callback(null, xml);
                                                                 }
                                                                 else
                                                                 {
-                                                                    var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, rule.Codecs, null);
+                                                                    var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, context, profile, '[^\\s]*', false, attTransInfo, dvpCallDirection, rule.Codecs, null, bUnit);
 
                                                                     callback(null, xml);
                                                                 }

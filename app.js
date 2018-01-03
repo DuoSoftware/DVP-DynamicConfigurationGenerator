@@ -134,7 +134,7 @@ var RedisOperations = function(callUuid, companyId, tenantId, appId, appType, is
 };
 
 
-var HandleOutRequest = function(reqId, data, callerIdNum, contextTenant, appType, contextCompany, dvpOriginationType, destNum, domain, callerContext, profile, varUuid, isDialPlanGiven, ctxt, cacheData, eventTime, res)
+var HandleOutRequest = function(reqId, data, callerIdNum, contextTenant, appType, contextCompany, dvpOriginationType, destNum, domain, callerContext, profile, varUuid, isDialPlanGiven, ctxt, cacheData, eventTime, bUnit, res)
 {
     try
     {
@@ -187,7 +187,7 @@ var HandleOutRequest = function(reqId, data, callerIdNum, contextTenant, appType
 
                         if(appType && appType === 'HTTAPI')
                         {
-                            extDialplanEngine.ProcessExtendedDialplan(reqId, callerIdNum, destNum, callerContext, 'OUT', data, null, contextCompany, contextTenant, null, null, 'inbound', ctxt, cacheData, function(err, extDialplan)
+                            extDialplanEngine.ProcessExtendedDialplan(reqId, callerIdNum, destNum, callerContext, 'OUT', data, null, contextCompany, contextTenant, securityToken, null, 'inbound', ctxt, cacheData, bUnit, function(err, extDialplan)
                             {
                                 if(err)
                                 {
@@ -299,7 +299,7 @@ var HandleOutRequest = function(reqId, data, callerIdNum, contextTenant, appType
                                                             {
                                                                 if (balanceRes && balanceRes.IsSuccess)
                                                                 {
-                                                                    var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, callerContext, profile, '[^\\s]*', false, null, 'outbound', rule.Codecs, null);
+                                                                    var xml = xmlBuilder.CreateRouteGatewayDialplan(reqId, ep, callerContext, profile, '[^\\s]*', false, null, 'outbound', rule.Codecs, null, bUnit);
 
                                                                     RedisOperations(varUuid, rule.CompanyId, rule.TenantId, null, 'EMERGENCY', isDialPlanGiven, 'outbound', eventTime);
 
@@ -391,7 +391,7 @@ var HandleOutRequest = function(reqId, data, callerIdNum, contextTenant, appType
                                                                     redisHandler.ExpireKey(varUuid + "_data", 86400);
                                                                     logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Session data added to redis successfully - Key : %s_data', reqId, varUuid);
 
-                                                                    var xml = xmlGen.CreateHttpApiDialplan('[^\\s]*', callerContext, masterUrl, reqId, null, app.id, rule.CompanyId, rule.TenantId, 'outbound', tempAni);
+                                                                    var xml = xmlGen.CreateHttpApiDialplan('[^\\s]*', callerContext, masterUrl, reqId, null, app.id, rule.CompanyId, rule.TenantId, 'outbound', tempAni, rule.BusinessUnit);
 
                                                                     logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
 
@@ -435,7 +435,7 @@ var HandleOutRequest = function(reqId, data, callerIdNum, contextTenant, appType
                                                                     redisHandler.ExpireKey(varUuid + "_data", 86400);
                                                                     logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Session data added to redis successfully - Key : : %s_data', reqId, varUuid);
 
-                                                                    var xml = xmlGen.CreateSocketApiDialplan('[^\\s]*', callerContext, masterUrl, reqId, null, app.id, rule.CompanyId, rule.TenantId, 'outbound');
+                                                                    var xml = xmlGen.CreateSocketApiDialplan('[^\\s]*', callerContext, masterUrl, reqId, null, app.id, rule.CompanyId, rule.TenantId, 'outbound', rule.BusinessUnit);
 
                                                                     logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
 
@@ -450,7 +450,7 @@ var HandleOutRequest = function(reqId, data, callerIdNum, contextTenant, appType
                                                         {
                                                             data.DVPAppUrl = masterApp.Url;
                                                             data.AppId = masterApp.id;
-                                                            extDialplanEngine.ProcessExtendedDialplan(reqId, callerIdNum, destNum, callerContext, 'OUT', data, fromUsr, rule.CompanyId, rule.TenantId, securityToken, undefined, 'outbound', ctxt, cacheData, function(err, extDialplan)
+                                                            extDialplanEngine.ProcessExtendedDialplan(reqId, callerIdNum, destNum, callerContext, 'OUT', data, fromUsr, rule.CompanyId, rule.TenantId, securityToken, null, 'outbound', ctxt, cacheData, rule.BusinessUnit, function(err, extDialplan)
                                                             {
                                                                 if(err)
                                                                 {
@@ -489,7 +489,7 @@ var HandleOutRequest = function(reqId, data, callerIdNum, contextTenant, appType
                                                         {
                                                             logger.info('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Master App Type is HTTAPI', reqId);
                                                             //add to redis
-                                                            var xml = xmlGen.CreateHttpApiDialplan('[^\\s]*', callerContext, app.Url, reqId, undefined, app.id, rule.CompanyId, rule.TenantId, 'outbound', tempAni);
+                                                            var xml = xmlGen.CreateHttpApiDialplan('[^\\s]*', callerContext, app.Url, reqId, undefined, app.id, rule.CompanyId, rule.TenantId, 'outbound', tempAni, rule.BusinessUnit);
 
                                                             logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
 
@@ -502,7 +502,7 @@ var HandleOutRequest = function(reqId, data, callerIdNum, contextTenant, appType
                                                         {
                                                             logger.info('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Master App Type is SOCKET', reqId);
 
-                                                            var xml = xmlGen.CreateSocketApiDialplan('[^\\s]*', callerContext, app.Url, reqId, null, app.id, rule.CompanyId, rule.TenantId, 'outbound');
+                                                            var xml = xmlGen.CreateSocketApiDialplan('[^\\s]*', callerContext, app.Url, reqId, null, app.id, rule.CompanyId, rule.TenantId, 'outbound', rule.BusinessUnit);
 
                                                             logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
 
@@ -514,7 +514,7 @@ var HandleOutRequest = function(reqId, data, callerIdNum, contextTenant, appType
                                                         {
                                                             data.DVPAppUrl = app.Url;
                                                             data.AppId = app.id;
-                                                            extDialplanEngine.ProcessExtendedDialplan(reqId, callerIdNum, destNum, callerContext, 'OUT', data, fromUsr, rule.CompanyId, rule.TenantId, securityToken, undefined, 'outbound', ctxt, cacheData, function(err, extDialplan)
+                                                            extDialplanEngine.ProcessExtendedDialplan(reqId, callerIdNum, destNum, callerContext, 'OUT', data, fromUsr, rule.CompanyId, rule.TenantId, securityToken, null, 'outbound', ctxt, cacheData, rule.BusinessUnit, function(err, extDialplan)
                                                             {
                                                                 if(err)
                                                                 {
@@ -1202,7 +1202,7 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
 
                                                         if(NumLimitInfo)
                                                         {
-                                                            var xml = xmlBuilder.CreatePbxFeaturesGateway(reqId, huntDestNum, outRule.TrunkNumber, outRule.GatewayCode, ctxt.CompanyId, ctxt.TenantId, null, huntContext, outRule.DNIS, outRule.Operator, outRule.IpUrl, NumLimitInfo, outRule.Codecs, transferCallerName);
+                                                            var xml = xmlBuilder.CreatePbxFeaturesGateway(reqId, huntDestNum, outRule.TrunkNumber, outRule.GatewayCode, ctxt.CompanyId, ctxt.TenantId, null, huntContext, outRule.DNIS, outRule.Operator, outRule.IpUrl, NumLimitInfo, outRule.Codecs, transferCallerName, outRule.BusinessUnit);
 
                                                             logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
 
@@ -1296,7 +1296,7 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
 
                 if(huntCtxtSplit.length === 3)
                 {
-                    extDialplanEngine.ProcessExtendedDialplan(reqId, callerIdNum, destNum, tempHuntCtxt, 'OUT', data, null, huntCtxtSplit[2], huntCtxtSplit[1], securityToken, null, 'outbound', null, null, function(err, extDialplan)
+                    extDialplanEngine.ProcessExtendedDialplan(reqId, callerIdNum, destNum, tempHuntCtxt, 'OUT', data, null, huntCtxtSplit[2], huntCtxtSplit[1], securityToken, null, 'outbound', null, null, null, function(err, extDialplan)
                     {
                         if(err)
                         {
@@ -1476,7 +1476,7 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
 
                                 if(appType === 'HTTAPI' && varCompanyId && varTenantId)
                                 {
-                                    HandleOutRequest(reqId, data, callerIdNum, varTenantId, appType, varCompanyId, dvpOriginationType, destNum, domain, callerContext, profile, varUuid, isDialplanGiven, ctxt, cacheData, eventTime, res);
+                                    HandleOutRequest(reqId, data, callerIdNum, varTenantId, appType, varCompanyId, dvpOriginationType, destNum, domain, callerContext, profile, varUuid, isDialplanGiven, ctxt, cacheData, eventTime, null, res);
                                 }
                                 else
                                 {
@@ -1562,7 +1562,7 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
 
                                                                     if(num.ObjCategory === 'FAX')
                                                                     {
-                                                                        var xml = xmlBuilder.FaxReceiveUpload(reqId, callerContext, '[^\\s]*', NumLimitInfo, 'inbound', num.CompanyId, num.TenantId, num.PhoneNumber);
+                                                                        var xml = xmlBuilder.FaxReceiveUpload(reqId, callerContext, '[^\\s]*', NumLimitInfo, 'inbound', num.CompanyId, num.TenantId, num.PhoneNumber, null);
                                                                         logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
 
                                                                         res.end(xml);
@@ -1640,7 +1640,7 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
                                                                                                     redisHandler.ExpireKey(varUuid + "_data", 86400);
                                                                                                     logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Session data added to redis successfully - Key : %s_data', reqId, varUuid);
 
-                                                                                                    var xml = xmlGen.CreateHttpApiDialplan('[^\\s]*', callerContext, masterUrl, reqId, NumLimitInfo, app.id, rule.CompanyId, rule.TenantId, 'inbound', tempAni);
+                                                                                                    var xml = xmlGen.CreateHttpApiDialplan('[^\\s]*', callerContext, masterUrl, reqId, NumLimitInfo, app.id, rule.CompanyId, rule.TenantId, 'inbound', tempAni, rule.BusinessUnit);
 
                                                                                                     logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
 
@@ -1685,7 +1685,7 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
                                                                                                     redisHandler.ExpireKey(varUuid + "_data", 86400);
                                                                                                     logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Session data added to redis successfully - Key : : %s_data', reqId, varUuid);
 
-                                                                                                    var xml = xmlGen.CreateSocketApiDialplan('[^\\s]*', callerContext, app.Url, reqId, NumLimitInfo, app.id, rule.CompanyId, rule.TenantId, 'inbound');
+                                                                                                    var xml = xmlGen.CreateSocketApiDialplan('[^\\s]*', callerContext, app.Url, reqId, NumLimitInfo, app.id, rule.CompanyId, rule.TenantId, 'inbound', rule.BusinessUnit);
 
                                                                                                     logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
 
@@ -1700,7 +1700,7 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
                                                                                         {
                                                                                             data.DVPAppUrl = masterApp.Url;
                                                                                             data.AppId = masterApp.id;
-                                                                                            extDialplanEngine.ProcessExtendedDialplan(reqId, callerIdNum, destNum, callerContext, direction, data, undefined, rule.CompanyId, rule.TenantId, securityToken, NumLimitInfo, 'inbound', ctxt, null, function(err, extDialplan)
+                                                                                            extDialplanEngine.ProcessExtendedDialplan(reqId, callerIdNum, destNum, callerContext, direction, data, undefined, rule.CompanyId, rule.TenantId, securityToken, NumLimitInfo, 'inbound', ctxt, null, rule.BusinessUnit, function(err, extDialplan)
                                                                                             {
                                                                                                 if(err)
                                                                                                 {
@@ -1739,7 +1739,7 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
                                                                                             logger.info('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Master App Type is HTTAPI', reqId);
                                                                                             //add to redis
 
-                                                                                            var xml = xmlGen.CreateHttpApiDialplan('[^\\s]*', callerContext, app.Url, reqId, NumLimitInfo, app.id, rule.CompanyId, rule.TenantId, 'inbound', tempAni);
+                                                                                            var xml = xmlGen.CreateHttpApiDialplan('[^\\s]*', callerContext, app.Url, reqId, NumLimitInfo, app.id, rule.CompanyId, rule.TenantId, 'inbound', tempAni, rule.BusinessUnit);
 
                                                                                             logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
                                                                                             RedisOperations(varUuid, rule.CompanyId, rule.TenantId, rule.Application.id, app.ObjType, isDialplanGiven, 'inbound', eventTime);
@@ -1751,7 +1751,7 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
                                                                                         {
                                                                                             logger.info('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - App Type is SOCKET', reqId);
 
-                                                                                            var xml = xmlGen.CreateSocketApiDialplan('[^\\s]*', callerContext, app.Url, reqId, NumLimitInfo, app.id, rule.CompanyId, rule.TenantId, 'inbound');
+                                                                                            var xml = xmlGen.CreateSocketApiDialplan('[^\\s]*', callerContext, app.Url, reqId, NumLimitInfo, app.id, rule.CompanyId, rule.TenantId, 'inbound', rule.BusinessUnit);
 
                                                                                             logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
 
@@ -1764,7 +1764,7 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
                                                                                             data.DVPAppUrl = app.Url;
                                                                                             data.AppId = app.id;
 
-                                                                                            extDialplanEngine.ProcessExtendedDialplan(reqId, callerIdNum, destNum, callerContext, direction, data, undefined, rule.CompanyId, rule.TenantId, securityToken, NumLimitInfo, 'inbound', ctxt, cacheData, function(err, extDialplan)
+                                                                                            extDialplanEngine.ProcessExtendedDialplan(reqId, callerIdNum, destNum, callerContext, direction, data, undefined, rule.CompanyId, rule.TenantId, securityToken, NumLimitInfo, 'inbound', ctxt, cacheData, rule.BusinessUnit, function(err, extDialplan)
                                                                                             {
 
                                                                                                 if(err)
@@ -1959,7 +1959,7 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
                                                                                 redisHandler.ExpireKey(varUuid + "_data", 86400);
                                                                                 logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Session data added to redis successfully - Key : %s_data', reqId, varUuid);
 
-                                                                                var xml = xmlGen.CreateHttpApiDialplan('[^\\s]*', callerContext, masterUrl, reqId, null, app.id, rule.CompanyId, rule.TenantId, 'inbound', tempAni);
+                                                                                var xml = xmlGen.CreateHttpApiDialplan('[^\\s]*', callerContext, masterUrl, reqId, null, app.id, rule.CompanyId, rule.TenantId, 'inbound', tempAni, rule.BusinessUnit);
 
                                                                                 logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
 
@@ -2004,7 +2004,7 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
                                                                                 redisHandler.ExpireKey(varUuid + "_data", 86400);
                                                                                 logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Session data added to redis successfully - Key : : %s_data', reqId, varUuid);
 
-                                                                                var xml = xmlGen.CreateSocketApiDialplan('[^\\s]*', callerContext, app.Url, reqId, null, app.id, rule.CompanyId, rule.TenantId, 'inbound');
+                                                                                var xml = xmlGen.CreateSocketApiDialplan('[^\\s]*', callerContext, app.Url, reqId, null, app.id, rule.CompanyId, rule.TenantId, 'inbound', rule.BusinessUnit);
 
                                                                                 logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
 
@@ -2019,7 +2019,7 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
                                                                     {
                                                                         data.DVPAppUrl = masterApp.Url;
                                                                         data.AppId = masterApp.id;
-                                                                        extDialplanEngine.ProcessExtendedDialplan(reqId, callerIdNum, destNum, callerContext, direction, data, undefined, rule.CompanyId, rule.TenantId, securityToken, NumLimitInfo, 'inbound', ctxt, null, function(err, extDialplan)
+                                                                        extDialplanEngine.ProcessExtendedDialplan(reqId, callerIdNum, destNum, callerContext, direction, data, undefined, rule.CompanyId, rule.TenantId, securityToken, NumLimitInfo, 'inbound', ctxt, null, rule.BusinessUnit, function(err, extDialplan)
                                                                         {
                                                                             if(err)
                                                                             {
@@ -2057,7 +2057,7 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
                                                                         logger.info('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Master App Type is HTTAPI', reqId);
                                                                         //add to redis
 
-                                                                        var xml = xmlGen.CreateHttpApiDialplan('[^\\s]*', callerContext, app.Url, reqId, null, app.id, rule.CompanyId, rule.TenantId, 'inbound', tempAni);
+                                                                        var xml = xmlGen.CreateHttpApiDialplan('[^\\s]*', callerContext, app.Url, reqId, null, app.id, rule.CompanyId, rule.TenantId, 'inbound', tempAni, rule.BusinessUnit);
 
                                                                         logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
                                                                         RedisOperations(varUuid, rule.CompanyId, rule.TenantId, rule.Application.id, app.ObjType, isDialplanGiven, 'inbound', eventTime);
@@ -2068,7 +2068,7 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
                                                                     {
                                                                         logger.info('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - App Type is SOCKET', reqId);
 
-                                                                        var xml = xmlGen.CreateSocketApiDialplan('[^\\s]*', callerContext, app.Url, reqId, null, app.id, rule.CompanyId, rule.TenantId, 'inbound');
+                                                                        var xml = xmlGen.CreateSocketApiDialplan('[^\\s]*', callerContext, app.Url, reqId, null, app.id, rule.CompanyId, rule.TenantId, 'inbound', rule.BusinessUnit);
 
                                                                         logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
 
@@ -2080,7 +2080,7 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
                                                                     {
                                                                         data.DVPAppUrl = app.Url;
                                                                         data.AppId = app.id;
-                                                                        extDialplanEngine.ProcessExtendedDialplan(reqId, callerIdNum, destNum, callerContext, direction, data, undefined, rule.CompanyId, rule.TenantId, securityToken, NumLimitInfo, 'inbound', ctxt, null, function(err, extDialplan)
+                                                                        extDialplanEngine.ProcessExtendedDialplan(reqId, callerIdNum, destNum, callerContext, direction, data, undefined, rule.CompanyId, rule.TenantId, securityToken, NumLimitInfo, 'inbound', ctxt, null, rule.BusinessUnit, function(err, extDialplan)
                                                                         {
                                                                             if(err)
                                                                             {
@@ -2178,7 +2178,7 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
                             {
                                 logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Call Direction OUT', reqId);
 
-                                HandleOutRequest(reqId, data, callerIdNum, contextTenant, appType, contextCompany, dvpOriginationType, destNum, domain, callerContext, profile, varUuid, isDialplanGiven, ctxt, cacheData, eventTime, res);
+                                HandleOutRequest(reqId, data, callerIdNum, contextTenant, appType, contextCompany, dvpOriginationType, destNum, domain, callerContext, profile, varUuid, isDialplanGiven, ctxt, cacheData, eventTime, null, res);
 
                             }
 
