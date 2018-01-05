@@ -127,11 +127,11 @@ else
 }
 
 
-var PublishDashboardMessage = function(tenantId, companyId, eventClass, eventType, eventCategory, sessionId, param1, param2, timestamp)
+var PublishDashboardMessage = function(tenantId, companyId, eventClass, eventType, eventCategory, sessionId, param1, param2, timestamp, bUnit)
 {
     if(redisClient)
     {
-        var pubMessage = util.format("EVENT:%s:%s:%s:%s:%s:%s:%s:%s:YYYY", tenantId, companyId, eventClass, eventType, eventCategory, param1, param2, sessionId);
+        var pubMessage = util.format("EVENT:%s:%s:%s:%s:%s:%s:%s:%s:%s:YYYY", tenantId, companyId, bUnit, eventClass, eventType, eventCategory, param1, param2, sessionId);
 
         redisClient.publish('events', pubMessage);
 
@@ -158,7 +158,8 @@ var PublishDashboardMessage = function(tenantId, companyId, eventClass, eventTyp
                 SessionID: sessionId,
                 TimeStamp: timestamp,
                 Parameter1: param1,
-                Parameter2: param2
+                Parameter2: param2,
+                BusinessUnit: bUnit
             };
 
             amqpClient.publish('DashboardEvents', sendObj, {
