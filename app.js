@@ -1199,10 +1199,14 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
                                                     {
                                                         var limits = {
                                                             NumberOutboundLimit: outRule.OutLimit,
-                                                            NumberBothLimit: outRule.BothLimit,
-                                                            CompanyOutboundLimit: compLimits.OutboundLimit,
-                                                            CompanyBothLimit: compLimits.BothLimit
+                                                            NumberBothLimit: outRule.BothLimit
                                                         };
+
+                                                        if(compLimits)
+                                                        {
+                                                            limits.CompanyOutboundLimit = compLimits.OutboundLimit;
+                                                            limits.CompanyBothLimit = compLimits.BothLimit;
+                                                        }
 
                                                         var NumLimitInfo = LimitValidator(limits, outRule.TrunkNumber, 'outbound');
 

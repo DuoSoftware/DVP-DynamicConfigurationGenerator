@@ -83,10 +83,14 @@ var CreateFMEndpointList = function(reqId, aniNum, context, companyId, tenantId,
 
                                 var limits = {
                                     NumberOutboundLimit: rule.OutLimit,
-                                    NumberBothLimit: rule.BothLimit,
-                                    CompanyOutboundLimit: compLimits.OutboundLimit,
-                                    CompanyBothLimit: compLimits.BothLimit
+                                    NumberBothLimit: rule.BothLimit
                                 };
+
+                                if(compLimits)
+                                {
+                                    limits.CompanyOutboundLimit = compLimits.OutboundLimit;
+                                    limits.CompanyBothLimit = compLimits.BothLimit;
+                                }
 
                                 var NumLimitInfo = LimitValidator(limits, rule.TrunkNumber, 'outbound');
 
@@ -435,10 +439,14 @@ var ProcessCallForwarding = function(reqId, aniNum, dnisNum, callerDomain, conte
                                                 {
                                                     var limits = {
                                                         NumberOutboundLimit: rule.OutLimit,
-                                                        NumberBothLimit: rule.BothLimit,
-                                                        CompanyOutboundLimit: compLimits.OutboundLimit,
-                                                        CompanyBothLimit: compLimits.BothLimit
+                                                        NumberBothLimit: rule.BothLimit
                                                     };
+
+                                                    if(compLimits)
+                                                    {
+                                                        limits.CompanyOutboundLimit = compLimits.OutboundLimit;
+                                                        limits.CompanyBothLimit = compLimits.BothLimit;
+                                                    }
 
                                                     var NumLimitInfo = LimitValidator(limits, rule.TrunkNumber, 'outbound');
 
@@ -1210,10 +1218,14 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                                 {
                                                                                     var limits = {
                                                                                         NumberOutboundLimit: rule.OutLimit,
-                                                                                        NumberBothLimit: rule.BothLimit,
-                                                                                        CompanyOutboundLimit: compLimits.OutboundLimit,
-                                                                                        CompanyBothLimit: compLimits.BothLimit
+                                                                                        NumberBothLimit: rule.BothLimit
                                                                                     };
+
+                                                                                    if(compLimits)
+                                                                                    {
+                                                                                        limits.CompanyOutboundLimit = compLimits.OutboundLimit;
+                                                                                        limits.CompanyBothLimit = compLimits.BothLimit;
+                                                                                    }
 
                                                                                     var NumLimitInfo = LimitValidator(limits, rule.TrunkNumber, 'outbound');
 
@@ -2185,10 +2197,14 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                                     {
                                                                                         var limits = {
                                                                                             NumberOutboundLimit: rule.OutLimit,
-                                                                                            NumberBothLimit: rule.BothLimit,
-                                                                                            CompanyOutboundLimit: compLimits.OutboundLimit,
-                                                                                            CompanyBothLimit: compLimits.BothLimit
+                                                                                            NumberBothLimit: rule.BothLimit
                                                                                         };
+
+                                                                                        if(compLimits)
+                                                                                        {
+                                                                                            limits.CompanyOutboundLimit = compLimits.OutboundLimit;
+                                                                                            limits.CompanyBothLimit = compLimits.BothLimit;
+                                                                                        }
 
                                                                                         var NumLimitInfo = LimitValidator(limits, rule.TrunkNumber, 'outbound');
 
@@ -2812,10 +2828,14 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                             {
                                                                                 var limits = {
                                                                                     NumberOutboundLimit: rule.OutLimit,
-                                                                                    NumberBothLimit: rule.BothLimit,
-                                                                                    CompanyOutboundLimit: compLimits.OutboundLimit,
-                                                                                    CompanyBothLimit: compLimits.BothLimit
+                                                                                    NumberBothLimit: rule.BothLimit
                                                                                 };
+
+                                                                                if(compLimits)
+                                                                                {
+                                                                                    limits.CompanyOutboundLimit = compLimits.OutboundLimit;
+                                                                                    limits.CompanyBothLimit = compLimits.BothLimit;
+                                                                                }
 
                                                                                 var NumLimitInfo = LimitValidator(limits, rule.TrunkNumber, 'outbound');
 
@@ -3105,10 +3125,14 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                     {
                                                                         var limits = {
                                                                             NumberOutboundLimit: rule.OutLimit,
-                                                                            NumberBothLimit: rule.BothLimit,
-                                                                            CompanyOutboundLimit: compLimits.OutboundLimit,
-                                                                            CompanyBothLimit: compLimits.BothLimit
+                                                                            NumberBothLimit: rule.BothLimit
                                                                         };
+
+                                                                        if(compLimits)
+                                                                        {
+                                                                            limits.CompanyOutboundLimit = compLimits.OutboundLimit;
+                                                                            limits.CompanyBothLimit = compLimits.BothLimit;
+                                                                        }
 
                                                                         var NumLimitInfo = LimitValidator(limits, rule.TrunkNumber, 'outbound');
 
@@ -3249,10 +3273,14 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                         {
                                                             var limits = {
                                                                 NumberOutboundLimit: rule.OutLimit,
-                                                                NumberBothLimit: rule.BothLimit,
-                                                                CompanyOutboundLimit: compLimits.OutboundLimit,
-                                                                CompanyBothLimit: compLimits.BothLimit
+                                                                NumberBothLimit: rule.BothLimit
                                                             };
+
+                                                            if(compLimits)
+                                                            {
+                                                                limits.CompanyOutboundLimit = compLimits.OutboundLimit;
+                                                                limits.CompanyBothLimit = compLimits.BothLimit;
+                                                            }
 
                                                             var NumLimitInfo = LimitValidator(limits, rule.TrunkNumber, 'outbound');
 
@@ -3746,10 +3774,14 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                                         {
                                                                                             var limits = {
                                                                                                 NumberOutboundLimit: rule.OutLimit,
-                                                                                                NumberBothLimit: rule.BothLimit,
-                                                                                                CompanyOutboundLimit: compLimits.OutboundLimit,
-                                                                                                CompanyBothLimit: compLimits.BothLimit
+                                                                                                NumberBothLimit: rule.BothLimit
                                                                                             };
+
+                                                                                            if(compLimits)
+                                                                                            {
+                                                                                                limits.CompanyOutboundLimit = compLimits.OutboundLimit;
+                                                                                                limits.CompanyBothLimit = compLimits.BothLimit;
+                                                                                            }
 
                                                                                             var NumLimitInfo = LimitValidator(limits, rule.TrunkNumber, 'outbound');
 
@@ -4274,10 +4306,14 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                         {
                                                             var limits = {
                                                                 NumberOutboundLimit: rule.OutLimit,
-                                                                NumberBothLimit: rule.BothLimit,
-                                                                CompanyOutboundLimit: compLimits.OutboundLimit,
-                                                                CompanyBothLimit: compLimits.BothLimit
+                                                                NumberBothLimit: rule.BothLimit
                                                             };
+
+                                                            if(compLimits)
+                                                            {
+                                                                limits.CompanyOutboundLimit = compLimits.OutboundLimit;
+                                                                limits.CompanyBothLimit = compLimits.BothLimit;
+                                                            }
 
                                                             var NumLimitInfo = LimitValidator(limits, rule.TrunkNumber, 'outbound');
 
