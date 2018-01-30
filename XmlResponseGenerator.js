@@ -578,7 +578,7 @@ var createDirectoryProfile = function(extName, ext, domain, email, password, con
 
 };
 
-var CreateHttpApiDialplan = function(destinationPattern, context, httApiUrl, reqId, numLimitInfo, appId, companyId, tenantId, dvpCallDirection, ani, bUnit, isDialerIVR)
+var CreateHttpApiDialplan = function(destinationPattern, context, httApiUrl, reqId, numLimitInfo, appId, companyId, tenantId, dvpCallDirection, ani, bUnit)
 {
     try
     {
@@ -666,12 +666,6 @@ var CreateHttpApiDialplan = function(destinationPattern, context, httApiUrl, req
                 .up()
         }
 
-        if(isDialerIVR)
-        {
-            cond.ele('action').att('application', 'set').att('data', 'is_dialer_ivr=true')
-                .up()
-        }
-
         cond.ele('action').att('application', 'set').att('data', 'DVP_OPERATION_CAT=HTTAPI')
             .up()
             .ele('action').att('application', 'export').att('data', 'dvp_app_type=HTTAPI')
@@ -697,7 +691,7 @@ var CreateHttpApiDialplan = function(destinationPattern, context, httApiUrl, req
 
 };
 
-var CreateHttpApiDialplanTransfer = function(destinationPattern, context, httApiUrl, reqId, numLimitInfo, appId, companyId, tenantId, dvpCallDirection, ani, appType, bUnit)
+var CreateHttpApiDialplanTransfer = function(destinationPattern, context, httApiUrl, reqId, numLimitInfo, appId, companyId, tenantId, dvpCallDirection, ani, appType, bUnit, isDialerIVR)
 {
     try
     {
@@ -762,6 +756,12 @@ var CreateHttpApiDialplanTransfer = function(destinationPattern, context, httApi
         if(bUnit)
         {
             cond.ele('action').att('application', 'export').att('data', 'business_unit=' + bUnit)
+                .up()
+        }
+
+        if(isDialerIVR)
+        {
+            cond.ele('action').att('application', 'set').att('data', 'is_dialer_ivr=true')
                 .up()
         }
 

@@ -633,7 +633,7 @@ var ProcessCallForwarding = function(reqId, aniNum, dnisNum, callerDomain, conte
     }
 };
 
-var handleIVRExt = function(reqId, companyId, tenantId, uuid, context, extDetails, isTransfer, ani, appType, bUnit)
+var handleIVRExt = function(reqId, companyId, tenantId, uuid, context, extDetails, isTransfer, ani, appType, bUnit, isDialerIVR)
 {
 
     return new Promise(function(fulfill, reject)
@@ -680,11 +680,11 @@ var handleIVRExt = function(reqId, companyId, tenantId, uuid, context, extDetail
 
                             if(isTransfer)
                             {
-                                xml = xmlRespBuilder.CreateHttpApiDialplanTransfer('[^\\s]*', context, masterUrl, reqId, null, app.id, companyId, tenantId, 'outbound', ani, appType, bUnit);
+                                xml = xmlRespBuilder.CreateHttpApiDialplanTransfer('[^\\s]*', context, masterUrl, reqId, null, app.id, companyId, tenantId, 'outbound', ani, appType, bUnit, isDialerIVR);
                             }
                             else
                             {
-                                xml = xmlRespBuilder.CreateHttpApiDialplan('[^\\s]*', context, masterUrl, reqId, null, app.id, companyId, tenantId, 'outbound', ani, bUnit, false);
+                                xml = xmlRespBuilder.CreateHttpApiDialplan('[^\\s]*', context, masterUrl, reqId, null, app.id, companyId, tenantId, 'outbound', ani, bUnit);
                             }
 
                             fulfill(xml);
@@ -710,7 +710,7 @@ var handleIVRExt = function(reqId, companyId, tenantId, uuid, context, extDetail
 };
 
 
-var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, extraData, fromUserData, companyId, tenantId, securityToken, numLimitInfo, dvpCallDirection, ctxt, cacheData, bUnit, callback)
+var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, extraData, fromUserData, companyId, tenantId, securityToken, numLimitInfo, dvpCallDirection, ctxt, cacheData, bUnit, isDialerIVR, callback)
 {
 
     try
@@ -1646,7 +1646,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                             else if(extDetails.ObjCategory === 'IVR')
                             {
 
-                                handleIVRExt(reqId, companyId, tenantId, uuid, context, extDetails, false, callerIdNum, appType, bUnit)
+                                handleIVRExt(reqId, companyId, tenantId, uuid, context, extDetails, false, callerIdNum, appType, bUnit, isDialerIVR)
                                     .then(function(ivrResp)
                                     {
                                         callback(null, ivrResp);
@@ -2635,7 +2635,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                 else if(extDetails.ObjCategory === 'IVR')
                                 {
 
-                                    handleIVRExt(reqId, companyId, tenantId, uuid, context, extDetails, false, null, appType, bUnit)
+                                    handleIVRExt(reqId, companyId, tenantId, uuid, context, extDetails, false, null, appType, bUnit, isDialerIVR)
                                         .then(function(ivrResp)
                                         {
                                             callback(null, ivrResp);
@@ -4194,7 +4194,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                     else if(extDetails.ObjCategory === 'IVR' || extDetails.ObjCategory === 'CAMPAIGN')
                                     {
 
-                                        handleIVRExt(reqId, companyId, tenantId, uuid, context, extDetails, true, null, appType, bUnit)
+                                        handleIVRExt(reqId, companyId, tenantId, uuid, context, extDetails, true, null, appType, bUnit, isDialerIVR)
                                             .then(function(ivrResp)
                                             {
                                                 callback(null, ivrResp);
