@@ -578,7 +578,7 @@ var createDirectoryProfile = function(extName, ext, domain, email, password, con
 
 };
 
-var CreateHttpApiDialplan = function(destinationPattern, context, httApiUrl, reqId, numLimitInfo, appId, companyId, tenantId, dvpCallDirection, ani, bUnit)
+var CreateHttpApiDialplan = function(destinationPattern, context, httApiUrl, reqId, numLimitInfo, appId, companyId, tenantId, dvpCallDirection, ani, bUnit, isDialerIVR)
 {
     try
     {
@@ -663,6 +663,12 @@ var CreateHttpApiDialplan = function(destinationPattern, context, httApiUrl, req
         if(ani)
         {
             cond.ele('action').att('application', 'set').att('data', 'effective_caller_id_number=' + ani)
+                .up()
+        }
+
+        if(isDialerIVR)
+        {
+            cond.ele('action').att('application', 'set').att('data', 'is_dialer_ivr=true')
                 .up()
         }
 
