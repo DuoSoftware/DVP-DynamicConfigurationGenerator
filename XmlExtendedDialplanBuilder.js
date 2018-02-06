@@ -517,7 +517,7 @@ var CreatePbxFeaturesGateway = function(reqId, destNum, trunkNumber, trunkCode, 
 
         if(bUnit)
         {
-            option = '[business_unit=' + bUnit + ']';
+            option = option + '[business_unit=' + bUnit + ']';
         }
 
 
