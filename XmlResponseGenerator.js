@@ -578,7 +578,7 @@ var createDirectoryProfile = function(extName, ext, domain, email, password, con
 
 };
 
-var CreateHttpApiDialplan = function(destinationPattern, context, httApiUrl, reqId, numLimitInfo, appId, companyId, tenantId, dvpCallDirection, ani)
+var CreateHttpApiDialplan = function(destinationPattern, context, httApiUrl, reqId, numLimitInfo, appId, companyId, tenantId, dvpCallDirection, ani, bUnit)
 {
     try
     {
@@ -654,6 +654,12 @@ var CreateHttpApiDialplan = function(destinationPattern, context, httApiUrl, req
                 .up()
         }
 
+        if(bUnit)
+        {
+            cond.ele('action').att('application', 'export').att('data', 'business_unit=' + bUnit)
+                .up()
+        }
+
         if(ani)
         {
             cond.ele('action').att('application', 'set').att('data', 'effective_caller_id_number=' + ani)
@@ -685,7 +691,7 @@ var CreateHttpApiDialplan = function(destinationPattern, context, httApiUrl, req
 
 };
 
-var CreateHttpApiDialplanTransfer = function(destinationPattern, context, httApiUrl, reqId, numLimitInfo, appId, companyId, tenantId, dvpCallDirection, ani, appType)
+var CreateHttpApiDialplanTransfer = function(destinationPattern, context, httApiUrl, reqId, numLimitInfo, appId, companyId, tenantId, dvpCallDirection, ani, appType, bUnit, isDialerIVR)
 {
     try
     {
@@ -746,6 +752,19 @@ var CreateHttpApiDialplanTransfer = function(destinationPattern, context, httApi
             cond.ele('action').att('application', 'export').att('data', 'tenantid=' + tenantId)
                 .up()
         }
+
+        if(bUnit)
+        {
+            cond.ele('action').att('application', 'export').att('data', 'business_unit=' + bUnit)
+                .up()
+        }
+
+        if(isDialerIVR)
+        {
+            cond.ele('action').att('application', 'set').att('data', 'is_dialer_ivr=true')
+                .up()
+        }
+
         if(appId)
         {
             cond.ele('action').att('application', 'export').att('data', 'dvp_app_id=' + appId)
@@ -791,7 +810,7 @@ var CreateHttpApiDialplanTransfer = function(destinationPattern, context, httApi
 
 };
 
-var CreateSocketApiDialplan = function(destinationPattern, context, socketUrl, reqId, numLimitInfo, appId, companyId, tenantId, dvpCallDirection)
+var CreateSocketApiDialplan = function(destinationPattern, context, socketUrl, reqId, numLimitInfo, appId, companyId, tenantId, dvpCallDirection, bUnit)
 {
     try
     {
@@ -846,6 +865,11 @@ var CreateSocketApiDialplan = function(destinationPattern, context, socketUrl, r
         if(tenantId)
         {
             cond.ele('action').att('application', 'export').att('data', 'tenantid=' + tenantId)
+                .up()
+        }
+        if(bUnit)
+        {
+            cond.ele('action').att('application', 'export').att('data', 'business_unit=' + bUnit)
                 .up()
         }
         if(appId)
