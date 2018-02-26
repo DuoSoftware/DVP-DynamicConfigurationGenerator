@@ -786,7 +786,7 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
 
             var destNum = (huntDestNum) ? huntDestNum:cdnum;
 
-            if(!destNum || destNum === 'undefined')
+            if(!destNum || destNum === '' || destNum === 'undefined')
             {
                 var xml = xmlGen.createRejectResponse(callerContext);
 
