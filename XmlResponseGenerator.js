@@ -372,6 +372,10 @@ var CreateGatewayProfile = function(gwList, reqId)
                         '@value': password
                     },
                     {
+                        '@name': 'caller-id-in-from',
+                        '@value': 'true'
+                    },
+                    {
                         '@name': 'contact-params',
                         '@value': username + '@' + domain
                     },
@@ -391,6 +395,14 @@ var CreateGatewayProfile = function(gwList, reqId)
                         '@name': 'retry-seconds',
                         '@value': '30'
                     });
+
+                if(!gw.Register)
+                {
+                    domainEle.user.gateways.gateway.param.push({
+                        '@name': 'register',
+                        '@value': 'false'
+                    });
+                }
 
             }
 

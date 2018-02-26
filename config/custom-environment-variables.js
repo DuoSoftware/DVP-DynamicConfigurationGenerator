@@ -61,7 +61,6 @@ module.exports = {
         "dccaclientHost": "SYS_DIAMETERCLIENT_HOST",
         "dccaclientPort": "SYS_DIAMETERCLIENT_PORT",
         "dccaclientVersion": "SYS_DIAMETERCLIENT_VERSION"
-
     },
 
     "Token": "HOST_TOKEN",
