@@ -1020,6 +1020,17 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                     {
                                                         if(pbxDetails.Endpoints && pbxDetails.Endpoints.length > 0)
                                                         {
+                                                            var recEnabled = false;
+
+                                                            if((extDetails.SipUACEndpoint.Context && extDetails.SipUACEndpoint.Context.RecordingEnabled) || extDetails.SipUACEndpoint.RecordingEnabled)
+                                                            {
+                                                                recEnabled = true;
+                                                            }
+                                                            else
+                                                            {
+                                                                recEnabled = false;
+                                                            }
+
                                                             CreateFMEndpointList(reqId, ani, context, companyId, tenantId, pbxDetails.Endpoints, '', false, callerIdNum, callerIdName, csId, appId, cacheData, function(err, epList)
                                                             {
                                                                 if(err)
@@ -1028,7 +1039,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                 }
                                                                 else if(epList && epList.length > 0)
                                                                 {
-                                                                    var xml = xmlBuilder.CreateFollowMeDialplan(reqId, epList, context, profile, '[^\\s]*', false, numLimitInfo, companyId, tenantId, appId, dvpCallDirection, bUnit);
+                                                                    var xml = xmlBuilder.CreateFollowMeDialplan(reqId, epList, context, profile, '[^\\s]*', false, numLimitInfo, companyId, tenantId, appId, dvpCallDirection, bUnit, recEnabled);
 
                                                                     callback(undefined, xml);
                                                                 }
@@ -1969,6 +1980,23 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                         {
                                                             if(pbxDetails.Endpoints && pbxDetails.Endpoints.length > 0)
                                                             {
+                                                                var recEnabled = false;
+
+                                                                if(ctxtRecordingEnabled)
+                                                                {
+                                                                    recEnabled = true;
+                                                                }
+                                                                else
+                                                                {
+                                                                    if(fromUserData.RecordingEnabled)
+                                                                    {
+                                                                        recEnabled = true;
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        recEnabled = false;
+                                                                    }
+                                                                }
                                                                 CreateFMEndpointList(reqId, ani, context, companyId, tenantId, pbxDetails.Endpoints, '', false, callerIdNum, callerIdName, csId, appId, cacheData, function(err, epList)
                                                                 {
                                                                     if(err)
@@ -1977,7 +2005,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                     }
                                                                     else if(epList && epList.length > 0)
                                                                     {
-                                                                        var xml = xmlBuilder.CreateFollowMeDialplan(reqId, epList, context, profile, '[^\\s]*', false, undefined, companyId, tenantId, appId, dvpCallDirection, bUnit);
+                                                                        var xml = xmlBuilder.CreateFollowMeDialplan(reqId, epList, context, profile, '[^\\s]*', false, undefined, companyId, tenantId, appId, dvpCallDirection, bUnit, recEnabled);
 
                                                                         callback(undefined, xml);
                                                                     }
@@ -3566,6 +3594,8 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                             {
                                                                 if(pbxDetails.Endpoints && pbxDetails.Endpoints.length > 0)
                                                                 {
+                                                                    var recEnabled = false;
+
                                                                     CreateFMEndpointList(reqId, ani, context, companyId, tenantId, pbxDetails.Endpoints, '', false, callerIdNum, callerIdName, csId, appId, cacheData, function(err, epList)
                                                                     {
                                                                         if(err)
@@ -3574,7 +3604,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                         }
                                                                         else if(epList && epList.length > 0)
                                                                         {
-                                                                            var xml = xmlBuilder.CreateFollowMeDialplan(reqId, epList, context, profile, '[^\\s]*', false, undefined, companyId, tenantId, appId, dvpCallDirection, bUnit);
+                                                                            var xml = xmlBuilder.CreateFollowMeDialplan(reqId, epList, context, profile, '[^\\s]*', false, undefined, companyId, tenantId, appId, dvpCallDirection, bUnit, recEnabled);
 
                                                                             callback(undefined, xml);
                                                                         }

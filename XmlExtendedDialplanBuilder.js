@@ -1151,7 +1151,7 @@ var CreateRouteUserDialplan = function(reqId, ep, context, profile, destinationP
 
                 if(recordingPath)
                 {
-                    fileSavePath = recordingPath + '${my_uuid}.mp3';
+                    fileSavePath = recordingPath + '${uuid}.mp3';
                 }
 
                 var playFileDetails = 'record_post_process_exec_api=curl_sendfile:' + fileUploadUrl + ' file=${dvpRecFile} class=CALLSERVER&type=CALL&category=CONVERSATION&referenceid=${uuid}&mediatype=audio&filetype=wav&sessionid=${uuid}&display=' + ep.Destination + '-${caller_id_number}';
@@ -2487,7 +2487,7 @@ var FaxReceiveUpload = function(reqId, context, destinationPattern, numLimitInfo
 
         if(recordingPath)
         {
-            fileSavePath = recordingPath + '${my_uuid}.mp3';
+            fileSavePath = recordingPath + '${uuid}.mp3';
         }
 
         cond.ele('action').att('application', 'set').att('data', 'dvpUploadFaxFile=' + fileSavePath)
@@ -2627,7 +2627,7 @@ var CreateRouteGatewayDialplan = function(reqId, ep, context, profile, destinati
 
                 if(recordingPath)
                 {
-                    fileSavePath = recordingPath + '${my_uuid}.mp3';
+                    fileSavePath = recordingPath + '${uuid}.mp3';
                 }
 
                 var playFileDetails = 'record_post_process_exec_api=curl_sendfile:' + fileUploadUrl + ' file=${dvpRecFile} class=CALLSERVER&type=CALL&category=CONVERSATION&referenceid=${uuid}&mediatype=audio&filetype=wav&sessionid=${uuid}&display=' + ep.Destination + '-${caller_id_number}';
@@ -3002,7 +3002,7 @@ var CreateRouteGatewayCampaignDialplan = function(reqId, ep, context, profile, d
 
                 if(recordingPath)
                 {
-                    fileSavePath = recordingPath + '${my_uuid}.mp3';
+                    fileSavePath = recordingPath + '${uuid}.mp3';
                 }
 
                 var playFileDetails = 'record_post_process_exec_api=curl_sendfile:' + fileUploadUrl + ' file=${dvpRecFile} class=CALLSERVER&type=CALL&category=CONVERSATION&referenceid=${uuid}&mediatype=audio&filetype=wav&sessionid=${uuid}&display=' + ep.Destination + '-${caller_id_number}';
@@ -3285,7 +3285,7 @@ var CreateRouteGatewayCampaignDialplan = function(reqId, ep, context, profile, d
 
 };
 
-var CreateFollowMeDialplan = function(reqId, fmEndpoints, context, profile, destinationPattern, ignoreEarlyMedia, numLimitInfo, companyId, tenantId, appId, dvpCallDirection, bUnit)
+var CreateFollowMeDialplan = function(reqId, fmEndpoints, context, profile, destinationPattern, ignoreEarlyMedia, numLimitInfo, companyId, tenantId, appId, dvpCallDirection, bUnit, recordingEnabled)
 {
     try
     {
@@ -3388,6 +3388,69 @@ var CreateFollowMeDialplan = function(reqId, fmEndpoints, context, profile, dest
                 cond.ele('action').att('application', 'limit').att('data', limitStr)
                     .up()
             }
+        }
+
+        if(dvpCallDirection === 'outbound')
+        {
+            cond.ele('action').att('application', 'set').att('data', 'my_uuid=${create_uuid()}').att('inline', 'true')
+                .up()
+        }
+
+        if(recordingEnabled)
+        {
+            if(dvpCallDirection === 'outbound')
+            {
+                var fileUploadUrl = 'http://' + fileServiceIp + ':' + fileServicePort + '/DVP/API/' + fileServiceVersion + '/InternalFileService/File/Upload/' + tenantId + '/' + companyId;
+
+                if(!validator.isIP(fileServiceIp))
+                {
+                    fileUploadUrl = 'http://' + fileServiceIp + '/DVP/API/' + fileServiceVersion + '/InternalFileService/File/Upload/' + tenantId + '/' + companyId;
+                }
+
+                var fileSavePath = '$${base_dir}/recordings/${my_uuid}.mp3';
+
+                if(recordingPath)
+                {
+                    fileSavePath = recordingPath + '${my_uuid}.mp3';
+                }
+
+                var playFileDetails = 'record_post_process_exec_api=curl_sendfile:' + fileUploadUrl + ' file=${dvpRecFile} class=CALLSERVER&type=CALL&category=CONVERSATION&referenceid=${my_uuid}&mediatype=audio&filetype=wav&sessionid=${my_uuid}&display=' + fmEndpoints[0].Destination + '-${caller_id_number}';
+
+                cond.ele('action').att('application', 'set').att('data', 'dvpRecFile=' + fileSavePath)
+                    .up()
+                    .ele('action').att('application', 'export').att('data', 'execute_on_answer=record_session ${dvpRecFile}')
+                    .up()
+                    .ele('action').att('application', 'export').att('data', playFileDetails)
+                    .up()
+            }
+            else
+            {
+                var fileUploadUrl = 'http://' + fileServiceIp + ':' + fileServicePort + '/DVP/API/' + fileServiceVersion + '/InternalFileService/File/Upload/' + tenantId + '/' + companyId;
+
+                if(!validator.isIP(fileServiceIp))
+                {
+                    fileUploadUrl = 'http://' + fileServiceIp + '/DVP/API/' + fileServiceVersion + '/InternalFileService/File/Upload/' + tenantId + '/' + companyId;
+                }
+
+                var fileSavePath = '$${base_dir}/recordings/${uuid}.mp3';
+
+                if(recordingPath)
+                {
+                    fileSavePath = recordingPath + '${uuid}.mp3';
+                }
+
+                var playFileDetails = 'record_post_process_exec_api=curl_sendfile:' + fileUploadUrl + ' file=${dvpRecFile} class=CALLSERVER&type=CALL&category=CONVERSATION&referenceid=${uuid}&mediatype=audio&filetype=wav&sessionid=${uuid}&display=' + fmEndpoints[0].Destination + '-${caller_id_number}';
+
+                cond.ele('action').att('application', 'set').att('data', 'dvpRecFile=' + fileSavePath)
+                    .up()
+                    .ele('action').att('application', 'export').att('data', 'execute_on_answer=record_session ${dvpRecFile}')
+                    .up()
+                    .ele('action').att('application', 'set').att('data', playFileDetails)
+                    .up()
+            }
+
+
+
         }
 
 
