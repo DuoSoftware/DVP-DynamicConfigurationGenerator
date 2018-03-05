@@ -753,6 +753,7 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
         var preTransCaller = data['variable_origination_caller_id_number'];
         var eventTime = data['Event-Date-Timestamp'];
         var businessUnit = data['variable_business_unit'];
+        var transAgentSkill = decodeURIComponent(data['variable_ards_skill_display']);
 
         if(data['variable_pre_transfer_caller_id_number'])
         {
@@ -1046,7 +1047,7 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
                                                 {
                                                     tempCodecPref = codecPrefs.Codecs;
                                                 }
-                                                var xml = xmlBuilder.CreatePbxFeaturesUser(reqId, huntDestNum, 'user', varDomain, huntCtxtSplit[2], huntCtxtSplit[1], null, tempHuntCtxt, transCodes, ardsClientUuid, destNum, tempCodecPref, transferCallerName, ext.SipUACEndpoint.SipUsername, preTransCaller, businessUnit);
+                                                var xml = xmlBuilder.CreatePbxFeaturesUser(reqId, huntDestNum, 'user', varDomain, huntCtxtSplit[2], huntCtxtSplit[1], null, tempHuntCtxt, transCodes, ardsClientUuid, destNum, tempCodecPref, transferCallerName, ext.SipUACEndpoint.SipUsername, preTransCaller, businessUnit, transAgentSkill);
 
                                                 logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
 
@@ -1116,7 +1117,7 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
                                                     {
                                                         tempCodecPref = codecPrefs.Codecs;
                                                     }
-                                                    var xml = xmlBuilder.CreatePbxFeaturesUser(reqId, huntDestNum, 'user', varDomain, ctxt.CompanyId, ctxt.TenantId, null, tempHuntCtxt, transCodes, ardsClientUuid, destNum, tempCodecPref, transferCallerName, ext.SipUACEndpoint.SipUsername, preTransCaller, businessUnit);
+                                                    var xml = xmlBuilder.CreatePbxFeaturesUser(reqId, huntDestNum, 'user', varDomain, ctxt.CompanyId, ctxt.TenantId, null, tempHuntCtxt, transCodes, ardsClientUuid, destNum, tempCodecPref, transferCallerName, ext.SipUACEndpoint.SipUsername, preTransCaller, businessUnit, transAgentSkill);
 
                                                     logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
 
