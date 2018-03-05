@@ -261,7 +261,7 @@ var CreatePbxFeatures = function(reqId, destNum, pbxType, domain, trunkNumber, t
     }
 };
 
-var CreatePbxFeaturesUser = function(reqId, destNum, pbxType, domain, companyId, tenantId, appId, context, transferCodes, ardsClientUuid, digits, codecList, transferCallerName, transferedParty, origCaller, bUnit)
+var CreatePbxFeaturesUser = function(reqId, destNum, pbxType, domain, companyId, tenantId, appId, context, transferCodes, ardsClientUuid, digits, codecList, transferCallerName, transferedParty, origCaller, bUnit, skill)
 {
     try
     {
@@ -359,6 +359,11 @@ var CreatePbxFeaturesUser = function(reqId, destNum, pbxType, domain, companyId,
         if(bUnit)
         {
             option = option + ',business_unit=' + bUnit;
+        }
+
+        if(skill)
+        {
+            option = option + ',transfer_call_skill=' + skill;
         }
 
         if(codecListString && allowCodecPref)
