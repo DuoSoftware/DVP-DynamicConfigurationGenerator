@@ -1316,6 +1316,12 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
                 }
                 else if(pabxFeaturesPattern.test(huntContext) || ardsFeaturesPattern.test(huntContext))
                 {
+                    var tempDirection = data['variable_DVP_CALL_DIRECTION'];
+
+                    if(!tempDirection)
+                    {
+                        tempDirection = 'outbound';
+                    }
 
                     var tempHuntCtxt = decodeURIComponent(huntContext);
 
@@ -1325,7 +1331,7 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
 
                     if(huntCtxtSplit.length === 3)
                     {
-                        extDialplanEngine.ProcessExtendedDialplan(reqId, callerIdNum, destNum, tempHuntCtxt, 'OUT', data, null, huntCtxtSplit[2], huntCtxtSplit[1], securityToken, null, 'outbound', null, null, null, isDialerIVR, function(err, extDialplan)
+                        extDialplanEngine.ProcessExtendedDialplan(reqId, callerIdNum, destNum, tempHuntCtxt, 'OUT', data, null, huntCtxtSplit[2], huntCtxtSplit[1], null, null, tempDirection, null, null, null, isDialerIVR, function(err, extDialplan)
                         {
                             if(err)
                             {
