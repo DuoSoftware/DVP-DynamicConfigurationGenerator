@@ -680,7 +680,12 @@ var handleIVRExt = function(reqId, companyId, tenantId, uuid, context, extDetail
 
                             if(isTransfer)
                             {
-                                xml = xmlRespBuilder.CreateHttpApiDialplanTransfer('[^\\s]*', context, masterUrl, reqId, null, app.id, companyId, tenantId, direction, ani, appType, bUnit, isDialerIVR);
+                                var transIVR = false;
+                                if(!isDialerIVR)
+                                {
+                                    transIVR = true;
+                                }
+                                xml = xmlRespBuilder.CreateHttpApiDialplanTransfer('[^\\s]*', context, masterUrl, reqId, null, app.id, companyId, tenantId, direction, ani, appType, bUnit, isDialerIVR, transIVR);
                             }
                             else
                             {

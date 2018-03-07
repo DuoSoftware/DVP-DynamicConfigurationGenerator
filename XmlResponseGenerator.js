@@ -703,7 +703,7 @@ var CreateHttpApiDialplan = function(destinationPattern, context, httApiUrl, req
 
 };
 
-var CreateHttpApiDialplanTransfer = function(destinationPattern, context, httApiUrl, reqId, numLimitInfo, appId, companyId, tenantId, dvpCallDirection, ani, appType, bUnit, isDialerIVR)
+var CreateHttpApiDialplanTransfer = function(destinationPattern, context, httApiUrl, reqId, numLimitInfo, appId, companyId, tenantId, dvpCallDirection, ani, appType, bUnit, isDialerIVR, isIvrTransfer)
 {
     try
     {
@@ -774,6 +774,12 @@ var CreateHttpApiDialplanTransfer = function(destinationPattern, context, httApi
         if(isDialerIVR)
         {
             cond.ele('action').att('application', 'set').att('data', 'is_dialer_ivr=true')
+                .up()
+        }
+
+        if(isIvrTransfer)
+        {
+            cond.ele('action').att('application', 'set').att('data', 'is_ivr_transfer=true')
                 .up()
         }
 
