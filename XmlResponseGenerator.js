@@ -403,6 +403,13 @@ var CreateGatewayProfile = function(gwList, reqId)
                         '@value': 'false'
                     });
                 }
+                else
+                {
+                    domainEle.user.gateways.gateway.param.push({
+                        '@name': 'register',
+                        '@value': 'true'
+                    });
+                }
 
             }
 
