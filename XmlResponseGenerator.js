@@ -404,13 +404,6 @@ var CreateGatewayProfile = function(gwList, reqId)
                         '@value': 'true'
                     });
                 }
-                else
-                {
-                    domainEle.user.gateways.gateway.param.push({
-                        '@name': 'register',
-                        '@value': 'true'
-                    });
-                }
 
             }
 
