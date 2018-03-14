@@ -392,6 +392,19 @@ var CreateGatewayProfile = function(gwList, reqId)
                         '@value': '30'
                     });
 
+                if(!gw.Register)
+                {
+                    domainEle.user.gateways.gateway.param.push({
+                        '@name': 'register',
+                        '@value': 'false'
+                    });
+
+                    domainEle.user.gateways.gateway.param.push({
+                        '@name': 'caller-id-in-from',
+                        '@value': 'true'
+                    });
+                }
+
             }
 
             obj.document.section.domain.push(domainEle);
@@ -691,7 +704,7 @@ var CreateHttpApiDialplan = function(destinationPattern, context, httApiUrl, req
 
 };
 
-var CreateHttpApiDialplanTransfer = function(destinationPattern, context, httApiUrl, reqId, numLimitInfo, appId, companyId, tenantId, dvpCallDirection, ani, appType, bUnit, isDialerIVR)
+var CreateHttpApiDialplanTransfer = function(destinationPattern, context, httApiUrl, reqId, numLimitInfo, appId, companyId, tenantId, dvpCallDirection, ani, appType, bUnit, isDialerIVR, isIvrTransfer)
 {
     try
     {
@@ -762,6 +775,12 @@ var CreateHttpApiDialplanTransfer = function(destinationPattern, context, httApi
         if(isDialerIVR)
         {
             cond.ele('action').att('application', 'set').att('data', 'is_dialer_ivr=true')
+                .up()
+        }
+
+        if(isIvrTransfer)
+        {
+            cond.ele('action').att('application', 'set').att('data', 'is_ivr_transfer=true')
                 .up()
         }
 

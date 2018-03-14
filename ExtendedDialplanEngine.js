@@ -633,7 +633,7 @@ var ProcessCallForwarding = function(reqId, aniNum, dnisNum, callerDomain, conte
     }
 };
 
-var handleIVRExt = function(reqId, companyId, tenantId, uuid, context, extDetails, isTransfer, ani, appType, bUnit, isDialerIVR)
+var handleIVRExt = function(reqId, companyId, tenantId, uuid, context, extDetails, isTransfer, ani, appType, bUnit, isDialerIVR, direction)
 {
 
     return new Promise(function(fulfill, reject)
@@ -680,11 +680,16 @@ var handleIVRExt = function(reqId, companyId, tenantId, uuid, context, extDetail
 
                             if(isTransfer)
                             {
-                                xml = xmlRespBuilder.CreateHttpApiDialplanTransfer('[^\\s]*', context, masterUrl, reqId, null, app.id, companyId, tenantId, 'outbound', ani, appType, bUnit, isDialerIVR);
+                                var transIVR = false;
+                                if(!isDialerIVR)
+                                {
+                                    transIVR = true;
+                                }
+                                xml = xmlRespBuilder.CreateHttpApiDialplanTransfer('[^\\s]*', context, masterUrl, reqId, null, app.id, companyId, tenantId, direction, ani, appType, bUnit, isDialerIVR, transIVR);
                             }
                             else
                             {
-                                xml = xmlRespBuilder.CreateHttpApiDialplan('[^\\s]*', context, masterUrl, reqId, null, app.id, companyId, tenantId, 'outbound', ani, bUnit);
+                                xml = xmlRespBuilder.CreateHttpApiDialplan('[^\\s]*', context, masterUrl, reqId, null, app.id, companyId, tenantId, direction, ani, bUnit);
                             }
 
                             fulfill(xml);
@@ -1020,6 +1025,17 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                     {
                                                         if(pbxDetails.Endpoints && pbxDetails.Endpoints.length > 0)
                                                         {
+                                                            var recEnabled = false;
+
+                                                            if((extDetails.SipUACEndpoint.Context && extDetails.SipUACEndpoint.Context.RecordingEnabled) || extDetails.SipUACEndpoint.RecordingEnabled)
+                                                            {
+                                                                recEnabled = true;
+                                                            }
+                                                            else
+                                                            {
+                                                                recEnabled = false;
+                                                            }
+
                                                             CreateFMEndpointList(reqId, ani, context, companyId, tenantId, pbxDetails.Endpoints, '', false, callerIdNum, callerIdName, csId, appId, cacheData, function(err, epList)
                                                             {
                                                                 if(err)
@@ -1028,7 +1044,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                 }
                                                                 else if(epList && epList.length > 0)
                                                                 {
-                                                                    var xml = xmlBuilder.CreateFollowMeDialplan(reqId, epList, context, profile, '[^\\s]*', false, numLimitInfo, companyId, tenantId, appId, dvpCallDirection, bUnit);
+                                                                    var xml = xmlBuilder.CreateFollowMeDialplan(reqId, epList, context, profile, '[^\\s]*', false, numLimitInfo, companyId, tenantId, appId, dvpCallDirection, bUnit, recEnabled);
 
                                                                     callback(undefined, xml);
                                                                 }
@@ -1646,7 +1662,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                             else if(extDetails.ObjCategory === 'IVR')
                             {
 
-                                handleIVRExt(reqId, companyId, tenantId, uuid, context, extDetails, false, callerIdNum, appType, bUnit, isDialerIVR)
+                                handleIVRExt(reqId, companyId, tenantId, uuid, context, extDetails, false, callerIdNum, appType, bUnit, isDialerIVR, dvpCallDirection)
                                     .then(function(ivrResp)
                                     {
                                         callback(null, ivrResp);
@@ -1969,6 +1985,23 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                         {
                                                             if(pbxDetails.Endpoints && pbxDetails.Endpoints.length > 0)
                                                             {
+                                                                var recEnabled = false;
+
+                                                                if(ctxtRecordingEnabled)
+                                                                {
+                                                                    recEnabled = true;
+                                                                }
+                                                                else
+                                                                {
+                                                                    if(fromUserData.RecordingEnabled)
+                                                                    {
+                                                                        recEnabled = true;
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        recEnabled = false;
+                                                                    }
+                                                                }
                                                                 CreateFMEndpointList(reqId, ani, context, companyId, tenantId, pbxDetails.Endpoints, '', false, callerIdNum, callerIdName, csId, appId, cacheData, function(err, epList)
                                                                 {
                                                                     if(err)
@@ -1977,7 +2010,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                     }
                                                                     else if(epList && epList.length > 0)
                                                                     {
-                                                                        var xml = xmlBuilder.CreateFollowMeDialplan(reqId, epList, context, profile, '[^\\s]*', false, undefined, companyId, tenantId, appId, dvpCallDirection, bUnit);
+                                                                        var xml = xmlBuilder.CreateFollowMeDialplan(reqId, epList, context, profile, '[^\\s]*', false, undefined, companyId, tenantId, appId, dvpCallDirection, bUnit, recEnabled);
 
                                                                         callback(undefined, xml);
                                                                     }
@@ -2635,7 +2668,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                 else if(extDetails.ObjCategory === 'IVR')
                                 {
 
-                                    handleIVRExt(reqId, companyId, tenantId, uuid, context, extDetails, false, null, appType, bUnit, isDialerIVR)
+                                    handleIVRExt(reqId, companyId, tenantId, uuid, context, extDetails, false, null, appType, bUnit, isDialerIVR, dvpCallDirection)
                                         .then(function(ivrResp)
                                         {
                                             callback(null, ivrResp);
@@ -3566,6 +3599,8 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                             {
                                                                 if(pbxDetails.Endpoints && pbxDetails.Endpoints.length > 0)
                                                                 {
+                                                                    var recEnabled = false;
+
                                                                     CreateFMEndpointList(reqId, ani, context, companyId, tenantId, pbxDetails.Endpoints, '', false, callerIdNum, callerIdName, csId, appId, cacheData, function(err, epList)
                                                                     {
                                                                         if(err)
@@ -3574,7 +3609,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                         }
                                                                         else if(epList && epList.length > 0)
                                                                         {
-                                                                            var xml = xmlBuilder.CreateFollowMeDialplan(reqId, epList, context, profile, '[^\\s]*', false, undefined, companyId, tenantId, appId, dvpCallDirection, bUnit);
+                                                                            var xml = xmlBuilder.CreateFollowMeDialplan(reqId, epList, context, profile, '[^\\s]*', false, undefined, companyId, tenantId, appId, dvpCallDirection, bUnit, recEnabled);
 
                                                                             callback(undefined, xml);
                                                                         }
@@ -4194,7 +4229,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                     else if(extDetails.ObjCategory === 'IVR' || extDetails.ObjCategory === 'CAMPAIGN')
                                     {
 
-                                        handleIVRExt(reqId, companyId, tenantId, uuid, context, extDetails, true, null, appType, bUnit, isDialerIVR)
+                                        handleIVRExt(reqId, companyId, tenantId, uuid, context, extDetails, true, null, appType, bUnit, isDialerIVR, dvpCallDirection)
                                             .then(function(ivrResp)
                                             {
                                                 callback(null, ivrResp);

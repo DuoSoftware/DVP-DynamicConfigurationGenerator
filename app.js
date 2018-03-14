@@ -753,6 +753,7 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
         var preTransCaller = data['variable_origination_caller_id_number'];
         var eventTime = data['Event-Date-Timestamp'];
         var businessUnit = data['variable_business_unit'];
+        var transAgentSkill = decodeURIComponent(data['variable_ards_skill_display']);
 
         if(data['variable_pre_transfer_caller_id_number'])
         {
@@ -786,316 +787,198 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
 
             var destNum = (huntDestNum) ? huntDestNum:cdnum;
 
-            if ((ardsFeaturesPattern.test(huntContext) || huntContext == 'PBXFeatures') && huntDestNum == 'att_xfer')
+            if(!destNum || destNum === '' || destNum === 'undefined')
             {
-                logger.debug('[DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Attendant Transfer User ------------', reqId);
+                var xml = xmlGen.createRejectResponse(callerContext);
 
-                var tempHuntCtxt = decodeURIComponent(huntContext);
-
-                var xml = xmlBuilder.CreateAttendantTransferUser(reqId, huntDestNum, tempHuntCtxt);
                 logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+
                 res.end(xml);
-
-                /*backendFactory.getBackendHandler().GetContext(varUsrContext, function(err, ctxt)
-                {
-                    if(ctxt)
-                    {
-                        backendFactory.getBackendHandler().GetCacheObject(ctxt.TenantId, ctxt.CompanyId, function(err, cacheInfo)
-                        {
-                            var tempHuntCtxt = decodeURIComponent(huntContext);
-
-                            var xml = xmlBuilder.CreateAttendantTransferUser(reqId, huntDestNum, tempHuntCtxt);
-                            logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
-                            res.end(xml);
-
-                            /!*if(err)
-                            {
-                                var xml = xmlBuilder.CreatePbxFeatures(reqId, huntDestNum, 'user', varDomain, null, null, ctxt.CompanyId, ctxt.TenantId, null, huntContext, null, ardsClientUuid);
-
-                                logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
-
-                                res.end(xml);
-                            }
-                            else
-                            {
-                                /!*backendFactory.getBackendHandler().GetTransferCodesForTenantDB(reqId, ctxt.CompanyId, ctxt.TenantId, cacheInfo, function(err, transCodes)
-                                {
-                                    var xml = xmlBuilder.CreatePbxFeatures(reqId, huntDestNum, 'user', varDomain, null, null, ctxt.CompanyId, ctxt.TenantId, null, huntContext, transCodes, ardsClientUuid);
-
-                                    logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
-
-                                    res.end(xml);
-
-                                })*!/
-
-                            }*!/
-
-                        });
-
-                    }
-                    else
-                    {
-                        var xml = xmlBuilder.CreatePbxFeatures(reqId, huntDestNum, 'user', varDomain, null, null, null, null, null, huntContext, null, ardsClientUuid);
-
-                        logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
-
-                        res.end(xml);
-
-                    }
-
-                });*/
-
             }
-            else if (huntContext == 'PBXFeatures' && huntDestNum == 'att_xfer_ivr')
+            else
             {
-                logger.debug('[DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Attendant Transfer IVR ------------', reqId);
-
-                backendFactory.getBackendHandler().GetContext(varUsrContext, function(err, ctxt)
+                if ((ardsFeaturesPattern.test(huntContext) || huntContext == 'PBXFeatures') && huntDestNum == 'att_xfer')
                 {
-                    if(ctxt)
-                    {
-                        var xml = xmlBuilder.CreatePbxFeatures(reqId, huntDestNum, 'ivr', varDomain, null, null, ctxt.CompanyId, ctxt.TenantId, null, huntContext, null, ardsClientUuid);
+                    logger.debug('[DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Attendant Transfer User ------------', reqId);
 
-                        logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+                    var tempHuntCtxt = decodeURIComponent(huntContext);
 
-                        res.end(xml);
-
-                    }
-                    else
-                    {
-                        var xml = xmlBuilder.CreatePbxFeatures(reqId, huntDestNum, 'ivr', varDomain, null, null, null, null, null, huntContext, null, ardsClientUuid);
-
-                        logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
-
-                        res.end(xml);
-
-                    }
-
-                });
-
-            }
-            else if (ardsFeaturesPattern.test(huntContext) && huntDestNum == 'att_xfer_ivr')
-            {
-                logger.debug('[DVP-DynamicConfigurationGenerator.CallApp] - [%s] - ARDS Attendant Transfer User ------------', reqId);
-
-                var tempHuntCtxt = decodeURIComponent(huntContext);
-
-                var huntCtxtSplit = tempHuntCtxt.split('|');
-
-                if(huntCtxtSplit.length === 3)
-                {
-                    var xml = xmlBuilder.CreatePbxFeatures(reqId, huntDestNum, 'ivr', varDomain, null, null, huntCtxtSplit[2], huntCtxtSplit[1], null, tempHuntCtxt, null, ardsClientUuid);
-
+                    var xml = xmlBuilder.CreateAttendantTransferUser(reqId, huntDestNum, tempHuntCtxt);
                     logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
-
                     res.end(xml);
 
+                    /*backendFactory.getBackendHandler().GetContext(varUsrContext, function(err, ctxt)
+                     {
+                     if(ctxt)
+                     {
+                     backendFactory.getBackendHandler().GetCacheObject(ctxt.TenantId, ctxt.CompanyId, function(err, cacheInfo)
+                     {
+                     var tempHuntCtxt = decodeURIComponent(huntContext);
+
+                     var xml = xmlBuilder.CreateAttendantTransferUser(reqId, huntDestNum, tempHuntCtxt);
+                     logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+                     res.end(xml);
+
+                     /!*if(err)
+                     {
+                     var xml = xmlBuilder.CreatePbxFeatures(reqId, huntDestNum, 'user', varDomain, null, null, ctxt.CompanyId, ctxt.TenantId, null, huntContext, null, ardsClientUuid);
+
+                     logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+
+                     res.end(xml);
+                     }
+                     else
+                     {
+                     /!*backendFactory.getBackendHandler().GetTransferCodesForTenantDB(reqId, ctxt.CompanyId, ctxt.TenantId, cacheInfo, function(err, transCodes)
+                     {
+                     var xml = xmlBuilder.CreatePbxFeatures(reqId, huntDestNum, 'user', varDomain, null, null, ctxt.CompanyId, ctxt.TenantId, null, huntContext, transCodes, ardsClientUuid);
+
+                     logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+
+                     res.end(xml);
+
+                     })*!/
+
+                     }*!/
+
+                     });
+
+                     }
+                     else
+                     {
+                     var xml = xmlBuilder.CreatePbxFeatures(reqId, huntDestNum, 'user', varDomain, null, null, null, null, null, huntContext, null, ardsClientUuid);
+
+                     logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+
+                     res.end(xml);
+
+                     }
+
+                     });*/
 
                 }
-                else
+                else if (huntContext == 'PBXFeatures' && huntDestNum == 'att_xfer_ivr')
                 {
-                    var xml = xmlGen.createRejectResponse(callerContext);
+                    logger.debug('[DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Attendant Transfer IVR ------------', reqId);
 
-                    logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
-
-                    res.end(xml);
-                }
-
-
-            }
-            /*else if (ardsFeaturesPattern.test(huntContext) && huntDestNum == 'att_xfer')
-            {
-                logger.debug('[DVP-DynamicConfigurationGenerator.CallApp] - [%s] - ARDS Attendant Transfer User ------------', reqId);
-
-                var tempHuntCtxt = decodeURIComponent(huntContext);
-
-                var huntCtxtSplit = tempHuntCtxt.split('|');
-
-                if(huntCtxtSplit.length === 3)
-                {
-                    backendFactory.getBackendHandler().GetCacheObject(huntCtxtSplit[1], huntCtxtSplit[2], function(err, cacheInfo)
+                    backendFactory.getBackendHandler().GetContext(varUsrContext, function(err, ctxt)
                     {
-                        if(err)
+                        if(ctxt)
                         {
-                            var xml = xmlBuilder.CreatePbxFeatures(reqId, huntDestNum, 'user', varDomain, null, null, huntCtxtSplit[2], huntCtxtSplit[1], null, tempHuntCtxt, null, ardsClientUuid);
+                            var xml = xmlBuilder.CreatePbxFeatures(reqId, huntDestNum, 'ivr', varDomain, null, null, ctxt.CompanyId, ctxt.TenantId, null, huntContext, null, ardsClientUuid);
 
                             logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
 
                             res.end(xml);
+
                         }
                         else
                         {
-                            backendFactory.getBackendHandler().GetTransferCodesForTenantDB(reqId, huntCtxtSplit[2], huntCtxtSplit[1], cacheInfo, function(err, transCodes)
-                            {
-                                var xml = xmlBuilder.CreatePbxFeatures(reqId, huntDestNum, 'user', varDomain, null, null, huntCtxtSplit[2], huntCtxtSplit[1], null, tempHuntCtxt, transCodes, ardsClientUuid);
+                            var xml = xmlBuilder.CreatePbxFeatures(reqId, huntDestNum, 'ivr', varDomain, null, null, null, null, null, huntContext, null, ardsClientUuid);
 
-                                logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+                            logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
 
-                                res.end(xml);
+                            res.end(xml);
 
-                            })
                         }
 
                     });
 
-
                 }
-                else
+                else if (ardsFeaturesPattern.test(huntContext) && huntDestNum == 'att_xfer_ivr')
                 {
-                    var xml = xmlGen.createRejectResponse(callerContext);
+                    logger.debug('[DVP-DynamicConfigurationGenerator.CallApp] - [%s] - ARDS Attendant Transfer User ------------', reqId);
 
-                    logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
-
-                    res.end(xml);
-                }
-
-
-            }*/
-            else if ((ardsFeaturesPattern.test(huntContext) || huntContext == 'PBXFeatures') && huntDestNum == 'att_xfer_outbound')
-            {
-                logger.debug('[DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Attendant Transfer Gateway ------------', reqId);
-
-                logger.debug('[DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Trying to get context : %s', reqId, varUsrContext);
-
-                var tempHuntCtxt = decodeURIComponent(huntContext);
-
-                backendFactory.getBackendHandler().GetContext(varUsrContext, function(err, ctxt)
-                {
-                    if(ctxt)
-                    {
-                        backendFactory.getBackendHandler().GetCacheObject(ctxt.TenantId, ctxt.CompanyId, function(err, cacheInfo)
-                        {
-                            if(err)
-                            {
-                                var xml = xmlGen.createRejectResponse(tempHuntCtxt);
-
-                                logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
-
-                                res.end(xml);
-                            }
-                            else
-                            {
-                                var xml = xmlBuilder.CreateAttendantTransferGW(reqId, huntDestNum, tempHuntCtxt);
-                                logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
-                                res.end(xml);
-                            }
-
-                        });
-
-                    }
-                    else
-                    {
-                        logger.error('[DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Context not found', reqId, err);
-                        var xml = xmlGen.createRejectResponse(tempHuntCtxt);
-
-                        logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
-
-                        res.end(xml);
-                    }
-
-                });
-
-            }
-            else if(huntDestNum === 'usertransfer')
-            {
-                logger.debug('[DVP-DynamicConfigurationGenerator.CallApp] - [%s] - ARDS Attendant Transfer User ------------', reqId);
-
-                if(data['variable_DVP_CALL_DIRECTION'] === 'outbound')
-                {
-                    if(data['variable_DVP_OPERATION_CAT'] === 'GATEWAY' || data['variable_DVP_OPERATION_CAT'] === 'ATT_XFER_USER')
-                    {
-                        preTransCaller = data['Other-Leg-Destination-Number'];
-                    }
-
-                }
-
-                destNum = data["variable_digits"];
-
-                destNum = decodeURIComponent(destNum);
-
-                if(ardsFeaturesPattern.test(huntContext))
-                {
                     var tempHuntCtxt = decodeURIComponent(huntContext);
 
                     var huntCtxtSplit = tempHuntCtxt.split('|');
 
                     if(huntCtxtSplit.length === 3)
                     {
-                        backendFactory.getBackendHandler().GetCacheObject(huntCtxtSplit[1], huntCtxtSplit[2], function(err, cacheInfo)
-                        {
-                            if(err)
-                            {
-                                var xml = xmlBuilder.createTransferRejectResponse(tempHuntCtxt, transferCallerName, huntCtxtSplit[2], huntCtxtSplit[1], destNum);
+                        var xml = xmlBuilder.CreatePbxFeatures(reqId, huntDestNum, 'ivr', varDomain, null, null, huntCtxtSplit[2], huntCtxtSplit[1], null, tempHuntCtxt, null, ardsClientUuid);
 
-                                logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+                        logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
 
-                                res.end(xml);
-                            }
-                            else
-                            {
-                                backendFactory.getBackendHandler().GetTransferCodesForTenantDB(reqId, huntCtxtSplit[2], huntCtxtSplit[1], cacheInfo, function(err, transCodes)
-                                {
-                                    backendFactory.getBackendHandler().GetAllDataForExt(reqId, destNum, huntCtxtSplit[2], huntCtxtSplit[1], 'USER', null, null, function(err, ext)
-                                    {
-                                        if(ext && ext.SipUACEndpoint)
-                                        {
-                                            backendFactory.getBackendHandler().getContextPreferences(varUsrContext, ext.SipUACEndpoint.ContextId, huntCtxtSplit[2], huntCtxtSplit[1]).then(function(codecPrefs)
-                                            {
-                                                var tempCodecPref = null;
-                                                if(codecPrefs)
-                                                {
-                                                    tempCodecPref = codecPrefs.Codecs;
-                                                }
-                                                var xml = xmlBuilder.CreatePbxFeaturesUser(reqId, huntDestNum, 'user', varDomain, huntCtxtSplit[2], huntCtxtSplit[1], null, tempHuntCtxt, transCodes, ardsClientUuid, destNum, tempCodecPref, transferCallerName, ext.SipUACEndpoint.SipUsername, preTransCaller, businessUnit);
-
-                                                logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
-
-                                                res.end(xml);
-
-                                            }).catch(function(err)
-                                            {
-                                                logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - error getting codec preferences', reqId);
-                                                res.end(xmlBuilder.createTransferRejectResponse(tempHuntCtxt, transferCallerName, huntCtxtSplit[2], huntCtxtSplit[1], ext.SipUACEndpoint.SipUsername));
-                                            });
-                                        }
-                                        else
-                                        {
-                                            logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - User not not found', reqId);
-                                            res.end(xmlBuilder.createTransferRejectResponse(tempHuntCtxt, transferCallerName, huntCtxtSplit[2], huntCtxtSplit[1], destNum));
-                                        }
-
-                                    })
-
-
-                                })
-                            }
-
-                        });
+                        res.end(xml);
 
 
                     }
                     else
                     {
-                        var xml = xmlBuilder.createTransferRejectResponse(tempHuntCtxt, transferCallerName, huntCtxtSplit[2], huntCtxtSplit[1], destNum);
+                        var xml = xmlGen.createRejectResponse(callerContext);
 
                         logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
 
                         res.end(xml);
                     }
-                }
-                else
-                {
-                    var tempHuntCtxt = decodeURIComponent(huntContext);
-                    backendFactory.getBackendHandler().GetContext(varUsrContext, function (err, ctxt)
-                    {
-                        if (ctxt)
-                        {
-                            backendFactory.getBackendHandler().GetCacheObject(ctxt.TenantId, ctxt.CompanyId, function (err, cacheInfo)
-                            {
 
-                                if (err)
+
+                }
+                /*else if (ardsFeaturesPattern.test(huntContext) && huntDestNum == 'att_xfer')
+                 {
+                 logger.debug('[DVP-DynamicConfigurationGenerator.CallApp] - [%s] - ARDS Attendant Transfer User ------------', reqId);
+
+                 var tempHuntCtxt = decodeURIComponent(huntContext);
+
+                 var huntCtxtSplit = tempHuntCtxt.split('|');
+
+                 if(huntCtxtSplit.length === 3)
+                 {
+                 backendFactory.getBackendHandler().GetCacheObject(huntCtxtSplit[1], huntCtxtSplit[2], function(err, cacheInfo)
+                 {
+                 if(err)
+                 {
+                 var xml = xmlBuilder.CreatePbxFeatures(reqId, huntDestNum, 'user', varDomain, null, null, huntCtxtSplit[2], huntCtxtSplit[1], null, tempHuntCtxt, null, ardsClientUuid);
+
+                 logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+
+                 res.end(xml);
+                 }
+                 else
+                 {
+                 backendFactory.getBackendHandler().GetTransferCodesForTenantDB(reqId, huntCtxtSplit[2], huntCtxtSplit[1], cacheInfo, function(err, transCodes)
+                 {
+                 var xml = xmlBuilder.CreatePbxFeatures(reqId, huntDestNum, 'user', varDomain, null, null, huntCtxtSplit[2], huntCtxtSplit[1], null, tempHuntCtxt, transCodes, ardsClientUuid);
+
+                 logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+
+                 res.end(xml);
+
+                 })
+                 }
+
+                 });
+
+
+                 }
+                 else
+                 {
+                 var xml = xmlGen.createRejectResponse(callerContext);
+
+                 logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+
+                 res.end(xml);
+                 }
+
+
+                 }*/
+                else if ((ardsFeaturesPattern.test(huntContext) || huntContext == 'PBXFeatures') && huntDestNum == 'att_xfer_outbound')
+                {
+                    logger.debug('[DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Attendant Transfer Gateway ------------', reqId);
+
+                    logger.debug('[DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Trying to get context : %s', reqId, varUsrContext);
+
+                    var tempHuntCtxt = decodeURIComponent(huntContext);
+
+                    backendFactory.getBackendHandler().GetContext(varUsrContext, function(err, ctxt)
+                    {
+                        if(ctxt)
+                        {
+                            backendFactory.getBackendHandler().GetCacheObject(ctxt.TenantId, ctxt.CompanyId, function(err, cacheInfo)
+                            {
+                                if(err)
                                 {
-                                    var xml = xmlBuilder.createTransferRejectResponse(tempHuntCtxt, transferCallerName, ctxt.CompanyId, ctxt.TenantId, destNum);
+                                    var xml = xmlGen.createRejectResponse(tempHuntCtxt);
 
                                     logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
 
@@ -1103,20 +986,78 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
                                 }
                                 else
                                 {
-                                    backendFactory.getBackendHandler().GetTransferCodesForTenantDB(reqId, ctxt.CompanyId, ctxt.TenantId, cacheInfo, function (err, transCodes)
+                                    var xml = xmlBuilder.CreateAttendantTransferGW(reqId, huntDestNum, tempHuntCtxt);
+                                    logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+                                    res.end(xml);
+                                }
+
+                            });
+
+                        }
+                        else
+                        {
+                            logger.error('[DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Context not found', reqId, err);
+                            var xml = xmlGen.createRejectResponse(tempHuntCtxt);
+
+                            logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+
+                            res.end(xml);
+                        }
+
+                    });
+
+                }
+                else if(huntDestNum === 'usertransfer')
+                {
+                    logger.debug('[DVP-DynamicConfigurationGenerator.CallApp] - [%s] - ARDS Attendant Transfer User ------------', reqId);
+
+                    if(data['variable_DVP_CALL_DIRECTION'] === 'outbound')
+                    {
+                        if(data['variable_DVP_OPERATION_CAT'] === 'GATEWAY' || data['variable_DVP_OPERATION_CAT'] === 'ATT_XFER_USER')
+                        {
+                            preTransCaller = data['Other-Leg-Destination-Number'];
+                        }
+
+                    }
+
+                    destNum = data["variable_digits"];
+
+                    destNum = decodeURIComponent(destNum);
+
+                    if(ardsFeaturesPattern.test(huntContext))
+                    {
+                        var tempHuntCtxt = decodeURIComponent(huntContext);
+
+                        var huntCtxtSplit = tempHuntCtxt.split('|');
+
+                        if(huntCtxtSplit.length === 3)
+                        {
+                            backendFactory.getBackendHandler().GetCacheObject(huntCtxtSplit[1], huntCtxtSplit[2], function(err, cacheInfo)
+                            {
+                                if(err)
+                                {
+                                    var xml = xmlBuilder.createTransferRejectResponse(tempHuntCtxt, transferCallerName, huntCtxtSplit[2], huntCtxtSplit[1], destNum);
+
+                                    logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+
+                                    res.end(xml);
+                                }
+                                else
+                                {
+                                    backendFactory.getBackendHandler().GetTransferCodesForTenantDB(reqId, huntCtxtSplit[2], huntCtxtSplit[1], cacheInfo, function(err, transCodes)
                                     {
-                                        backendFactory.getBackendHandler().GetAllDataForExt(reqId, destNum, ctxt.CompanyId, ctxt.TenantId, 'USER', null, null, function(err, ext)
+                                        backendFactory.getBackendHandler().GetAllDataForExt(reqId, destNum, huntCtxtSplit[2], huntCtxtSplit[1], 'USER', null, null, function(err, ext)
                                         {
                                             if(ext && ext.SipUACEndpoint)
                                             {
-                                                backendFactory.getBackendHandler().getContextPreferences(varUsrContext, ext.SipUACEndpoint.ContextId, ctxt.CompanyId, ctxt.TenantId).then(function(codecPrefs)
+                                                backendFactory.getBackendHandler().getContextPreferences(varUsrContext, ext.SipUACEndpoint.ContextId, huntCtxtSplit[2], huntCtxtSplit[1]).then(function(codecPrefs)
                                                 {
                                                     var tempCodecPref = null;
                                                     if(codecPrefs)
                                                     {
                                                         tempCodecPref = codecPrefs.Codecs;
                                                     }
-                                                    var xml = xmlBuilder.CreatePbxFeaturesUser(reqId, huntDestNum, 'user', varDomain, ctxt.CompanyId, ctxt.TenantId, null, tempHuntCtxt, transCodes, ardsClientUuid, destNum, tempCodecPref, transferCallerName, ext.SipUACEndpoint.SipUsername, preTransCaller, businessUnit);
+                                                    var xml = xmlBuilder.CreatePbxFeaturesUser(reqId, huntDestNum, 'user', varDomain, huntCtxtSplit[2], huntCtxtSplit[1], null, tempHuntCtxt, transCodes, ardsClientUuid, destNum, tempCodecPref, transferCallerName, ext.SipUACEndpoint.SipUsername, preTransCaller, businessUnit, transAgentSkill);
 
                                                     logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
 
@@ -1124,137 +1065,86 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
 
                                                 }).catch(function(err)
                                                 {
-                                                    var xml = xmlBuilder.createTransferRejectResponse(tempHuntCtxt, transferCallerName, ctxt.CompanyId, ctxt.TenantId, ext.SipUACEndpoint.SipUsername);
-
-                                                    logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
-
-                                                    res.end(xml);
+                                                    logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - error getting codec preferences', reqId);
+                                                    res.end(xmlBuilder.createTransferRejectResponse(tempHuntCtxt, transferCallerName, huntCtxtSplit[2], huntCtxtSplit[1], ext.SipUACEndpoint.SipUsername));
                                                 });
                                             }
                                             else
                                             {
-                                                var xml = xmlBuilder.createTransferRejectResponse(tempHuntCtxt, transferCallerName, ctxt.CompanyId, ctxt.TenantId, destNum);
-
-                                                logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
-
-                                                res.end(xml);
+                                                logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - User not not found', reqId);
+                                                res.end(xmlBuilder.createTransferRejectResponse(tempHuntCtxt, transferCallerName, huntCtxtSplit[2], huntCtxtSplit[1], destNum));
                                             }
 
                                         })
 
 
                                     })
-
                                 }
 
                             });
 
+
                         }
                         else
                         {
-                            var xml = xmlBuilder.createTransferRejectResponse(tempHuntCtxt, transferCallerName, null, null, destNum);
+                            var xml = xmlBuilder.createTransferRejectResponse(tempHuntCtxt, transferCallerName, huntCtxtSplit[2], huntCtxtSplit[1], destNum);
 
                             logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
 
                             res.end(xml);
-
                         }
-
-                    });
-                }
-
-
-
-            }
-            else if(huntDestNum === 'gwtransfer')
-            {
-                destNum = data["variable_digits"];
-
-                destNum = decodeURIComponent(destNum);
-
-                logger.debug('[DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Attendant Transfer Gateway ------------', reqId);
-
-                logger.debug('[DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Trying to get context : %s', reqId, varUsrContext);
-
-                backendFactory.getBackendHandler().GetContext(varUsrContext, function(err, ctxt)
-                {
-                    if(ctxt)
+                    }
+                    else
                     {
-                        backendFactory.getBackendHandler().GetCacheObject(ctxt.TenantId, ctxt.CompanyId, function(err, cacheInfo)
+                        var tempHuntCtxt = decodeURIComponent(huntContext);
+                        backendFactory.getBackendHandler().GetContext(varUsrContext, function (err, ctxt)
                         {
-                            if(err)
+                            if (ctxt)
                             {
-                                var xml = xmlBuilder.createTransferRejectResponse(huntContext, transferCallerName, ctxt.CompanyId, ctxt.TenantId, destNum);
-
-                                logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
-
-                                res.end(xml);
-                            }
-                            else
-                            {
-                                backendFactory.getRuleHandler().PickCallRuleOutboundComplete(reqId, callerIdNum, destNum, '', varUsrContext, ctxt.CompanyId, ctxt.TenantId, true, cacheInfo, function (err, outRule)
+                                backendFactory.getBackendHandler().GetCacheObject(ctxt.TenantId, ctxt.CompanyId, function (err, cacheInfo)
                                 {
-                                    if(outRule)
+
+                                    if (err)
                                     {
-                                        extApi.CheckBalance(reqId, varUuid, outRule.ANI, outRule.DNIS, 'minute', outRule.Operator, ctxt.CompanyId, ctxt.TenantId)
-                                            .then(function(balanceRes)
+                                        var xml = xmlBuilder.createTransferRejectResponse(tempHuntCtxt, transferCallerName, ctxt.CompanyId, ctxt.TenantId, destNum);
+
+                                        logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+
+                                        res.end(xml);
+                                    }
+                                    else
+                                    {
+                                        backendFactory.getBackendHandler().GetTransferCodesForTenantDB(reqId, ctxt.CompanyId, ctxt.TenantId, cacheInfo, function (err, transCodes)
+                                        {
+                                            backendFactory.getBackendHandler().GetAllDataForExt(reqId, destNum, ctxt.CompanyId, ctxt.TenantId, 'USER', null, null, function(err, ext)
                                             {
-                                                if (balanceRes && balanceRes.IsSuccess)
+                                                if(ext && ext.SipUACEndpoint)
                                                 {
-                                                    //Validate limits
-
-                                                    backendFactory.getBackendHandler().GetCompanyLimits(ctxt.CompanyId, ctxt.TenantId).then(function(compLimits)
+                                                    backendFactory.getBackendHandler().getContextPreferences(varUsrContext, ext.SipUACEndpoint.ContextId, ctxt.CompanyId, ctxt.TenantId).then(function(codecPrefs)
                                                     {
-                                                        var limits = {
-                                                            NumberOutboundLimit: outRule.OutLimit,
-                                                            NumberBothLimit: outRule.BothLimit
-                                                        };
-
-                                                        if(compLimits)
+                                                        var tempCodecPref = null;
+                                                        if(codecPrefs)
                                                         {
-                                                            limits.CompanyOutboundLimit = compLimits.OutboundLimit;
-                                                            limits.CompanyBothLimit = compLimits.BothLimit;
+                                                            tempCodecPref = codecPrefs.Codecs;
                                                         }
-
-                                                        var NumLimitInfo = LimitValidator(limits, outRule.TrunkNumber, 'outbound');
-
-                                                        if(NumLimitInfo)
-                                                        {
-                                                            var xml = xmlBuilder.CreatePbxFeaturesGateway(reqId, huntDestNum, outRule.TrunkNumber, outRule.GatewayCode, ctxt.CompanyId, ctxt.TenantId, null, huntContext, outRule.DNIS, outRule.Operator, outRule.IpUrl, NumLimitInfo, outRule.Codecs, transferCallerName, outRule.BusinessUnit);
-
-                                                            logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
-
-                                                            res.end(xml);
-
-                                                        }
-                                                        else
-                                                        {
-                                                            var xml = xmlBuilder.createTransferRejectResponse(huntContext, transferCallerName, ctxt.CompanyId, ctxt.TenantId, destNum);
-
-                                                            logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
-
-                                                            res.end(xml);
-                                                        }
-
-
-
-                                                    }).catch(function(err)
-                                                    {
-                                                        var xml = xmlBuilder.createTransferRejectResponse(huntContext, transferCallerName, ctxt.CompanyId, ctxt.TenantId, destNum);
+                                                        var xml = xmlBuilder.CreatePbxFeaturesUser(reqId, huntDestNum, 'user', varDomain, ctxt.CompanyId, ctxt.TenantId, null, tempHuntCtxt, transCodes, ardsClientUuid, destNum, tempCodecPref, transferCallerName, ext.SipUACEndpoint.SipUsername, preTransCaller, businessUnit, transAgentSkill);
 
                                                         logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
 
                                                         res.end(xml);
 
+                                                    }).catch(function(err)
+                                                    {
+                                                        var xml = xmlBuilder.createTransferRejectResponse(tempHuntCtxt, transferCallerName, ctxt.CompanyId, ctxt.TenantId, ext.SipUACEndpoint.SipUsername);
+
+                                                        logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+
+                                                        res.end(xml);
                                                     });
-
-
                                                 }
                                                 else
                                                 {
-                                                    logger.error('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Insufficient balance', reqId);
-
-                                                    var xml = xmlBuilder.createTransferRejectResponse(huntContext, transferCallerName, ctxt.CompanyId, ctxt.TenantId, destNum);
+                                                    var xml = xmlBuilder.createTransferRejectResponse(tempHuntCtxt, transferCallerName, ctxt.CompanyId, ctxt.TenantId, destNum);
 
                                                     logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
 
@@ -1262,195 +1152,50 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
                                                 }
 
                                             })
-                                            .catch(function(err)
-                                            {
-                                                logger.error('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Insufficient balance', reqId, err);
-
-                                                var xml = xmlBuilder.createTransferRejectResponse(huntContext, transferCallerName, ctxt.CompanyId, ctxt.TenantId, destNum);
-
-                                                logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
-
-                                                res.end(xml);
-                                            });
 
 
-                                    }
-                                    else
-                                    {
-                                        logger.error('[DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Outbound Rule Not Found', reqId, err);
-                                        var xml = xmlBuilder.createTransferRejectResponse(huntContext, transferCallerName, ctxt.CompanyId, ctxt.TenantId, destNum);
+                                        })
 
-                                        logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
-
-                                        res.end(xml);
                                     }
 
                                 });
+
+                            }
+                            else
+                            {
+                                var xml = xmlBuilder.createTransferRejectResponse(tempHuntCtxt, transferCallerName, null, null, destNum);
+
+                                logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+
+                                res.end(xml);
+
                             }
 
                         });
-
-                    }
-                    else
-                    {
-                        logger.error('[DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Context not found', reqId, err);
-                        var xml = xmlBuilder.createTransferRejectResponse(huntContext, transferCallerName, null, null, destNum);
-
-                        logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
-
-                        res.end(xml);
                     }
 
-                });
-            }
-            else if(pabxFeaturesPattern.test(huntContext) || ardsFeaturesPattern.test(huntContext))
-            {
-
-                var tempHuntCtxt = decodeURIComponent(huntContext);
-
-                data['IsIVRTransfer'] = true;
-
-                var huntCtxtSplit = tempHuntCtxt.split('|');
-
-                if(huntCtxtSplit.length === 3)
-                {
-                    extDialplanEngine.ProcessExtendedDialplan(reqId, callerIdNum, destNum, tempHuntCtxt, 'OUT', data, null, huntCtxtSplit[2], huntCtxtSplit[1], securityToken, null, 'outbound', null, null, null, isDialerIVR, function(err, extDialplan)
-                    {
-                        if(err)
-                        {
-                            logger.error('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Extended dialplan Error', reqId, err);
-
-                            var xml = xmlGen.createRejectResponse(tempHuntCtxt);
-
-                            logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
-                            res.end(xml);
-                        }
-                        else
-                        {
-                            //No need to do redis op
-
-                            logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, extDialplan);
-                            res.end(extDialplan);
-                        }
-
-                    })
 
 
                 }
-                else
+                else if(huntDestNum === 'gwtransfer')
                 {
-                    var xml = xmlGen.createRejectResponse(callerContext);
+                    destNum = data["variable_digits"];
 
-                    logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+                    destNum = decodeURIComponent(destNum);
 
-                    res.end(xml);
-                }
+                    logger.debug('[DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Attendant Transfer Gateway ------------', reqId);
 
+                    logger.debug('[DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Trying to get context : %s', reqId, varUsrContext);
 
-
-
-            }
-            else
-            {
-                logger.debug('[DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Trying to get context : %s', reqId, callerContext);
-
-                var cacheData = null;
-
-                backendFactory.getBackendHandler().GetContext(callerContext, function(err, ctxt)
-                {
-                    if(err)
+                    backendFactory.getBackendHandler().GetContext(varUsrContext, function(err, ctxt)
                     {
-                        logger.error('[DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Error occurred getting context', reqId, err);
-                        var xml = xmlGen.createRejectResponse(callerContext);
-
-                        logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
-
-                        res.end(xml);
-                    }
-                    else //Same dialplan for all - only use context to find direction
-                    {
-                        var direction = 'IN';
-                        var contextCompany = undefined;
-                        var contextTenant = undefined;
-
-
-                        if(ctxt && ctxt.ContextCat && ctxt.ContextCat.toUpperCase() === "INTERNAL")
+                        if(ctxt)
                         {
-
-                            direction = 'OUT';
-                            contextCompany = ctxt.CompanyId;
-                            contextTenant = ctxt.TenantId;
-
-                            logger.info('[DVP-DynamicConfigurationGenerator.CallApp] - [%s] - context found category INTERNAL', reqId);
-                        }
-                        else
-                        {
-                            logger.info('[DVP-DynamicConfigurationGenerator.CallApp] - [%s] - context found category PUBLIC', reqId);
-
-                            if(dvpOriginationType && dvpOriginationType === 'PUBLIC_USER')
-                            {
-                                //Don't Check Phone number
-                                direction = 'OUT';
-                            }
-                        }
-
-                        var decodedSipFromUri = decodeURIComponent(varSipFromUri);
-                        var decodedSipToUri = decodeURIComponent(varSipToUri);
-
-                        var fromSplitArr = decodedSipFromUri.split("@");
-
-                        var toSplitArr = decodedSipToUri.split("@");
-
-                        var aniNum = "";
-                        var dnisNum = "";
-                        var domain = "";
-
-                        if(fromSplitArr.length == 2)
-                        {
-                            var domainS = fromSplitArr[1];
-
-                            var domainAndPort = domainS.split(":");
-
-                            if(domainAndPort.length == 2)
-                            {
-                                domain = domainAndPort[0];
-                            }
-
-                            aniNum = fromSplitArr[0];
-
-                        }
-
-                        if(toSplitArr.length == 2)
-                        {
-                            dnisNum = toSplitArr[0];
-                        }
-
-                        //Find
-                        var dnisRegExPattern = new RegExp('^(CF/)[^\s]*');
-                        if(dnisRegExPattern.test(destNum))
-                        {
-                            logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Call Forwarding Lua Response Detected : %s', reqId, destNum);
-                            //Call Forwarding
-                            var dnisSplitArr = destNum.split('/');
-                            var fwdId = dnisSplitArr[1];
-                            var companyId = dnisSplitArr[2];
-                            var tenantId = dnisSplitArr[3];
-                            var disconReason = dnisSplitArr[4];
-                            var dodNumber = dnisSplitArr[5];
-                            var context = dnisSplitArr[6];
-                            var origination = dnisSplitArr[7];
-                            var origCallerIdNum = dnisSplitArr[8];
-
-                            if(!dodNumber)
-                            {
-                                dodNumber = '';
-                            }
-
-                            backendFactory.getBackendHandler().GetCacheObject(tenantId, companyId, function(err, cacheInfo)
+                            backendFactory.getBackendHandler().GetCacheObject(ctxt.TenantId, ctxt.CompanyId, function(err, cacheInfo)
                             {
                                 if(err)
                                 {
-                                    var xml = xmlGen.createRejectResponse(callerContext);
+                                    var xml = xmlBuilder.createTransferRejectResponse(huntContext, transferCallerName, ctxt.CompanyId, ctxt.TenantId, destNum);
 
                                     logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
 
@@ -1458,416 +1203,973 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
                                 }
                                 else
                                 {
-                                    cacheData = cacheInfo;
-                                    extDialplanEngine.ProcessCallForwarding(reqId, callerIdNum, destNum, domain, context, direction, data, companyId, tenantId, disconReason, fwdId, dodNumber, '', origination, origCallerIdNum, csId, cacheData, function(err, xml)
+                                    backendFactory.getRuleHandler().PickCallRuleOutboundComplete(reqId, callerIdNum, destNum, '', varUsrContext, ctxt.CompanyId, ctxt.TenantId, true, cacheInfo, function (err, outRule)
                                     {
-                                        if(err)
+                                        if(outRule)
                                         {
-                                            logger.error('[DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Error occurred while processing call forwarding lua equest', reqId, err);
-                                            var xml = xmlGen.createRejectResponse(callerContext);
+                                            extApi.CheckBalance(reqId, varUuid, outRule.ANI, outRule.DNIS, 'minute', outRule.Operator, ctxt.CompanyId, ctxt.TenantId)
+                                                .then(function(balanceRes)
+                                                {
+                                                    if (balanceRes && balanceRes.IsSuccess)
+                                                    {
+                                                        //Validate limits
 
-                                            logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+                                                        backendFactory.getBackendHandler().GetCompanyLimits(ctxt.CompanyId, ctxt.TenantId).then(function(compLimits)
+                                                        {
+                                                            var limits = {
+                                                                NumberOutboundLimit: outRule.OutLimit,
+                                                                NumberBothLimit: outRule.BothLimit
+                                                            };
 
-                                            res.end(xml);
+                                                            if(compLimits)
+                                                            {
+                                                                limits.CompanyOutboundLimit = compLimits.OutboundLimit;
+                                                                limits.CompanyBothLimit = compLimits.BothLimit;
+                                                            }
+
+                                                            var NumLimitInfo = LimitValidator(limits, outRule.TrunkNumber, 'outbound');
+
+                                                            if(NumLimitInfo)
+                                                            {
+                                                                var xml = xmlBuilder.CreatePbxFeaturesGateway(reqId, huntDestNum, outRule.TrunkNumber, outRule.GatewayCode, ctxt.CompanyId, ctxt.TenantId, null, huntContext, outRule.DNIS, outRule.Operator, outRule.IpUrl, NumLimitInfo, outRule.Codecs, transferCallerName, outRule.BusinessUnit);
+
+                                                                logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+
+                                                                res.end(xml);
+
+                                                            }
+                                                            else
+                                                            {
+                                                                var xml = xmlBuilder.createTransferRejectResponse(huntContext, transferCallerName, ctxt.CompanyId, ctxt.TenantId, destNum);
+
+                                                                logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+
+                                                                res.end(xml);
+                                                            }
+
+
+
+                                                        }).catch(function(err)
+                                                        {
+                                                            var xml = xmlBuilder.createTransferRejectResponse(huntContext, transferCallerName, ctxt.CompanyId, ctxt.TenantId, destNum);
+
+                                                            logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+
+                                                            res.end(xml);
+
+                                                        });
+
+
+                                                    }
+                                                    else
+                                                    {
+                                                        logger.error('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Insufficient balance', reqId);
+
+                                                        var xml = xmlBuilder.createTransferRejectResponse(huntContext, transferCallerName, ctxt.CompanyId, ctxt.TenantId, destNum);
+
+                                                        logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+
+                                                        res.end(xml);
+                                                    }
+
+                                                })
+                                                .catch(function(err)
+                                                {
+                                                    logger.error('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Insufficient balance', reqId, err);
+
+                                                    var xml = xmlBuilder.createTransferRejectResponse(huntContext, transferCallerName, ctxt.CompanyId, ctxt.TenantId, destNum);
+
+                                                    logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+
+                                                    res.end(xml);
+                                                });
+
+
                                         }
                                         else
                                         {
+                                            logger.error('[DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Outbound Rule Not Found', reqId, err);
+                                            var xml = xmlBuilder.createTransferRejectResponse(huntContext, transferCallerName, ctxt.CompanyId, ctxt.TenantId, destNum);
+
                                             logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+
                                             res.end(xml);
                                         }
-                                    })
+
+                                    });
                                 }
 
                             });
 
-
                         }
                         else
                         {
-                            if(direction === 'IN')
+                            logger.error('[DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Context not found', reqId, err);
+                            var xml = xmlBuilder.createTransferRejectResponse(huntContext, transferCallerName, null, null, destNum);
+
+                            logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+
+                            res.end(xml);
+                        }
+
+                    });
+                }
+                else if(pabxFeaturesPattern.test(huntContext) || ardsFeaturesPattern.test(huntContext))
+                {
+                    var tempDirection = data['variable_DVP_CALL_DIRECTION'];
+
+                    if(!tempDirection)
+                    {
+                        tempDirection = 'outbound';
+                    }
+
+                    var tempHuntCtxt = decodeURIComponent(huntContext);
+
+                    data['IsIVRTransfer'] = true;
+
+                    var huntCtxtSplit = tempHuntCtxt.split('|');
+
+                    if(huntCtxtSplit.length === 3)
+                    {
+                        extDialplanEngine.ProcessExtendedDialplan(reqId, callerIdNum, destNum, tempHuntCtxt, 'OUT', data, null, huntCtxtSplit[2], huntCtxtSplit[1], null, null, tempDirection, null, null, null, isDialerIVR, function(err, extDialplan)
+                        {
+                            if(err)
                             {
-                                logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Call Direction IN', reqId);
+                                logger.error('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Extended dialplan Error', reqId, err);
 
-                                var varCompanyId = data["variable_companyid"];
-                                var varTenantId = data["variable_tenantid"];
+                                var xml = xmlGen.createRejectResponse(tempHuntCtxt);
+
+                                logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+                                res.end(xml);
+                            }
+                            else
+                            {
+                                //No need to do redis op
+
+                                logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, extDialplan);
+                                res.end(extDialplan);
+                            }
+
+                        })
 
 
-                                if(appType === 'HTTAPI' && varCompanyId && varTenantId)
+                    }
+                    else
+                    {
+                        var xml = xmlGen.createRejectResponse(callerContext);
+
+                        logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+
+                        res.end(xml);
+                    }
+
+
+
+
+                }
+                else
+                {
+                    logger.debug('[DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Trying to get context : %s', reqId, callerContext);
+
+                    var cacheData = null;
+
+                    backendFactory.getBackendHandler().GetContext(callerContext, function(err, ctxt)
+                    {
+                        if(err)
+                        {
+                            logger.error('[DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Error occurred getting context', reqId, err);
+                            var xml = xmlGen.createRejectResponse(callerContext);
+
+                            logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+
+                            res.end(xml);
+                        }
+                        else //Same dialplan for all - only use context to find direction
+                        {
+                            var direction = 'IN';
+                            var contextCompany = undefined;
+                            var contextTenant = undefined;
+
+
+                            if(ctxt && ctxt.ContextCat && ctxt.ContextCat.toUpperCase() === "INTERNAL")
+                            {
+
+                                direction = 'OUT';
+                                contextCompany = ctxt.CompanyId;
+                                contextTenant = ctxt.TenantId;
+
+                                logger.info('[DVP-DynamicConfigurationGenerator.CallApp] - [%s] - context found category INTERNAL', reqId);
+                            }
+                            else
+                            {
+                                logger.info('[DVP-DynamicConfigurationGenerator.CallApp] - [%s] - context found category PUBLIC', reqId);
+
+                                if(dvpOriginationType && dvpOriginationType === 'PUBLIC_USER')
                                 {
-                                    HandleOutRequest(reqId, data, callerIdNum, varTenantId, appType, varCompanyId, dvpOriginationType, destNum, domain, callerContext, profile, varUuid, isDialplanGiven, ctxt, cacheData, eventTime, null, isDialerIVR, res);
+                                    //Don't Check Phone number
+                                    direction = 'OUT';
                                 }
-                                else
-                                {
-                                    logger.debug('[DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Validating trunk number for inbound call - TrunkNumber : %s', reqId, destNum);
+                            }
 
-                                    backendFactory.getBackendHandler().GetPhoneNumberDetails(destNum, function(err, num, cacheInfo)
+                            var decodedSipFromUri = decodeURIComponent(varSipFromUri);
+                            var decodedSipToUri = decodeURIComponent(varSipToUri);
+
+                            var fromSplitArr = decodedSipFromUri.split("@");
+
+                            var toSplitArr = decodedSipToUri.split("@");
+
+                            var aniNum = "";
+                            var dnisNum = "";
+                            var domain = "";
+
+                            if(fromSplitArr.length == 2)
+                            {
+                                var domainS = fromSplitArr[1];
+
+                                var domainAndPort = domainS.split(":");
+
+                                if(domainAndPort.length == 2)
+                                {
+                                    domain = domainAndPort[0];
+                                }
+
+                                aniNum = fromSplitArr[0];
+
+                            }
+
+                            if(toSplitArr.length == 2)
+                            {
+                                dnisNum = toSplitArr[0];
+                            }
+
+                            //Find
+                            var dnisRegExPattern = new RegExp('^(CF/)[^\s]*');
+                            if(dnisRegExPattern.test(destNum))
+                            {
+                                logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Call Forwarding Lua Response Detected : %s', reqId, destNum);
+                                //Call Forwarding
+                                var dnisSplitArr = destNum.split('/');
+                                var fwdId = dnisSplitArr[1];
+                                var companyId = dnisSplitArr[2];
+                                var tenantId = dnisSplitArr[3];
+                                var disconReason = dnisSplitArr[4];
+                                var dodNumber = dnisSplitArr[5];
+                                var context = dnisSplitArr[6];
+                                var origination = dnisSplitArr[7];
+                                var origCallerIdNum = dnisSplitArr[8];
+
+                                if(!dodNumber)
+                                {
+                                    dodNumber = '';
+                                }
+
+                                backendFactory.getBackendHandler().GetCacheObject(tenantId, companyId, function(err, cacheInfo)
+                                {
+                                    if(err)
+                                    {
+                                        var xml = xmlGen.createRejectResponse(callerContext);
+
+                                        logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+
+                                        res.end(xml);
+                                    }
+                                    else
                                     {
                                         cacheData = cacheInfo;
-                                        if(err)
+                                        extDialplanEngine.ProcessCallForwarding(reqId, callerIdNum, destNum, domain, context, direction, data, companyId, tenantId, disconReason, fwdId, dodNumber, '', origination, origCallerIdNum, csId, cacheData, function(err, xml)
                                         {
-                                            logger.error('[DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Error occurred while validating incoming number', reqId, err);
-                                            var xml = xmlGen.createRejectResponse(callerContext);
-
-                                            res.end(xml);
-
-                                        }
-                                        else if(num)
-                                        {
-                                            logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - TrunkNumber found', reqId);
-
-                                            backendFactory.getBackendHandler().ValidateBlacklistNumber(callerIdNum, num.CompanyId, num.TenantId, cacheData, function(err, blackListNum)
+                                            if(err)
                                             {
+                                                logger.error('[DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Error occurred while processing call forwarding lua equest', reqId, err);
+                                                var xml = xmlGen.createRejectResponse(callerContext);
 
-                                                if(err || blackListNum)
-                                                {
-                                                    logger.error('[DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Error occurred while validating black list number or number is in black list', reqId, err);
-                                                    var xml = xmlGen.createRejectResponse(callerContext);
+                                                logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
 
-                                                    res.end(xml);
-                                                }
-                                                else
+                                                res.end(xml);
+                                            }
+                                            else
+                                            {
+                                                logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+                                                res.end(xml);
+                                            }
+                                        })
+                                    }
+
+                                });
+
+
+                            }
+                            else
+                            {
+                                if(direction === 'IN')
+                                {
+                                    logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Call Direction IN', reqId);
+
+                                    var varCompanyId = data["variable_companyid"];
+                                    var varTenantId = data["variable_tenantid"];
+
+
+                                    if(appType === 'HTTAPI' && varCompanyId && varTenantId)
+                                    {
+                                        HandleOutRequest(reqId, data, callerIdNum, varTenantId, appType, varCompanyId, dvpOriginationType, destNum, domain, callerContext, profile, varUuid, isDialplanGiven, ctxt, cacheData, eventTime, null, isDialerIVR, res);
+                                    }
+                                    else
+                                    {
+                                        logger.debug('[DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Validating trunk number for inbound call - TrunkNumber : %s', reqId, destNum);
+
+                                        backendFactory.getBackendHandler().GetPhoneNumberDetails(destNum, function(err, num, cacheInfo)
+                                        {
+                                            cacheData = cacheInfo;
+                                            if(err)
+                                            {
+                                                logger.error('[DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Error occurred while validating incoming number', reqId, err);
+                                                var xml = xmlGen.createRejectResponse(callerContext);
+
+                                                res.end(xml);
+
+                                            }
+                                            else if(num)
+                                            {
+                                                logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - TrunkNumber found', reqId);
+
+                                                backendFactory.getBackendHandler().ValidateBlacklistNumber(callerIdNum, num.CompanyId, num.TenantId, cacheData, function(err, blackListNum)
                                                 {
-                                                    if(!num.Trunk || !num.Trunk.TrunkIpAddress)
+
+                                                    if(err || blackListNum)
                                                     {
-                                                        logger.error('[DVP-DynamicConfigurationGenerator.CallApp] - [%s] -  No trunk or ip addresses associated to number', reqId);
+                                                        logger.error('[DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Error occurred while validating black list number or number is in black list', reqId, err);
                                                         var xml = xmlGen.createRejectResponse(callerContext);
 
                                                         res.end(xml);
                                                     }
                                                     else
                                                     {
-                                                        var isValidIp = ipValidator.ValidateRange(varSipFromHost, num.Trunk.TrunkIpAddress);
-
-                                                        if(!isValidIp)
+                                                        if(!num.Trunk || !num.Trunk.TrunkIpAddress)
                                                         {
-                                                            logger.error('[DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Incoming IP validation failed', reqId);
+                                                            logger.error('[DVP-DynamicConfigurationGenerator.CallApp] - [%s] -  No trunk or ip addresses associated to number', reqId);
                                                             var xml = xmlGen.createRejectResponse(callerContext);
 
                                                             res.end(xml);
                                                         }
                                                         else
                                                         {
-                                                            //Get company limits
+                                                            var isValidIp = ipValidator.ValidateRange(varSipFromHost, num.Trunk.TrunkIpAddress);
 
-                                                            backendFactory.getBackendHandler().GetCompanyLimits(num.CompanyId, num.TenantId).then(function(compLimits)
+                                                            if(!isValidIp)
                                                             {
-                                                                var limits = {
-                                                                    NumberInboundLimit: num.LimitInfoInbound,
-                                                                    NumberBothLimit: num.LimitInfoBoth,
-                                                                    CompanyInboundLimit: null,
-                                                                    CompanyBothLimit: null
-                                                                };
+                                                                logger.error('[DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Incoming IP validation failed', reqId);
+                                                                var xml = xmlGen.createRejectResponse(callerContext);
 
-                                                                if(compLimits)
+                                                                res.end(xml);
+                                                            }
+                                                            else
+                                                            {
+                                                                //Get company limits
+
+                                                                backendFactory.getBackendHandler().GetCompanyLimits(num.CompanyId, num.TenantId).then(function(compLimits)
                                                                 {
-                                                                    limits.CompanyInboundLimit = compLimits.InboundLimit;
-                                                                    limits.CompanyBothLimit = compLimits.BothLimit;
-                                                                }
+                                                                    var limits = {
+                                                                        NumberInboundLimit: num.LimitInfoInbound,
+                                                                        NumberBothLimit: num.LimitInfoBoth,
+                                                                        CompanyInboundLimit: null,
+                                                                        CompanyBothLimit: null
+                                                                    };
 
-                                                                var NumLimitInfo = LimitValidator(limits, num.PhoneNumber, 'inbound');
-
-                                                                if(NumLimitInfo)
-                                                                {
-                                                                    var faxType = undefined;
-                                                                    if(num.Trunk)
+                                                                    if(compLimits)
                                                                     {
-                                                                        faxType = num.Trunk.FaxType;
-
-                                                                        data['TrunkFaxType'] = faxType;
+                                                                        limits.CompanyInboundLimit = compLimits.InboundLimit;
+                                                                        limits.CompanyBothLimit = compLimits.BothLimit;
                                                                     }
 
-                                                                    //Check number is a fax number - if true upload it to media gallery
+                                                                    var NumLimitInfo = LimitValidator(limits, num.PhoneNumber, 'inbound');
 
-                                                                    if(num.ObjCategory === 'FAX')
+                                                                    if(NumLimitInfo)
                                                                     {
-                                                                        var xml = xmlBuilder.FaxReceiveUpload(reqId, callerContext, '[^\\s]*', NumLimitInfo, 'inbound', num.CompanyId, num.TenantId, num.PhoneNumber, null);
-                                                                        logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
-
-                                                                        res.end(xml);
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        logger.debug('[DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Trying to pick inbound rule - Params - aniNum : %s, destNum : %s, domain : %s, companyId : %s, tenantId : %s', reqId, aniNum, destNum, domain, num.CompanyId, num.TenantId);
-
-                                                                        backendFactory.getRuleHandler().PickCallRuleInbound(reqId, callerIdNum, destNum, '', domain, callerContext, 'CALL', num.CompanyId, num.TenantId, cacheData, function(err, rule)
+                                                                        var faxType = undefined;
+                                                                        if(num.Trunk)
                                                                         {
-                                                                            if(err)
-                                                                            {
-                                                                                logger.error('[DVP-DynamicConfigurationGenerator.CallApp] - [%s] - PickCallRuleInbound returned exception', reqId, err);
-                                                                                var xml = xmlGen.createRejectResponse(callerContext);
+                                                                            faxType = num.Trunk.FaxType;
 
-                                                                                res.end(xml);
-                                                                            }
-                                                                            else if(rule)
+                                                                            data['TrunkFaxType'] = faxType;
+                                                                        }
+
+                                                                        //Check number is a fax number - if true upload it to media gallery
+
+                                                                        if(num.ObjCategory === 'FAX')
+                                                                        {
+                                                                            var xml = xmlBuilder.FaxReceiveUpload(reqId, callerContext, '[^\\s]*', NumLimitInfo, 'inbound', num.CompanyId, num.TenantId, num.PhoneNumber, null);
+                                                                            logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+
+                                                                            res.end(xml);
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            logger.debug('[DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Trying to pick inbound rule - Params - aniNum : %s, destNum : %s, domain : %s, companyId : %s, tenantId : %s', reqId, aniNum, destNum, domain, num.CompanyId, num.TenantId);
+
+                                                                            backendFactory.getRuleHandler().PickCallRuleInbound(reqId, callerIdNum, destNum, '', domain, callerContext, 'CALL', num.CompanyId, num.TenantId, cacheData, function(err, rule)
                                                                             {
-                                                                                var tempAni = data["Caller-Caller-ID-Number"];
-                                                                                if(rule.ANITranslation)
+                                                                                if(err)
                                                                                 {
-                                                                                    tempAni = translationHandler.TranslateHandler(rule.ANITranslation, data["Caller-Caller-ID-Number"]);
-                                                                                    data["Caller-Caller-ID-Number"] = tempAni;
+                                                                                    logger.error('[DVP-DynamicConfigurationGenerator.CallApp] - [%s] - PickCallRuleInbound returned exception', reqId, err);
+                                                                                    var xml = xmlGen.createRejectResponse(callerContext);
+
+                                                                                    res.end(xml);
                                                                                 }
-
-                                                                                logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - PickCallRuleInbound returned rule : %s', reqId, JSON.stringify(rule));
-
-                                                                                //check dnis is a emergency number
-
-                                                                                if(rule.Application && rule.Application.Availability)
+                                                                                else if(rule)
                                                                                 {
-                                                                                    var app = rule.Application;
-
-                                                                                    logger.info('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Call rule has a app', reqId);
-
-                                                                                    if(rule.Application.MasterApplication && rule.Application.MasterApplication.Availability && rule.Application.MasterApplication.Url)
+                                                                                    var tempAni = data["Caller-Caller-ID-Number"];
+                                                                                    if(rule.ANITranslation)
                                                                                     {
-                                                                                        var masterUrl = '';
-                                                                                        var masterApp = rule.Application.MasterApplication;
+                                                                                        tempAni = translationHandler.TranslateHandler(rule.ANITranslation, data["Caller-Caller-ID-Number"]);
+                                                                                        data["Caller-Caller-ID-Number"] = tempAni;
+                                                                                    }
 
-                                                                                        logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Master application found : ', reqId, JSON.stringify(masterApp));
+                                                                                    logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - PickCallRuleInbound returned rule : %s', reqId, JSON.stringify(rule));
 
-                                                                                        if(masterApp.ObjType === "HTTAPI")
+                                                                                    //check dnis is a emergency number
+
+                                                                                    if(rule.Application && rule.Application.Availability)
+                                                                                    {
+                                                                                        var app = rule.Application;
+
+                                                                                        logger.info('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Call rule has a app', reqId);
+
+                                                                                        if(rule.Application.MasterApplication && rule.Application.MasterApplication.Availability && rule.Application.MasterApplication.Url)
                                                                                         {
-                                                                                            logger.info('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Master App Type is HTTAPI', reqId);
-                                                                                            //add to redis
-                                                                                            masterUrl = masterApp.Url;
-                                                                                            var sessionData =
+                                                                                            var masterUrl = '';
+                                                                                            var masterApp = rule.Application.MasterApplication;
+
+                                                                                            logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Master application found : ', reqId, JSON.stringify(masterApp));
+
+                                                                                            if(masterApp.ObjType === "HTTAPI")
                                                                                             {
-                                                                                                path: app.Url,
-                                                                                                company: rule.CompanyId,
-                                                                                                tenant: rule.TenantId,
-                                                                                                app: app.AppName,
-                                                                                                appid: app.id
-                                                                                            };
+                                                                                                logger.info('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Master App Type is HTTAPI', reqId);
+                                                                                                //add to redis
+                                                                                                masterUrl = masterApp.Url;
+                                                                                                var sessionData =
+                                                                                                {
+                                                                                                    path: app.Url,
+                                                                                                    company: rule.CompanyId,
+                                                                                                    tenant: rule.TenantId,
+                                                                                                    app: app.AppName,
+                                                                                                    appid: app.id
+                                                                                                };
 
-                                                                                            var jsonString = JSON.stringify(sessionData);
+                                                                                                var jsonString = JSON.stringify(sessionData);
 
-                                                                                            logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Session Data Object created for HTTAPI : %s', reqId, jsonString);
+                                                                                                logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Session Data Object created for HTTAPI : %s', reqId, jsonString);
 
-                                                                                            redisHandler.SetObject(varUuid + "_data", jsonString, function(err, result)
+                                                                                                redisHandler.SetObject(varUuid + "_data", jsonString, function(err, result)
+                                                                                                {
+                                                                                                    if(err)
+                                                                                                    {
+                                                                                                        logger.error('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Exception in setting sessionData on backend - Key : %s_data', reqId, varUuid, err);
+                                                                                                        var xml = xmlGen.createRejectResponse(callerContext);
+
+                                                                                                        logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+
+                                                                                                        res.end(xml);
+                                                                                                    }
+                                                                                                    else
+                                                                                                    {
+                                                                                                        redisHandler.ExpireKey(varUuid + "_data", 86400);
+                                                                                                        logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Session data added to redis successfully - Key : %s_data', reqId, varUuid);
+
+                                                                                                        var xml = xmlGen.CreateHttpApiDialplan('[^\\s]*', callerContext, masterUrl, reqId, NumLimitInfo, app.id, rule.CompanyId, rule.TenantId, 'inbound', tempAni, rule.BusinessUnit);
+
+                                                                                                        logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+
+                                                                                                        RedisOperations(varUuid, rule.CompanyId, rule.TenantId, rule.Application.id, app.ObjType, isDialplanGiven, 'inbound', eventTime, rule.BusinessUnit);
+
+                                                                                                        res.end(xml);
+                                                                                                    }
+
+                                                                                                });
+
+                                                                                            }
+                                                                                            else if(masterApp.ObjType === "SOCKET")
                                                                                             {
-                                                                                                if(err)
+                                                                                                logger.info('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Master App Type is SOCKET', reqId);
+
+                                                                                                var sessionData =
                                                                                                 {
-                                                                                                    logger.error('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Exception in setting sessionData on backend - Key : %s_data', reqId, varUuid, err);
-                                                                                                    var xml = xmlGen.createRejectResponse(callerContext);
+                                                                                                    path: app.Url,
+                                                                                                    company: rule.CompanyId,
+                                                                                                    tenant: rule.TenantId,
+                                                                                                    app: app.AppName,
+                                                                                                    appid: app.id
+                                                                                                };
 
-                                                                                                    logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+                                                                                                var jsonString = JSON.stringify(sessionData);
 
-                                                                                                    res.end(xml);
-                                                                                                }
-                                                                                                else
+                                                                                                logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Session Data Object created for SOCKET : %s', reqId, jsonString);
+
+                                                                                                redisHandler.SetObject(varUuid + "_data", jsonString, function(err, result)
                                                                                                 {
-                                                                                                    redisHandler.ExpireKey(varUuid + "_data", 86400);
-                                                                                                    logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Session data added to redis successfully - Key : %s_data', reqId, varUuid);
+                                                                                                    if(err)
+                                                                                                    {
+                                                                                                        logger.error('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Exception in setting sessionData on backend - Key : : %s_data', reqId, varUuid, err);
+                                                                                                        var xml = xmlGen.createRejectResponse(callerContext);
 
-                                                                                                    var xml = xmlGen.CreateHttpApiDialplan('[^\\s]*', callerContext, masterUrl, reqId, NumLimitInfo, app.id, rule.CompanyId, rule.TenantId, 'inbound', tempAni, rule.BusinessUnit);
+                                                                                                        logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
 
-                                                                                                    logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+                                                                                                        res.end(xml);
+                                                                                                    }
+                                                                                                    else
+                                                                                                    {
+                                                                                                        redisHandler.ExpireKey(varUuid + "_data", 86400);
+                                                                                                        logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Session data added to redis successfully - Key : : %s_data', reqId, varUuid);
 
-                                                                                                    RedisOperations(varUuid, rule.CompanyId, rule.TenantId, rule.Application.id, app.ObjType, isDialplanGiven, 'inbound', eventTime, rule.BusinessUnit);
+                                                                                                        var xml = xmlGen.CreateSocketApiDialplan('[^\\s]*', callerContext, app.Url, reqId, NumLimitInfo, app.id, rule.CompanyId, rule.TenantId, 'inbound', rule.BusinessUnit);
 
-                                                                                                    res.end(xml);
-                                                                                                }
+                                                                                                        logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
 
-                                                                                            });
+                                                                                                        RedisOperations(varUuid, rule.CompanyId, rule.TenantId, rule.Application.id, app.ObjType, isDialplanGiven, 'inbound', eventTime, rule.BusinessUnit);
 
-                                                                                        }
-                                                                                        else if(masterApp.ObjType === "SOCKET")
-                                                                                        {
-                                                                                            logger.info('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Master App Type is SOCKET', reqId);
+                                                                                                        res.end(xml);
+                                                                                                    }
 
-                                                                                            var sessionData =
+                                                                                                });
+                                                                                            }
+                                                                                            else if(masterApp.ObjType === 'EXTENDED')
                                                                                             {
-                                                                                                path: app.Url,
-                                                                                                company: rule.CompanyId,
-                                                                                                tenant: rule.TenantId,
-                                                                                                app: app.AppName,
-                                                                                                appid: app.id
-                                                                                            };
+                                                                                                data.DVPAppUrl = masterApp.Url;
+                                                                                                data.AppId = masterApp.id;
+                                                                                                extDialplanEngine.ProcessExtendedDialplan(reqId, callerIdNum, destNum, callerContext, direction, data, undefined, rule.CompanyId, rule.TenantId, securityToken, NumLimitInfo, 'inbound', ctxt, null, rule.BusinessUnit, isDialerIVR, function(err, extDialplan)
+                                                                                                {
+                                                                                                    if(err)
+                                                                                                    {
+                                                                                                        logger.error('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Extended dialplan Error', reqId, err);
 
-                                                                                            var jsonString = JSON.stringify(sessionData);
+                                                                                                        var xml = xmlGen.createRejectResponse(callerContext);
 
-                                                                                            logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Session Data Object created for SOCKET : %s', reqId, jsonString);
+                                                                                                        logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+                                                                                                        res.end(xml);
+                                                                                                    }
+                                                                                                    else
+                                                                                                    {
+                                                                                                        RedisOperations(varUuid, rule.CompanyId, rule.TenantId, rule.Application.id, app.ObjType, isDialplanGiven, 'inbound', eventTime, rule.BusinessUnit);
 
-                                                                                            redisHandler.SetObject(varUuid + "_data", jsonString, function(err, result)
+                                                                                                        logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, extDialplan);
+                                                                                                        res.end(extDialplan);
+                                                                                                    }
+
+                                                                                                })
+                                                                                            }
+                                                                                            else
                                                                                             {
-                                                                                                if(err)
-                                                                                                {
-                                                                                                    logger.error('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Exception in setting sessionData on backend - Key : : %s_data', reqId, varUuid, err);
-                                                                                                    var xml = xmlGen.createRejectResponse(callerContext);
+                                                                                                logger.error('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Master App Type Undefined - Terminating', reqId);
+                                                                                                var xml = xmlGen.createRejectResponse(callerContext);
 
-                                                                                                    logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+                                                                                                logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
 
-                                                                                                    res.end(xml);
-                                                                                                }
-                                                                                                else
-                                                                                                {
-                                                                                                    redisHandler.ExpireKey(varUuid + "_data", 86400);
-                                                                                                    logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Session data added to redis successfully - Key : : %s_data', reqId, varUuid);
+                                                                                                res.end(xml);
+                                                                                            }
 
-                                                                                                    var xml = xmlGen.CreateSocketApiDialplan('[^\\s]*', callerContext, app.Url, reqId, NumLimitInfo, app.id, rule.CompanyId, rule.TenantId, 'inbound', rule.BusinessUnit);
-
-                                                                                                    logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
-
-                                                                                                    RedisOperations(varUuid, rule.CompanyId, rule.TenantId, rule.Application.id, app.ObjType, isDialplanGiven, 'inbound', eventTime, rule.BusinessUnit);
-
-                                                                                                    res.end(xml);
-                                                                                                }
-
-                                                                                            });
-                                                                                        }
-                                                                                        else if(masterApp.ObjType === 'EXTENDED')
-                                                                                        {
-                                                                                            data.DVPAppUrl = masterApp.Url;
-                                                                                            data.AppId = masterApp.id;
-                                                                                            extDialplanEngine.ProcessExtendedDialplan(reqId, callerIdNum, destNum, callerContext, direction, data, undefined, rule.CompanyId, rule.TenantId, securityToken, NumLimitInfo, 'inbound', ctxt, null, rule.BusinessUnit, isDialerIVR, function(err, extDialplan)
-                                                                                            {
-                                                                                                if(err)
-                                                                                                {
-                                                                                                    logger.error('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Extended dialplan Error', reqId, err);
-
-                                                                                                    var xml = xmlGen.createRejectResponse(callerContext);
-
-                                                                                                    logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
-                                                                                                    res.end(xml);
-                                                                                                }
-                                                                                                else
-                                                                                                {
-                                                                                                    RedisOperations(varUuid, rule.CompanyId, rule.TenantId, rule.Application.id, app.ObjType, isDialplanGiven, 'inbound', eventTime, rule.BusinessUnit);
-
-                                                                                                    logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, extDialplan);
-                                                                                                    res.end(extDialplan);
-                                                                                                }
-
-                                                                                            })
                                                                                         }
                                                                                         else
                                                                                         {
-                                                                                            logger.error('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Master App Type Undefined - Terminating', reqId);
-                                                                                            var xml = xmlGen.createRejectResponse(callerContext);
+                                                                                            if(app.ObjType === "HTTAPI")
+                                                                                            {
+                                                                                                logger.info('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Master App Type is HTTAPI', reqId);
+                                                                                                //add to redis
 
-                                                                                            logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+                                                                                                var xml = xmlGen.CreateHttpApiDialplan('[^\\s]*', callerContext, app.Url, reqId, NumLimitInfo, app.id, rule.CompanyId, rule.TenantId, 'inbound', tempAni, rule.BusinessUnit);
 
-                                                                                            res.end(xml);
+                                                                                                logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+                                                                                                RedisOperations(varUuid, rule.CompanyId, rule.TenantId, rule.Application.id, app.ObjType, isDialplanGiven, 'inbound', eventTime, rule.BusinessUnit);
+                                                                                                res.end(xml);
+
+
+                                                                                            }
+                                                                                            else if(app.ObjType === "SOCKET")
+                                                                                            {
+                                                                                                logger.info('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - App Type is SOCKET', reqId);
+
+                                                                                                var xml = xmlGen.CreateSocketApiDialplan('[^\\s]*', callerContext, app.Url, reqId, NumLimitInfo, app.id, rule.CompanyId, rule.TenantId, 'inbound', rule.BusinessUnit);
+
+                                                                                                logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+
+                                                                                                RedisOperations(varUuid, rule.CompanyId, rule.TenantId, rule.Application.id, app.ObjType, isDialplanGiven, 'inbound', eventTime, rule.BusinessUnit);
+
+                                                                                                res.end(xml);
+                                                                                            }
+                                                                                            else if(app.ObjType === 'EXTENDED')
+                                                                                            {
+                                                                                                data.DVPAppUrl = app.Url;
+                                                                                                data.AppId = app.id;
+
+                                                                                                extDialplanEngine.ProcessExtendedDialplan(reqId, callerIdNum, destNum, callerContext, direction, data, undefined, rule.CompanyId, rule.TenantId, securityToken, NumLimitInfo, 'inbound', ctxt, cacheData, rule.BusinessUnit, isDialerIVR, function(err, extDialplan)
+                                                                                                {
+
+                                                                                                    if(err)
+                                                                                                    {
+                                                                                                        logger.error('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Extended dialplan Error', reqId, err);
+
+                                                                                                        var xml = xmlGen.createRejectResponse(callerContext);
+
+                                                                                                        logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+                                                                                                        res.end(xml);
+                                                                                                    }
+                                                                                                    else
+                                                                                                    {
+                                                                                                        RedisOperations(varUuid, rule.CompanyId, rule.TenantId, rule.Application.id, app.ObjType, isDialplanGiven, 'inbound', eventTime, rule.BusinessUnit);
+                                                                                                        logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, extDialplan);
+                                                                                                        res.end(extDialplan);
+                                                                                                    }
+
+
+
+                                                                                                })
+                                                                                            }
+                                                                                            else
+                                                                                            {
+                                                                                                logger.error('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Call rule developer app doesnt have a master app or master app url not set', reqId);
+                                                                                                var xml = xmlGen.createRejectResponse(callerContext);
+
+                                                                                                logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+
+                                                                                                res.end(xml);
+                                                                                            }
+
                                                                                         }
+
+                                                                                        var evtData =
+                                                                                        {
+                                                                                            SessionId: varUuid,
+                                                                                            EventClass: "CALL",
+                                                                                            EventType : "CALL_RULE",
+                                                                                            EventCategory: "INBOUND_RULE",
+                                                                                            EventTime : new Date(),
+                                                                                            EventName : "Call Rule Picked",
+                                                                                            EventData : destNum,
+                                                                                            EventParams : rule
+                                                                                        };
+
+                                                                                        var jsonStr = JSON.stringify(evtData);
+                                                                                        redisHandler.PublishToRedis('DVPEVENTS', jsonStr, function(err, redisRes)
+                                                                                        {
+
+                                                                                        });
 
                                                                                     }
                                                                                     else
                                                                                     {
-                                                                                        if(app.ObjType === "HTTAPI")
-                                                                                        {
-                                                                                            logger.info('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Master App Type is HTTAPI', reqId);
-                                                                                            //add to redis
+                                                                                        logger.error('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Call rule has no application or application availability not set', reqId);
+                                                                                        var xml = xmlGen.createRejectResponse(callerContext);
 
-                                                                                            var xml = xmlGen.CreateHttpApiDialplan('[^\\s]*', callerContext, app.Url, reqId, NumLimitInfo, app.id, rule.CompanyId, rule.TenantId, 'inbound', tempAni, rule.BusinessUnit);
+                                                                                        logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
 
-                                                                                            logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
-                                                                                            RedisOperations(varUuid, rule.CompanyId, rule.TenantId, rule.Application.id, app.ObjType, isDialplanGiven, 'inbound', eventTime, rule.BusinessUnit);
-                                                                                            res.end(xml);
-
-
-                                                                                        }
-                                                                                        else if(app.ObjType === "SOCKET")
-                                                                                        {
-                                                                                            logger.info('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - App Type is SOCKET', reqId);
-
-                                                                                            var xml = xmlGen.CreateSocketApiDialplan('[^\\s]*', callerContext, app.Url, reqId, NumLimitInfo, app.id, rule.CompanyId, rule.TenantId, 'inbound', rule.BusinessUnit);
-
-                                                                                            logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
-
-                                                                                            RedisOperations(varUuid, rule.CompanyId, rule.TenantId, rule.Application.id, app.ObjType, isDialplanGiven, 'inbound', eventTime, rule.BusinessUnit);
-
-                                                                                            res.end(xml);
-                                                                                        }
-                                                                                        else if(app.ObjType === 'EXTENDED')
-                                                                                        {
-                                                                                            data.DVPAppUrl = app.Url;
-                                                                                            data.AppId = app.id;
-
-                                                                                            extDialplanEngine.ProcessExtendedDialplan(reqId, callerIdNum, destNum, callerContext, direction, data, undefined, rule.CompanyId, rule.TenantId, securityToken, NumLimitInfo, 'inbound', ctxt, cacheData, rule.BusinessUnit, isDialerIVR, function(err, extDialplan)
-                                                                                            {
-
-                                                                                                if(err)
-                                                                                                {
-                                                                                                    logger.error('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Extended dialplan Error', reqId, err);
-
-                                                                                                    var xml = xmlGen.createRejectResponse(callerContext);
-
-                                                                                                    logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
-                                                                                                    res.end(xml);
-                                                                                                }
-                                                                                                else
-                                                                                                {
-                                                                                                    RedisOperations(varUuid, rule.CompanyId, rule.TenantId, rule.Application.id, app.ObjType, isDialplanGiven, 'inbound', eventTime, rule.BusinessUnit);
-                                                                                                    logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, extDialplan);
-                                                                                                    res.end(extDialplan);
-                                                                                                }
-
-
-
-                                                                                            })
-                                                                                        }
-                                                                                        else
-                                                                                        {
-                                                                                            logger.error('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Call rule developer app doesnt have a master app or master app url not set', reqId);
-                                                                                            var xml = xmlGen.createRejectResponse(callerContext);
-
-                                                                                            logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
-
-                                                                                            res.end(xml);
-                                                                                        }
-
+                                                                                        res.end(xml);
                                                                                     }
 
-                                                                                    var evtData =
-                                                                                    {
-                                                                                        SessionId: varUuid,
-                                                                                        EventClass: "CALL",
-                                                                                        EventType : "CALL_RULE",
-                                                                                        EventCategory: "INBOUND_RULE",
-                                                                                        EventTime : new Date(),
-                                                                                        EventName : "Call Rule Picked",
-                                                                                        EventData : destNum,
-                                                                                        EventParams : rule
-                                                                                    };
 
-                                                                                    var jsonStr = JSON.stringify(evtData);
-                                                                                    redisHandler.PublishToRedis('DVPEVENTS', jsonStr, function(err, redisRes)
-                                                                                    {
 
-                                                                                    });
 
                                                                                 }
                                                                                 else
                                                                                 {
-                                                                                    logger.error('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Call rule has no application or application availability not set', reqId);
+                                                                                    logger.error('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Call rule not found', reqId);
+
                                                                                     var xml = xmlGen.createRejectResponse(callerContext);
 
                                                                                     logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
 
                                                                                     res.end(xml);
                                                                                 }
+                                                                            })
+                                                                        }
 
 
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        logger.debug('[DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Trunk number is not an inbound number or limit exceeded or limit not set', reqId);
+                                                                        var xml = xmlGen.createRejectResponse(callerContext);
 
+                                                                        logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
 
-                                                                            }
-                                                                            else
-                                                                            {
-                                                                                logger.error('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Call rule not found', reqId);
-
-                                                                                var xml = xmlGen.createRejectResponse(callerContext);
-
-                                                                                logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
-
-                                                                                res.end(xml);
-                                                                            }
-                                                                        })
+                                                                        res.end(xml);
                                                                     }
 
+
+
+                                                                }).catch(function(err)
+                                                                {
+                                                                    logger.error('[DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Error occurred while getting company limits', reqId, err);
+                                                                    var xml = xmlGen.createRejectResponse(callerContext);
+
+                                                                    logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+
+                                                                    res.end(xml);
+
+                                                                })
+
+                                                            }
+                                                        }
+
+
+                                                    }
+                                                })
+
+
+                                            }
+                                            else
+                                            {
+                                                //check for click to call feature
+
+                                                var c2cRegExPattern = new RegExp('^(clicktocall_)[^\s]*');
+                                                if(c2cRegExPattern.test(destNum))
+                                                {
+                                                    var splitVals = destNum.split('_');
+
+                                                    if(splitVals.length === 4)
+                                                    {
+                                                        backendFactory.getRuleHandler().PickCallRuleInbound(reqId, callerIdNum, splitVals[3], '', callerContext, 'C2C', splitVals[2], splitVals[1], function(err, rule)
+                                                        {
+                                                            if(err)
+                                                            {
+                                                                logger.error('[DVP-DynamicConfigurationGenerator.CallApp] - [%s] - PickCallRuleInbound returned exception', reqId, err);
+                                                                var xml = xmlGen.createRejectResponse(callerContext);
+
+                                                                res.end(xml);
+                                                            }
+                                                            else if(rule)
+                                                            {
+                                                                logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - PickCallRuleInbound returned rule : %s', reqId, JSON.stringify(rule));
+
+                                                                //check dnis is a emergency number
+
+                                                                var tempAni = data["Caller-Caller-ID-Number"];
+                                                                if(rule.ANITranslation)
+                                                                {
+                                                                    tempAni = translationHandler.TranslateHandler(rule.ANITranslation, data["Caller-Caller-ID-Number"]);
+                                                                    data["Caller-Caller-ID-Number"] = tempAni;
+                                                                }
+
+                                                                if(rule.Application && rule.Application.Availability)
+                                                                {
+                                                                    var app = rule.Application;
+
+                                                                    logger.info('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Call rule has a app', reqId);
+
+                                                                    if(rule.Application.MasterApplication && rule.Application.MasterApplication.Availability && rule.Application.MasterApplication.Url)
+                                                                    {
+                                                                        var masterUrl = '';
+                                                                        var masterApp = rule.Application.MasterApplication;
+
+                                                                        logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Master application found : ', reqId, JSON.stringify(masterApp));
+
+                                                                        if(masterApp.ObjType === "HTTAPI")
+                                                                        {
+                                                                            logger.info('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Master App Type is HTTAPI', reqId);
+                                                                            //add to redis
+                                                                            masterUrl = masterApp.Url;
+                                                                            var sessionData =
+                                                                            {
+                                                                                path: app.Url,
+                                                                                company: rule.CompanyId,
+                                                                                tenant: rule.TenantId,
+                                                                                app: app.AppName,
+                                                                                appid: app.id
+                                                                            };
+
+                                                                            var jsonString = JSON.stringify(sessionData);
+
+                                                                            logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Session Data Object created for HTTAPI : %s', reqId, jsonString);
+
+                                                                            redisHandler.SetObject(varUuid + "_data", jsonString, function(err, result)
+                                                                            {
+                                                                                if(err)
+                                                                                {
+                                                                                    logger.error('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Exception in setting sessionData on backend - Key : %s_data', reqId, varUuid, err);
+                                                                                    var xml = xmlGen.createRejectResponse(callerContext);
+
+                                                                                    logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+
+                                                                                    res.end(xml);
+                                                                                }
+                                                                                else
+                                                                                {
+                                                                                    redisHandler.ExpireKey(varUuid + "_data", 86400);
+                                                                                    logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Session data added to redis successfully - Key : %s_data', reqId, varUuid);
+
+                                                                                    var xml = xmlGen.CreateHttpApiDialplan('[^\\s]*', callerContext, masterUrl, reqId, null, app.id, rule.CompanyId, rule.TenantId, 'inbound', tempAni, rule.BusinessUnit);
+
+                                                                                    logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+
+                                                                                    RedisOperations(varUuid, rule.CompanyId, rule.TenantId, rule.Application.id, app.ObjType, isDialplanGiven, 'inbound', eventTime, rule.BusinessUnit);
+
+                                                                                    res.end(xml);
+                                                                                }
+
+                                                                            });
+
+                                                                        }
+                                                                        else if(masterApp.ObjType === "SOCKET")
+                                                                        {
+                                                                            logger.info('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Master App Type is SOCKET', reqId);
+
+                                                                            var sessionData =
+                                                                            {
+                                                                                path: app.Url,
+                                                                                company: rule.CompanyId,
+                                                                                tenant: rule.TenantId,
+                                                                                app: app.AppName,
+                                                                                appid: app.id
+                                                                            };
+
+                                                                            var jsonString = JSON.stringify(sessionData);
+
+                                                                            logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Session Data Object created for SOCKET : %s', reqId, jsonString);
+
+                                                                            redisHandler.SetObject(varUuid + "_data", jsonString, function(err, result)
+                                                                            {
+                                                                                if(err)
+                                                                                {
+                                                                                    logger.error('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Exception in setting sessionData on backend - Key : : %s_data', reqId, varUuid, err);
+                                                                                    var xml = xmlGen.createRejectResponse(callerContext);
+
+                                                                                    logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+
+                                                                                    res.end(xml);
+                                                                                }
+                                                                                else
+                                                                                {
+                                                                                    redisHandler.ExpireKey(varUuid + "_data", 86400);
+                                                                                    logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Session data added to redis successfully - Key : : %s_data', reqId, varUuid);
+
+                                                                                    var xml = xmlGen.CreateSocketApiDialplan('[^\\s]*', callerContext, app.Url, reqId, null, app.id, rule.CompanyId, rule.TenantId, 'inbound', rule.BusinessUnit);
+
+                                                                                    logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+
+                                                                                    RedisOperations(varUuid, rule.CompanyId, rule.TenantId, rule.Application.id, app.ObjType, isDialplanGiven, 'inbound', eventTime, rule.BusinessUnit);
+
+                                                                                    res.end(xml);
+                                                                                }
+
+                                                                            });
+                                                                        }
+                                                                        else if(masterApp.ObjType === 'EXTENDED')
+                                                                        {
+                                                                            data.DVPAppUrl = masterApp.Url;
+                                                                            data.AppId = masterApp.id;
+                                                                            extDialplanEngine.ProcessExtendedDialplan(reqId, callerIdNum, destNum, callerContext, direction, data, undefined, rule.CompanyId, rule.TenantId, securityToken, NumLimitInfo, 'inbound', ctxt, null, rule.BusinessUnit, isDialerIVR, function(err, extDialplan)
+                                                                            {
+                                                                                if(err)
+                                                                                {
+                                                                                    logger.error('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Extended dialplan Error', reqId, err);
+
+                                                                                    var xml = xmlGen.createRejectResponse(callerContext);
+
+                                                                                    logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+                                                                                    res.end(xml);
+                                                                                }
+                                                                                else
+                                                                                {
+                                                                                    logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, extDialplan);
+                                                                                    RedisOperations(varUuid, rule.CompanyId, rule.TenantId, rule.Application.id, app.ObjType, isDialplanGiven, 'inbound', eventTime, rule.BusinessUnit);
+                                                                                    res.end(extDialplan);
+                                                                                }
+
+                                                                            })
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            logger.error('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Master App Type Undefined - Terminating', reqId);
+                                                                            var xml = xmlGen.createRejectResponse(callerContext);
+
+                                                                            logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+
+                                                                            res.end(xml);
+                                                                        }
+
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        if(app.ObjType === "HTTAPI")
+                                                                        {
+                                                                            logger.info('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Master App Type is HTTAPI', reqId);
+                                                                            //add to redis
+
+                                                                            var xml = xmlGen.CreateHttpApiDialplan('[^\\s]*', callerContext, app.Url, reqId, null, app.id, rule.CompanyId, rule.TenantId, 'inbound', tempAni, rule.BusinessUnit);
+
+                                                                            logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+                                                                            RedisOperations(varUuid, rule.CompanyId, rule.TenantId, rule.Application.id, app.ObjType, isDialplanGiven, 'inbound', eventTime, rule.BusinessUnit);
+                                                                            res.end(xml);
+
+                                                                        }
+                                                                        else if(app.ObjType === "SOCKET")
+                                                                        {
+                                                                            logger.info('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - App Type is SOCKET', reqId);
+
+                                                                            var xml = xmlGen.CreateSocketApiDialplan('[^\\s]*', callerContext, app.Url, reqId, null, app.id, rule.CompanyId, rule.TenantId, 'inbound', rule.BusinessUnit);
+
+                                                                            logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+
+                                                                            RedisOperations(varUuid, rule.CompanyId, rule.TenantId, rule.Application.id, app.ObjType, isDialplanGiven, 'inbound', eventTime, rule.BusinessUnit);
+
+                                                                            res.end(xml);
+                                                                        }
+                                                                        else if(app.ObjType === 'EXTENDED')
+                                                                        {
+                                                                            data.DVPAppUrl = app.Url;
+                                                                            data.AppId = app.id;
+                                                                            extDialplanEngine.ProcessExtendedDialplan(reqId, callerIdNum, destNum, callerContext, direction, data, undefined, rule.CompanyId, rule.TenantId, securityToken, NumLimitInfo, 'inbound', ctxt, null, rule.BusinessUnit, isDialerIVR, function(err, extDialplan)
+                                                                            {
+                                                                                if(err)
+                                                                                {
+                                                                                    logger.error('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Extended dialplan Error', reqId, err);
+
+                                                                                    var xml = xmlGen.createRejectResponse(callerContext);
+
+                                                                                    logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+                                                                                    res.end(xml);
+                                                                                }
+                                                                                else
+                                                                                {
+                                                                                    RedisOperations(varUuid, rule.CompanyId, rule.TenantId, rule.Application.id, app.ObjType, isDialplanGiven, 'inbound', eventTime, rule.BusinessUnit);
+
+                                                                                    logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, extDialplan);
+                                                                                    res.end(extDialplan);
+                                                                                }
+
+                                                                            })
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            logger.error('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Call rule developer app doesnt have a master app or master app url not set', reqId);
+                                                                            var xml = xmlGen.createRejectResponse(callerContext);
+
+                                                                            logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+
+                                                                            res.end(xml);
+                                                                        }
+
+                                                                    }
+
+                                                                    var evtData =
+                                                                    {
+                                                                        SessionId: varUuid,
+                                                                        EventClass: "CALL",
+                                                                        EventType : "CALL_RULE",
+                                                                        EventCategory: "INBOUND_RULE",
+                                                                        EventTime : new Date(),
+                                                                        EventName : "Call Rule Picked",
+                                                                        EventData : destNum,
+                                                                        EventParams : rule
+                                                                    };
+
+                                                                    var jsonStr = JSON.stringify(evtData);
+                                                                    redisHandler.PublishToRedis('DVPEVENTS', jsonStr, function(err, redisRes)
+                                                                    {
+
+                                                                    });
 
                                                                 }
                                                                 else
                                                                 {
-                                                                    logger.debug('[DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Trunk number is not an inbound number or limit exceeded or limit not set', reqId);
+                                                                    logger.error('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Call rule has no application or application availability not set', reqId);
                                                                     var xml = xmlGen.createRejectResponse(callerContext);
 
                                                                     logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
@@ -1876,336 +2178,54 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
                                                                 }
 
 
-
-                                                            }).catch(function(err)
-                                                            {
-                                                                logger.error('[DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Error occurred while getting company limits', reqId, err);
-                                                                var xml = xmlGen.createRejectResponse(callerContext);
-
-                                                                logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
-
-                                                                res.end(xml);
-
-                                                            })
-
-                                                        }
-                                                    }
-
-
-                                                }
-                                            })
-
-
-                                        }
-                                        else
-                                        {
-                                            //check for click to call feature
-
-                                            var c2cRegExPattern = new RegExp('^(clicktocall_)[^\s]*');
-                                            if(c2cRegExPattern.test(destNum))
-                                            {
-                                                var splitVals = destNum.split('_');
-
-                                                if(splitVals.length === 4)
-                                                {
-                                                    backendFactory.getRuleHandler().PickCallRuleInbound(reqId, callerIdNum, splitVals[3], '', callerContext, 'C2C', splitVals[2], splitVals[1], function(err, rule)
-                                                    {
-                                                        if(err)
-                                                        {
-                                                            logger.error('[DVP-DynamicConfigurationGenerator.CallApp] - [%s] - PickCallRuleInbound returned exception', reqId, err);
-                                                            var xml = xmlGen.createRejectResponse(callerContext);
-
-                                                            res.end(xml);
-                                                        }
-                                                        else if(rule)
-                                                        {
-                                                            logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - PickCallRuleInbound returned rule : %s', reqId, JSON.stringify(rule));
-
-                                                            //check dnis is a emergency number
-
-                                                            var tempAni = data["Caller-Caller-ID-Number"];
-                                                            if(rule.ANITranslation)
-                                                            {
-                                                                tempAni = translationHandler.TranslateHandler(rule.ANITranslation, data["Caller-Caller-ID-Number"]);
-                                                                data["Caller-Caller-ID-Number"] = tempAni;
-                                                            }
-
-                                                            if(rule.Application && rule.Application.Availability)
-                                                            {
-                                                                var app = rule.Application;
-
-                                                                logger.info('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Call rule has a app', reqId);
-
-                                                                if(rule.Application.MasterApplication && rule.Application.MasterApplication.Availability && rule.Application.MasterApplication.Url)
-                                                                {
-                                                                    var masterUrl = '';
-                                                                    var masterApp = rule.Application.MasterApplication;
-
-                                                                    logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Master application found : ', reqId, JSON.stringify(masterApp));
-
-                                                                    if(masterApp.ObjType === "HTTAPI")
-                                                                    {
-                                                                        logger.info('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Master App Type is HTTAPI', reqId);
-                                                                        //add to redis
-                                                                        masterUrl = masterApp.Url;
-                                                                        var sessionData =
-                                                                        {
-                                                                            path: app.Url,
-                                                                            company: rule.CompanyId,
-                                                                            tenant: rule.TenantId,
-                                                                            app: app.AppName,
-                                                                            appid: app.id
-                                                                        };
-
-                                                                        var jsonString = JSON.stringify(sessionData);
-
-                                                                        logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Session Data Object created for HTTAPI : %s', reqId, jsonString);
-
-                                                                        redisHandler.SetObject(varUuid + "_data", jsonString, function(err, result)
-                                                                        {
-                                                                            if(err)
-                                                                            {
-                                                                                logger.error('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Exception in setting sessionData on backend - Key : %s_data', reqId, varUuid, err);
-                                                                                var xml = xmlGen.createRejectResponse(callerContext);
-
-                                                                                logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
-
-                                                                                res.end(xml);
-                                                                            }
-                                                                            else
-                                                                            {
-                                                                                redisHandler.ExpireKey(varUuid + "_data", 86400);
-                                                                                logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Session data added to redis successfully - Key : %s_data', reqId, varUuid);
-
-                                                                                var xml = xmlGen.CreateHttpApiDialplan('[^\\s]*', callerContext, masterUrl, reqId, null, app.id, rule.CompanyId, rule.TenantId, 'inbound', tempAni, rule.BusinessUnit);
-
-                                                                                logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
-
-                                                                                RedisOperations(varUuid, rule.CompanyId, rule.TenantId, rule.Application.id, app.ObjType, isDialplanGiven, 'inbound', eventTime, rule.BusinessUnit);
-
-                                                                                res.end(xml);
-                                                                            }
-
-                                                                        });
-
-                                                                    }
-                                                                    else if(masterApp.ObjType === "SOCKET")
-                                                                    {
-                                                                        logger.info('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Master App Type is SOCKET', reqId);
-
-                                                                        var sessionData =
-                                                                        {
-                                                                            path: app.Url,
-                                                                            company: rule.CompanyId,
-                                                                            tenant: rule.TenantId,
-                                                                            app: app.AppName,
-                                                                            appid: app.id
-                                                                        };
-
-                                                                        var jsonString = JSON.stringify(sessionData);
-
-                                                                        logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Session Data Object created for SOCKET : %s', reqId, jsonString);
-
-                                                                        redisHandler.SetObject(varUuid + "_data", jsonString, function(err, result)
-                                                                        {
-                                                                            if(err)
-                                                                            {
-                                                                                logger.error('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Exception in setting sessionData on backend - Key : : %s_data', reqId, varUuid, err);
-                                                                                var xml = xmlGen.createRejectResponse(callerContext);
-
-                                                                                logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
-
-                                                                                res.end(xml);
-                                                                            }
-                                                                            else
-                                                                            {
-                                                                                redisHandler.ExpireKey(varUuid + "_data", 86400);
-                                                                                logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Session data added to redis successfully - Key : : %s_data', reqId, varUuid);
-
-                                                                                var xml = xmlGen.CreateSocketApiDialplan('[^\\s]*', callerContext, app.Url, reqId, null, app.id, rule.CompanyId, rule.TenantId, 'inbound', rule.BusinessUnit);
-
-                                                                                logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
-
-                                                                                RedisOperations(varUuid, rule.CompanyId, rule.TenantId, rule.Application.id, app.ObjType, isDialplanGiven, 'inbound', eventTime, rule.BusinessUnit);
-
-                                                                                res.end(xml);
-                                                                            }
-
-                                                                        });
-                                                                    }
-                                                                    else if(masterApp.ObjType === 'EXTENDED')
-                                                                    {
-                                                                        data.DVPAppUrl = masterApp.Url;
-                                                                        data.AppId = masterApp.id;
-                                                                        extDialplanEngine.ProcessExtendedDialplan(reqId, callerIdNum, destNum, callerContext, direction, data, undefined, rule.CompanyId, rule.TenantId, securityToken, NumLimitInfo, 'inbound', ctxt, null, rule.BusinessUnit, isDialerIVR, function(err, extDialplan)
-                                                                        {
-                                                                            if(err)
-                                                                            {
-                                                                                logger.error('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Extended dialplan Error', reqId, err);
-
-                                                                                var xml = xmlGen.createRejectResponse(callerContext);
-
-                                                                                logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
-                                                                                res.end(xml);
-                                                                            }
-                                                                            else
-                                                                            {
-                                                                                logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, extDialplan);
-                                                                                RedisOperations(varUuid, rule.CompanyId, rule.TenantId, rule.Application.id, app.ObjType, isDialplanGiven, 'inbound', eventTime, rule.BusinessUnit);
-                                                                                res.end(extDialplan);
-                                                                            }
-
-                                                                        })
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        logger.error('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Master App Type Undefined - Terminating', reqId);
-                                                                        var xml = xmlGen.createRejectResponse(callerContext);
-
-                                                                        logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
-
-                                                                        res.end(xml);
-                                                                    }
-
-                                                                }
-                                                                else
-                                                                {
-                                                                    if(app.ObjType === "HTTAPI")
-                                                                    {
-                                                                        logger.info('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Master App Type is HTTAPI', reqId);
-                                                                        //add to redis
-
-                                                                        var xml = xmlGen.CreateHttpApiDialplan('[^\\s]*', callerContext, app.Url, reqId, null, app.id, rule.CompanyId, rule.TenantId, 'inbound', tempAni, rule.BusinessUnit);
-
-                                                                        logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
-                                                                        RedisOperations(varUuid, rule.CompanyId, rule.TenantId, rule.Application.id, app.ObjType, isDialplanGiven, 'inbound', eventTime, rule.BusinessUnit);
-                                                                        res.end(xml);
-
-                                                                    }
-                                                                    else if(app.ObjType === "SOCKET")
-                                                                    {
-                                                                        logger.info('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - App Type is SOCKET', reqId);
-
-                                                                        var xml = xmlGen.CreateSocketApiDialplan('[^\\s]*', callerContext, app.Url, reqId, null, app.id, rule.CompanyId, rule.TenantId, 'inbound', rule.BusinessUnit);
-
-                                                                        logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
-
-                                                                        RedisOperations(varUuid, rule.CompanyId, rule.TenantId, rule.Application.id, app.ObjType, isDialplanGiven, 'inbound', eventTime, rule.BusinessUnit);
-
-                                                                        res.end(xml);
-                                                                    }
-                                                                    else if(app.ObjType === 'EXTENDED')
-                                                                    {
-                                                                        data.DVPAppUrl = app.Url;
-                                                                        data.AppId = app.id;
-                                                                        extDialplanEngine.ProcessExtendedDialplan(reqId, callerIdNum, destNum, callerContext, direction, data, undefined, rule.CompanyId, rule.TenantId, securityToken, NumLimitInfo, 'inbound', ctxt, null, rule.BusinessUnit, isDialerIVR, function(err, extDialplan)
-                                                                        {
-                                                                            if(err)
-                                                                            {
-                                                                                logger.error('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Extended dialplan Error', reqId, err);
-
-                                                                                var xml = xmlGen.createRejectResponse(callerContext);
-
-                                                                                logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
-                                                                                res.end(xml);
-                                                                            }
-                                                                            else
-                                                                            {
-                                                                                RedisOperations(varUuid, rule.CompanyId, rule.TenantId, rule.Application.id, app.ObjType, isDialplanGiven, 'inbound', eventTime, rule.BusinessUnit);
-
-                                                                                logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, extDialplan);
-                                                                                res.end(extDialplan);
-                                                                            }
-
-                                                                        })
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        logger.error('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Call rule developer app doesnt have a master app or master app url not set', reqId);
-                                                                        var xml = xmlGen.createRejectResponse(callerContext);
-
-                                                                        logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
-
-                                                                        res.end(xml);
-                                                                    }
-
-                                                                }
-
-                                                                var evtData =
-                                                                {
-                                                                    SessionId: varUuid,
-                                                                    EventClass: "CALL",
-                                                                    EventType : "CALL_RULE",
-                                                                    EventCategory: "INBOUND_RULE",
-                                                                    EventTime : new Date(),
-                                                                    EventName : "Call Rule Picked",
-                                                                    EventData : destNum,
-                                                                    EventParams : rule
-                                                                };
-
-                                                                var jsonStr = JSON.stringify(evtData);
-                                                                redisHandler.PublishToRedis('DVPEVENTS', jsonStr, function(err, redisRes)
-                                                                {
-
-                                                                });
-
                                                             }
                                                             else
                                                             {
-                                                                logger.error('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Call rule has no application or application availability not set', reqId);
+                                                                logger.error('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Call rule not found', reqId);
+
                                                                 var xml = xmlGen.createRejectResponse(callerContext);
 
                                                                 logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
 
                                                                 res.end(xml);
                                                             }
-
-
-                                                        }
-                                                        else
-                                                        {
-                                                            logger.error('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Call rule not found', reqId);
-
-                                                            var xml = xmlGen.createRejectResponse(callerContext);
-
-                                                            logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
-
-                                                            res.end(xml);
-                                                        }
-                                                    })
+                                                        })
+                                                    }
                                                 }
+                                                else
+                                                {
+                                                    logger.debug('[DVP-DynamicConfigurationGenerator.CallApp] - [%s] - GetPhoneNumberDetails returned num obj : EMPTY', reqId);
+                                                    var xml = xmlGen.createRejectResponse(callerContext);
+
+                                                    logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+
+                                                    res.end(xml);
+                                                }
+
+
                                             }
-                                            else
-                                            {
-                                                logger.debug('[DVP-DynamicConfigurationGenerator.CallApp] - [%s] - GetPhoneNumberDetails returned num obj : EMPTY', reqId);
-                                                var xml = xmlGen.createRejectResponse(callerContext);
-
-                                                logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
-
-                                                res.end(xml);
-                                            }
+                                        });
+                                    }
 
 
-                                        }
-                                    });
+                                }
+                                else
+                                {
+                                    logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Call Direction OUT', reqId);
+
+                                    HandleOutRequest(reqId, data, callerIdNum, contextTenant, appType, contextCompany, dvpOriginationType, destNum, domain, callerContext, profile, varUuid, isDialplanGiven, ctxt, cacheData, eventTime, null, isDialerIVR, res);
+
                                 }
 
 
                             }
-                            else
-                            {
-                                logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Call Direction OUT', reqId);
-
-                                HandleOutRequest(reqId, data, callerIdNum, contextTenant, appType, contextCompany, dvpOriginationType, destNum, domain, callerContext, profile, varUuid, isDialplanGiven, ctxt, cacheData, eventTime, null, isDialerIVR, res);
-
-                            }
-
-
                         }
-                    }
 
-                })
+                    })
+                }
             }
+
+
 
         }
         else
