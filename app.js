@@ -755,9 +755,9 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
         var businessUnit = data['variable_business_unit'];
         var transAgentSkill = decodeURIComponent(data['variable_ards_skill_display']);
 
-        if(data['variable_pre_transfer_caller_id_number'])
+        if(data['variable_dvp_trans_orig_caller'])
         {
-            preTransCaller = data['variable_pre_transfer_caller_id_number'];
+            preTransCaller = data['variable_dvp_trans_orig_caller'];
         }
 
         var isDialerIVR = false;
@@ -1013,7 +1013,7 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
 
                     if(data['variable_DVP_CALL_DIRECTION'] === 'outbound')
                     {
-                        if(data['variable_DVP_OPERATION_CAT'] === 'GATEWAY' || data['variable_DVP_OPERATION_CAT'] === 'ATT_XFER_USER')
+                        if(!data['variable_dvp_trans_orig_caller'] && (data['variable_DVP_OPERATION_CAT'] === 'GATEWAY' || data['variable_DVP_OPERATION_CAT'] === 'ATT_XFER_USER'))
                         {
                             preTransCaller = data['Other-Leg-Destination-Number'];
                         }
