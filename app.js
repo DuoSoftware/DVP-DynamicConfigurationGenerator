@@ -2178,6 +2178,13 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
                             {
                                 logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Call Direction OUT', reqId);
 
+                                //CALL PREVIOUSLY GONE TO IVR BUT CONTEXT CHANGED TO GET RULE AGAIN
+                                logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - CALL PREVIOUSLY GONE TO IVR BUT CONTEXT CHANGED TO GET RULE AGAIN', reqId);
+                                if(appType === 'HTTAPI')
+                                {
+                                    appType = null;
+                                }
+
                                 HandleOutRequest(reqId, data, callerIdNum, contextTenant, appType, contextCompany, dvpOriginationType, destNum, domain, callerContext, profile, varUuid, isDialplanGiven, ctxt, cacheData, eventTime, res);
 
                             }
