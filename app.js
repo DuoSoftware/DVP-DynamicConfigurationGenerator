@@ -1097,6 +1097,8 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
                     else
                     {
                         var tempHuntCtxt = decodeURIComponent(huntContext);
+
+
                         backendFactory.getBackendHandler().GetContext(varUsrContext, function (err, ctxt)
                         {
                             if (ctxt)
@@ -2587,6 +2589,7 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/DirectoryProfile', functio
         var data = fsMediaFormatter.convertUrlEncoded(req.body);
 
         var hostname = data["hostname"];
+        var fsHostName = data["FreeSWITCH-Hostname"];
         var user = data["user"];
         var domain = data["domain"];
         var action = data["action"];
@@ -2758,7 +2761,7 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/DirectoryProfile', functio
         {
             logger.info('[DVP-DynamicConfigurationGenerator.DirectoryProfile] - [%s] - ACTION TYPE GATEWAYS', reqId);
             var csId = parseInt(hostname);
-            backendFactory.getBackendHandler().GetGatewayListForCallServerProfile(profile, csId, reqId, null, function(err, result)
+            backendFactory.getBackendHandler().GetGatewayListForCallServerProfile(profile, fsHostName, reqId, null, function(err, result)
             {
                 if (!err && result && result.length > 0)
                 {
