@@ -1182,6 +1182,7 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
                 else if(huntDestNum === 'gwtransfer')
                 {
                     destNum = data["variable_digits"];
+                    var transferee = data["variable_dialed_user"];
 
                     destNum = decodeURIComponent(destNum);
 
@@ -1233,6 +1234,8 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
 
                                                             if(NumLimitInfo)
                                                             {
+                                                                //Get Caller Information to Set DOD Number
+
                                                                 var xml = xmlBuilder.CreatePbxFeaturesGateway(reqId, huntDestNum, outRule.TrunkNumber, outRule.GatewayCode, ctxt.CompanyId, ctxt.TenantId, null, huntContext, outRule.DNIS, outRule.Operator, outRule.IpUrl, NumLimitInfo, outRule.Codecs, transferCallerName, outRule.BusinessUnit);
 
                                                                 logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
