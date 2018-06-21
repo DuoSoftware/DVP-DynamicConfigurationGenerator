@@ -263,7 +263,7 @@ var HandleOutRequest = function(reqId, data, callerIdNum, contextTenant, appType
                                             {
                                                 logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Emergency number detected - Trying to pick outbound rule', reqId, xml);
                                                 //pick outbound rule and route to gateway
-                                                ruleBackendHandler.PickCallRuleOutboundComplete(reqId, callerIdNum, destNum, '', callerContext, rule.CompanyId, rule.TenantId, true, cacheData, function (err, rule)
+                                                ruleBackendHandler.PickCallRuleOutboundComplete(reqId, callerIdNum, destNum, '', callerContext, rule.CompanyId, rule.TenantId, true, cacheData, dodNumber, function (err, rule)
                                                 {
                                                     if (!err && rule)
                                                     {
@@ -1178,96 +1178,109 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
                             }
                             else
                             {
-                                backendFactory.getRuleHandler().PickCallRuleOutboundComplete(reqId, callerIdNum, destNum, '', varUsrContext, ctxt.CompanyId, ctxt.TenantId, true, cacheInfo, function (err, outRule)
+                                var transferer = data['variable_dialed_user'];
+
+                                backendFactory.getBackendHandler().GatherFromUserDetails(reqId, transferer, ctxt.CompanyId, ctxt.TenantId, false, null, function(err, frmUsr)
                                 {
-                                    if(outRule)
+                                    var tmpDodNumber = null;
+                                    if(frmUsr && frmUsr.Extension && frmUsr.Extension.DodActive && frmUsr.Extension.DodNumber)
                                     {
-                                        extApi.CheckBalance(reqId, varUuid, outRule.ANI, outRule.DNIS, 'minute', outRule.Operator, ctxt.CompanyId, ctxt.TenantId)
-                                            .then(function(balanceRes)
-                                            {
-                                                if (balanceRes && balanceRes.IsSuccess)
+                                        tmpDodNumber = frmUsr.Extension.DodNumber;
+                                    }
+
+                                    backendFactory.getRuleHandler().PickCallRuleOutboundComplete(reqId, callerIdNum, destNum, '', varUsrContext, ctxt.CompanyId, ctxt.TenantId, true, cacheInfo, tmpDodNumber, function (err, outRule)
+                                    {
+                                        if(outRule)
+                                        {
+                                            extApi.CheckBalance(reqId, varUuid, outRule.ANI, outRule.DNIS, 'minute', outRule.Operator, ctxt.CompanyId, ctxt.TenantId)
+                                                .then(function(balanceRes)
                                                 {
-                                                    //Validate limits
-
-                                                    backendFactory.getBackendHandler().GetCompanyLimits(ctxt.CompanyId, ctxt.TenantId).then(function(compLimits)
+                                                    if (balanceRes && balanceRes.IsSuccess)
                                                     {
-                                                        var limits = {
-                                                            NumberOutboundLimit: outRule.OutLimit,
-                                                            NumberBothLimit: outRule.BothLimit,
-                                                            CompanyOutboundLimit: compLimits.OutboundLimit,
-                                                            CompanyBothLimit: compLimits.BothLimit
-                                                        };
+                                                        //Validate limits
 
-                                                        var NumLimitInfo = LimitValidator(limits, outRule.TrunkNumber, 'outbound');
-
-                                                        if(NumLimitInfo)
+                                                        backendFactory.getBackendHandler().GetCompanyLimits(ctxt.CompanyId, ctxt.TenantId).then(function(compLimits)
                                                         {
-                                                            var xml = xmlBuilder.CreatePbxFeaturesGateway(reqId, huntDestNum, outRule.TrunkNumber, outRule.GatewayCode, ctxt.CompanyId, ctxt.TenantId, null, huntContext, outRule.DNIS, outRule.Operator, outRule.IpUrl, NumLimitInfo, outRule.Codecs, transferCallerName);
+                                                            var limits = {
+                                                                NumberOutboundLimit: outRule.OutLimit,
+                                                                NumberBothLimit: outRule.BothLimit,
+                                                                CompanyOutboundLimit: compLimits.OutboundLimit,
+                                                                CompanyBothLimit: compLimits.BothLimit
+                                                            };
 
-                                                            logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+                                                            var NumLimitInfo = LimitValidator(limits, outRule.TrunkNumber, 'outbound');
 
-                                                            res.end(xml);
+                                                            if(NumLimitInfo)
+                                                            {
+                                                                var xml = xmlBuilder.CreatePbxFeaturesGateway(reqId, huntDestNum, outRule.TrunkNumber, outRule.GatewayCode, ctxt.CompanyId, ctxt.TenantId, null, huntContext, outRule.DNIS, outRule.Operator, outRule.IpUrl, NumLimitInfo, outRule.Codecs, transferCallerName);
 
-                                                        }
-                                                        else
+                                                                logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+
+                                                                res.end(xml);
+
+                                                            }
+                                                            else
+                                                            {
+                                                                var xml = xmlBuilder.createTransferRejectResponse(huntContext, transferCallerName, ctxt.CompanyId, ctxt.TenantId, destNum);
+
+                                                                logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+
+                                                                res.end(xml);
+                                                            }
+
+
+
+                                                        }).catch(function(err)
                                                         {
                                                             var xml = xmlBuilder.createTransferRejectResponse(huntContext, transferCallerName, ctxt.CompanyId, ctxt.TenantId, destNum);
 
                                                             logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
 
                                                             res.end(xml);
-                                                        }
+
+                                                        });
 
 
-
-                                                    }).catch(function(err)
+                                                    }
+                                                    else
                                                     {
+                                                        logger.error('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Insufficient balance', reqId);
+
                                                         var xml = xmlBuilder.createTransferRejectResponse(huntContext, transferCallerName, ctxt.CompanyId, ctxt.TenantId, destNum);
 
                                                         logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
 
                                                         res.end(xml);
+                                                    }
 
-                                                    });
-
-
-                                                }
-                                                else
+                                                })
+                                                .catch(function(err)
                                                 {
-                                                    logger.error('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Insufficient balance', reqId);
+                                                    logger.error('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Insufficient balance', reqId, err);
 
                                                     var xml = xmlBuilder.createTransferRejectResponse(huntContext, transferCallerName, ctxt.CompanyId, ctxt.TenantId, destNum);
 
                                                     logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
 
                                                     res.end(xml);
-                                                }
-
-                                            })
-                                            .catch(function(err)
-                                            {
-                                                logger.error('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Insufficient balance', reqId, err);
-
-                                                var xml = xmlBuilder.createTransferRejectResponse(huntContext, transferCallerName, ctxt.CompanyId, ctxt.TenantId, destNum);
-
-                                                logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
-
-                                                res.end(xml);
-                                            });
+                                                });
 
 
-                                    }
-                                    else
-                                    {
-                                        logger.error('[DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Outbound Rule Not Found', reqId, err);
-                                        var xml = xmlBuilder.createTransferRejectResponse(huntContext, transferCallerName, ctxt.CompanyId, ctxt.TenantId, destNum);
+                                        }
+                                        else
+                                        {
+                                            logger.error('[DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Outbound Rule Not Found', reqId, err);
+                                            var xml = xmlBuilder.createTransferRejectResponse(huntContext, transferCallerName, ctxt.CompanyId, ctxt.TenantId, destNum);
 
-                                        logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
+                                            logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
 
-                                        res.end(xml);
-                                    }
+                                            res.end(xml);
+                                        }
 
-                                });
+                                    });
+                                })
+
+
                             }
 
                         });
