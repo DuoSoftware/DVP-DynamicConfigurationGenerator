@@ -11,7 +11,7 @@
     "config": "^1.15.0",
     "dvp-common": "1.1.0",
     "dvp-dbmodels": "2.2.8",
-    "dvp-ruleservice": "2.2.0",
+    "dvp-ruleservice": "2.3.50",
     "ip": "^1.1.0",
     "libphonenumber": "0.0.9",
     "moment": "^2.14.1",
