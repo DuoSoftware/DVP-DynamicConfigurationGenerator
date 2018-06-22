@@ -139,7 +139,7 @@ var HandleOutRequest = function(reqId, data, callerIdNum, contextTenant, appType
     try
     {
         logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - Trying to find from user for outbound call', reqId);
-        backendFactory.getBackendHandler().GatherFromUserDetails(reqId, callerIdNum, contextCompany, contextTenant, true, cacheData, function(err, fromUsr)
+        backendFactory.getBackendHandler().GatherFromUserDetails(reqId, callerIdNum, contextCompany, contextTenant, false, cacheData, function(err, fromUsr)
         {
             var dodActive = false;
             var dodNumber = '';
