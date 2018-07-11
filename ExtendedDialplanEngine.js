@@ -39,6 +39,13 @@ var CreateFMEndpointList = function(reqId, aniNum, context, companyId, tenantId,
         var len = fmList.length;
         var count = 0;
 
+        var tempDodNumber = null;
+
+        if(dodActive && dodNum)
+        {
+            tempDodNumber = dodNum;
+        }
+
         backendFactory.getBackendHandler().GetCompanyLimits(companyId, tenantId).then(function(compLimits)
         {
             fmList.forEach(function(fm)
@@ -48,7 +55,7 @@ var CreateFMEndpointList = function(reqId, aniNum, context, companyId, tenantId,
                     if (fm.ObjCategory === 'GATEWAY')
                     {
                         //pick outbound rule
-                        backendFactory.getRuleHandler().PickCallRuleOutboundComplete(reqId, aniNum, fm.DestinationNumber, '', context, companyId, tenantId, false, cacheData, function (err, rule)
+                        backendFactory.getRuleHandler().PickCallRuleOutboundComplete(reqId, aniNum, fm.DestinationNumber, '', context, companyId, tenantId, false, cacheData, tempDodNumber, function (err, rule)
                         {
                             if (!err && rule)
                             {
@@ -70,16 +77,8 @@ var CreateFMEndpointList = function(reqId, aniNum, context, companyId, tenantId,
 
                                 };
 
-                                if(dodActive && dodNum)
-                                {
-                                    ep.Origination = dodNum;
-                                    ep.OriginationCallerIdNumber = dodNum;
-                                }
-                                else
-                                {
-                                    ep.Origination = rule.ANI;
-                                    ep.OriginationCallerIdNumber = rule.ANI;
-                                }
+                                ep.Origination = rule.ANI;
+                                ep.OriginationCallerIdNumber = rule.ANI;
 
                                 var limits = {
                                     NumberOutboundLimit: rule.OutLimit,
@@ -387,7 +386,7 @@ var ProcessCallForwarding = function(reqId, aniNum, dnisNum, callerDomain, conte
                         {
                             logger.debug('DVP-DynamicConfigurationGenerator.ProcessCallForwarding] - [%s] - Gateway Forward', reqId);
                             //pick outbound rule
-                            backendFactory.getRuleHandler().PickCallRuleOutboundComplete(reqId, origNum, fwdRule.DestinationNumber, '', context, companyId, tenantId, false, cacheData, function(err, rule)
+                            backendFactory.getRuleHandler().PickCallRuleOutboundComplete(reqId, origNum, fwdRule.DestinationNumber, '', context, companyId, tenantId, false, cacheData, dodNumber, function(err, rule)
                             {
                                 if(err)
                                 {
@@ -807,6 +806,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                         }
                         else if(extDetails)
                         {
+                            var dodNumber = null;
                             logger.debug('[DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - TO EXTENSION FOUND - TYPE : %s', reqId, extDetails.ObjCategory);
                             toFaxType = extDetails.ExtraData;
                             if(extDetails.ObjCategory === 'USER')
@@ -1036,7 +1036,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                 recEnabled = false;
                                                             }
 
-                                                            CreateFMEndpointList(reqId, ani, context, companyId, tenantId, pbxDetails.Endpoints, '', false, callerIdNum, callerIdName, csId, appId, cacheData, function(err, epList)
+                                                            CreateFMEndpointList(reqId, ani, context, companyId, tenantId, pbxDetails.Endpoints, null, false, callerIdNum, callerIdName, csId, appId, cacheData, function(err, epList)
                                                             {
                                                                 if(err)
                                                                 {
@@ -1077,7 +1077,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                 Action: 'DEFAULT'
                                                             };
 
-                                                            if(dodActive && dodNumber)
+                                                            if(dodNumber)
                                                             {
                                                                 ep.DodNumber = dodNumber;
                                                             }
@@ -1199,7 +1199,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                         if (pbxObj.Endpoints && pbxObj.Endpoints.ObjCategory === 'GATEWAY')
                                                         {
                                                             //pick outbound rule
-                                                            backendFactory.getRuleHandler().PickCallRuleOutboundComplete(reqId, ani, pbxObj.Endpoints.DestinationNumber, '', context, companyId, tenantId, false, cacheData, function (err, rule)
+                                                            backendFactory.getRuleHandler().PickCallRuleOutboundComplete(reqId, ani, pbxObj.Endpoints.DestinationNumber, '', context, companyId, tenantId, false, cacheData, dodNumber, function (err, rule)
                                                             {
                                                                 if (!err && rule)
                                                                 {
@@ -1720,10 +1720,10 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                     fromFaxType = fromUserData.Extension.ExtraData;
                 }
 
-                var dodNumber = undefined;
-                var dodActive = undefined;
+                var dodNumber = null;
+                var dodActive = null;
 
-                if(fromUserData.Extension)
+                if(fromUserData.Extension && fromUserData.Extension.DodActive && fromUserData.Extension.DodNumber)
                 {
                     dodNumber = fromUserData.Extension.DodNumber;
                     dodActive = fromUserData.Extension.DodActive;
@@ -2002,7 +2002,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                         recEnabled = false;
                                                                     }
                                                                 }
-                                                                CreateFMEndpointList(reqId, ani, context, companyId, tenantId, pbxDetails.Endpoints, '', false, callerIdNum, callerIdName, csId, appId, cacheData, function(err, epList)
+                                                                CreateFMEndpointList(reqId, ani, context, companyId, tenantId, pbxDetails.Endpoints, dodNumber, dodActive, callerIdNum, callerIdName, csId, appId, cacheData, function(err, epList)
                                                                 {
                                                                     if(err)
                                                                     {
@@ -2185,7 +2185,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                             if (pbxObj.Endpoints && pbxObj.Endpoints.ObjCategory === 'GATEWAY')
                                                             {
                                                                 //pick outbound rule
-                                                                backendFactory.getRuleHandler().PickCallRuleOutboundComplete(reqId, ani, pbxObj.Endpoints.DestinationNumber, '', context, companyId, tenantId, false, cacheData, function (err, rule)
+                                                                backendFactory.getRuleHandler().PickCallRuleOutboundComplete(reqId, ani, pbxObj.Endpoints.DestinationNumber, '', context, companyId, tenantId, false, cacheData, dodNumber, function (err, rule)
                                                                 {
                                                                     if (!err && rule)
                                                                     {
@@ -2208,16 +2208,8 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                         };
 
 
-                                                                        if(dodActive && dodNumber)
-                                                                        {
-                                                                            ep.Origination = dodNumber;
-                                                                            ep.OriginationCallerIdNumber = dodNumber;
-                                                                        }
-                                                                        else
-                                                                        {
-                                                                            ep.Origination = rule.ANI;
-                                                                            ep.OriginationCallerIdNumber = rule.ANI;
-                                                                        }
+                                                                        ep.Origination = rule.ANI;
+                                                                        ep.OriginationCallerIdNumber = rule.ANI;
 
                                                                         var attTransInfo = AttendantTransferLegInfoHandler(reqId, fromUserData, null);
 
@@ -2769,7 +2761,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                             if(operationType === 'GATEWAY')
                                             {
                                                 //xml DND response
-                                                backendFactory.getRuleHandler().PickCallRuleOutboundComplete(reqId, ani, dnis, '', context, companyId, tenantId, true, cacheData, function(err, rule)
+                                                backendFactory.getRuleHandler().PickCallRuleOutboundComplete(reqId, ani, dnis, '', context, companyId, tenantId, true, cacheData, dodNumber, function(err, rule)
                                                 {
                                                     if(err)
                                                     {
@@ -2835,12 +2827,6 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                 RecordEnabled: recEnabled,
                                                                 Operator: rule.Operator
                                                             };
-
-                                                            if(dodActive && dodNumber)
-                                                            {
-                                                                ep.Origination = dodNumber;
-                                                                ep.OriginationCallerIdNumber = dodNumber;
-                                                            }
 
                                                             if(toFaxType)
                                                             {
@@ -3082,7 +3068,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                         }
                                         else
                                         {
-                                            backendFactory.getRuleHandler().PickCallRuleOutboundComplete(reqId, ani, dnis, '', context, companyId, tenantId, true, cacheData, function(err, rule)
+                                            backendFactory.getRuleHandler().PickCallRuleOutboundComplete(reqId, ani, dnis, '', context, companyId, tenantId, true, cacheData, dodNumber, function(err, rule)
                                             {
                                                 if(err)
                                                 {
@@ -3132,12 +3118,6 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                         RecordEnabled: recEnabled,
                                                         Operator: rule.Operator
                                                     };
-
-                                                    if(dodActive && dodNumber)
-                                                    {
-                                                        ep.Origination = dodNumber;
-                                                        ep.OriginationCallerIdNumber = dodNumber;
-                                                    }
 
                                                     if(toFaxType)
                                                     {
@@ -3227,7 +3207,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                             }
                             else
                             {
-                                backendFactory.getRuleHandler().PickCallRuleOutboundComplete(reqId, ani, dnis, '', context, companyId, tenantId, true, cacheData, function(err, rule)
+                                backendFactory.getRuleHandler().PickCallRuleOutboundComplete(reqId, ani, dnis, '', context, companyId, tenantId, true, cacheData, dodNumber, function(err, rule)
                                 {
                                     if(err)
                                     {
@@ -3280,12 +3260,6 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                             RecordEnabled: recEnabled,
                                             Operator: rule.Operator
                                         };
-
-                                        if(dodActive && dodNumber)
-                                        {
-                                            ep.Origination = dodNumber;
-                                            ep.OriginationCallerIdNumber = dodNumber;
-                                        }
 
                                         if(toFaxType)
                                         {
@@ -3375,8 +3349,8 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                     var fromUserUuid = '';
 
 
-                    var dodNumber = undefined;
-                    var dodActive = undefined;
+                    var dodNumber = null;
+                    var dodActive = null;
 
                     //Get to user
                     backendFactory.getBackendHandler().GetExtensionDB(reqId, dnis, companyId, tenantId, cacheData, function(err, extInfo)
@@ -3601,7 +3575,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                 {
                                                                     var recEnabled = false;
 
-                                                                    CreateFMEndpointList(reqId, ani, context, companyId, tenantId, pbxDetails.Endpoints, '', false, callerIdNum, callerIdName, csId, appId, cacheData, function(err, epList)
+                                                                    CreateFMEndpointList(reqId, ani, context, companyId, tenantId, pbxDetails.Endpoints, null, false, callerIdNum, callerIdName, csId, appId, cacheData, function(err, epList)
                                                                     {
                                                                         if(err)
                                                                         {
@@ -3641,10 +3615,6 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                         AppId: appId
                                                                     };
 
-                                                                    if(dodActive && dodNumber)
-                                                                    {
-                                                                        ep.DodNumber = dodNumber;
-                                                                    }
 
                                                                     var pbxFwdKey = util.format('DVPFORWARDING_%d_%d_%s', companyId, tenantId, pbxDetails.UserRefId);
                                                                     var forwardingInfo = JSON.stringify(pbxDetails.Endpoints);
@@ -3764,7 +3734,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                 if (pbxObj.Endpoints && pbxObj.Endpoints.ObjCategory === 'GATEWAY')
                                                                 {
                                                                     //pick outbound rule
-                                                                    backendFactory.getRuleHandler().PickCallRuleOutboundComplete(reqId, ani, pbxObj.Endpoints.DestinationNumber, '', context, companyId, tenantId, false, cacheData, function (err, rule)
+                                                                    backendFactory.getRuleHandler().PickCallRuleOutboundComplete(reqId, ani, pbxObj.Endpoints.DestinationNumber, '', context, companyId, tenantId, false, cacheData, null, function (err, rule)
                                                                     {
                                                                         if (!err && rule)
                                                                         {
@@ -3786,17 +3756,8 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                                 Operator: rule.Operator
                                                                             };
 
-
-                                                                            if(dodActive && dodNumber)
-                                                                            {
-                                                                                ep.Origination = dodNumber;
-                                                                                ep.OriginationCallerIdNumber = dodNumber;
-                                                                            }
-                                                                            else
-                                                                            {
-                                                                                ep.Origination = rule.ANI;
-                                                                                ep.OriginationCallerIdNumber = rule.ANI;
-                                                                            }
+                                                                            ep.Origination = rule.ANI;
+                                                                            ep.OriginationCallerIdNumber = rule.ANI;
 
                                                                             var attTransInfo = AttendantTransferLegInfoHandler(reqId, null, null);
 
@@ -4264,7 +4225,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                             }
                             else
                             {
-                                backendFactory.getRuleHandler().PickCallRuleOutboundComplete(reqId, ani, dnis, '', context, companyId, tenantId, true, cacheData, function(err, rule)
+                                backendFactory.getRuleHandler().PickCallRuleOutboundComplete(reqId, ani, dnis, '', context, companyId, tenantId, true, cacheData, dodNumber, function(err, rule)
                                 {
                                     if(err)
                                     {
