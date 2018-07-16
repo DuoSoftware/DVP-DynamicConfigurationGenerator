@@ -685,6 +685,22 @@ var HandleOutRequest = function(reqId, data, callerIdNum, contextTenant, appType
 
 }*/
 
+server.opts('/DynamicConfigGenerator/HealthCheck', function(req,res,next)
+{
+    res.end('OK');
+
+    return next();
+
+});
+
+server.get('/DynamicConfigGenerator/HealthCheck', function(req,res,next)
+{
+    res.end('OK');
+
+    return next();
+
+});
+
 server.post('/DVP/API/:version/DynamicConfigGenerator/Factory/:factory', function(req,res,next)
 {
 
