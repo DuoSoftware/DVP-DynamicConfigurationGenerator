@@ -19,7 +19,6 @@ var extApi = require('./ExternalApiAccess.js');
 var LimitValidator = require('./LimitValidator.js').LimitValidator;
 var dashboardEvtHandler = require('./DashboardEventHandler.js');
 
-
 /*var backendHandler;
 var ruleHandler;
 
