@@ -66,5 +66,6 @@ module.exports = {
     "Token": "HOST_TOKEN",
     "billingEnabled": "SYS_BILLING_ENABLED",
     "RecordingPath": "SYS_CALL_RECORD_PATH",
-    "UseDashboardAMQP": "HOST_USE_DASHBOARD_MSG_QUEUE"
+    "UseDashboardAMQP": "HOST_USE_DASHBOARD_MSG_QUEUE",
+    "EnableDefaultRing": "HOST_ENABLE_DEFAULT_RING"
 };

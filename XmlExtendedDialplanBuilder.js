@@ -15,6 +15,8 @@ var allowCodecPref = config.Host.AllowCodecConfigure;
 
 var recordingPath = config.RecordingPath;
 
+var enableRing = config.EnableDefaultRing;
+
 var createRejectResponse = function(context)
 {
     try
@@ -2566,9 +2568,13 @@ var CreateRouteGatewayDialplan = function(reqId, ep, context, profile, destinati
             .ele('extension').att('name', 'test')
             .ele('condition').att('field', 'destination_number').att('expression', destinationPattern)
 
-        cond.ele('action').att('application', 'set').att('data', 'ringback=${us-ring}')
-            .up()
-            .ele('action').att('application', 'set').att('data', 'continue_on_fail=true')
+        if(enableRing === true || enableRing === 'true')
+        {
+            cond.ele('action').att('application', 'set').att('data', 'ringback=${us-ring}')
+                .up()
+        }
+
+        cond.ele('action').att('application', 'set').att('data', 'continue_on_fail=true')
             .up()
 
         if(dvpCallDirection === 'outbound')
