@@ -1058,15 +1058,13 @@ var CreateRouteUserDialplan = function(reqId, ep, context, profile, destinationP
                 .up()
         }
 
-        /*cond.ele('action').att('application', 'set').att('data', 'ringback=${us-ring}')
-         .up()*/
-        cond.ele('action').att('application', 'set').att('data', 'bridge_early_media=true')
+        cond.ele('action').att('application', 'set').att('data', 'ringback=${us-ring}')
+             .up()
+            .ele('action').att('application', 'set').att('data', 'bridge_early_media=true')
             .up()
             .ele('action').att('application', 'set').att('data', 'continue_on_fail=true')
             .up()
             .ele('action').att('application', 'set').att('data', 'hangup_after_bridge=true')
-            .up()
-            .ele('action').att('application', 'set').att('data', 'false')
             .up()
             .ele('action').att('application', 'set').att('data', bypassMedia)
             .up()
@@ -3358,15 +3356,15 @@ var CreateFollowMeDialplan = function(reqId, fmEndpoints, context, profile, dest
             {
                 destinationGroup = 'user';
 
-                var bypassMed = 'bypass_media=false';
+                var bypassMed = 'false';
 
                 if(ep.BypassMedia)
                 {
-                    bypassMed = 'bypass_media=true';
+                    bypassMed = 'true';
                 }
                 else
                 {
-                    bypassMed = 'bypass_media=false';
+                    bypassMed = 'false';
                 }
 
                 if (ep.LegStartDelay > 0)
