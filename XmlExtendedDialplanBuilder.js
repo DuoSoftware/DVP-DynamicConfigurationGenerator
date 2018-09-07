@@ -15,6 +15,8 @@ var allowCodecPref = config.Host.AllowCodecConfigure;
 
 var recordingPath = config.RecordingPath;
 
+var enableRing = config.EnableDefaultRing;
+
 var createRejectResponse = function(context)
 {
     try
@@ -349,7 +351,7 @@ var CreatePbxFeaturesUser = function(reqId, destNum, pbxType, domain, companyId,
             codecListString = codecList.join();
         }
 
-        var option = '{companyid=' + companyId + ',tenantid=' + tenantId + ',DVP_OPERATION_CAT=ATT_XFER_USER,dvp_app_id=' + appId + ',dvp_trans_caller=' + transferCallerName + ',dvp_trans_party=' + transferedParty + ',dvp_trans_orig_caller=' + origCaller;
+        var option = '{companyid=' + companyId + ',tenantid=' + tenantId + ',DVP_OPERATION_CAT=ATT_XFER_USER, IsTransferLeg=true, dvp_app_id=' + appId + ',dvp_trans_caller=' + transferCallerName + ',dvp_trans_party=' + transferedParty + ',dvp_trans_orig_caller=' + origCaller;
 
         if(ardsClientUuid)
         {
@@ -384,11 +386,11 @@ var CreatePbxFeaturesUser = function(reqId, destNum, pbxType, domain, companyId,
             .up()*/
         cond.ele('action').att('application', 'att_xfer').att('data', option + pbxType + '/' + digits + '@' + domain)
             .up()
-            .ele('action').att('application', 'event').att('data', 'Event-Name=TRANSFER_DISCONNECT,caller=' + transferCallerName + ',companyId=' + companyId + ',tenantId=' + tenantId + ',digits=' + transferedParty + ',reason=${originate_disposition}')
-            .up()
             .ele('action').att('application', 'speak').att('data', 'flite|slt|transfer line disconnected')
             .up()
             .ele('action').att('application', 'playback').att('data', 'tone_stream://L=3;%(500,500,480,620)')
+            .up()
+            .ele('action').att('application', 'event').att('data', 'Event-Name=TRANSFER_DISCONNECT,caller=' + transferCallerName + ',companyId=' + companyId + ',tenantId=' + tenantId + ',digits=' + transferedParty + ',reason=${originate_disposition}')
             .up()
             /*.ele('condition').att('field', '${originate_disposition}').att('expression', '^CALL_REJECTED$')
                 .ele('action').att('application', 'speak').att('data', 'flite|slt|transfer line disconnected ${originate_disposition}')
@@ -511,7 +513,7 @@ var CreatePbxFeaturesGateway = function(reqId, destNum, trunkNumber, trunkCode, 
             codecListString = codecList.join();
         }
 
-        var option = '{leg_timeout=60, origination_caller_id_name=' + trunkNumber + ', origination_caller_id_number=' + trunkNumber + ',dvp_app_id=' + appId + ',sip_h_X-Gateway=' + trunkIp;
+        var option = '{leg_timeout=60, IsTransferLeg=true, origination_caller_id_name=' + trunkNumber + ', origination_caller_id_number=' + trunkNumber + ',dvp_app_id=' + appId + ',sip_h_X-Gateway=' + trunkIp;
 
         if(codecListString && allowCodecPref)
         {
@@ -1088,15 +1090,13 @@ var CreateRouteUserDialplan = function(reqId, ep, context, profile, destinationP
                 .up()
         }
 
-        /*cond.ele('action').att('application', 'set').att('data', 'ringback=${us-ring}')
-         .up()*/
-        cond.ele('action').att('application', 'set').att('data', 'bridge_early_media=true')
+        cond.ele('action').att('application', 'set').att('data', 'ringback=${us-ring}')
+            .up()
+            .ele('action').att('application', 'set').att('data', 'bridge_early_media=true')
             .up()
             .ele('action').att('application', 'set').att('data', 'continue_on_fail=true')
             .up()
             .ele('action').att('application', 'set').att('data', 'hangup_after_bridge=true')
-            .up()
-            .ele('action').att('application', 'set').att('data', 'false')
             .up()
             .ele('action').att('application', 'set').att('data', bypassMedia)
             .up()
@@ -1156,7 +1156,7 @@ var CreateRouteUserDialplan = function(reqId, ep, context, profile, destinationP
 
                 if(recordingPath)
                 {
-                    fileSavePath = recordingPath + '${my_uuid}.mp3';
+                    fileSavePath = recordingPath + '${uuid}.mp3';
                 }
 
                 var playFileDetails = 'record_post_process_exec_api=curl_sendfile:' + fileUploadUrl + ' file=${dvpRecFile} class=CALLSERVER&type=CALL&category=CONVERSATION&referenceid=${uuid}&mediatype=audio&filetype=wav&sessionid=${uuid}&display=' + ep.Destination + '-${caller_id_number}';
@@ -2492,7 +2492,7 @@ var FaxReceiveUpload = function(reqId, context, destinationPattern, numLimitInfo
 
         if(recordingPath)
         {
-            fileSavePath = recordingPath + '${my_uuid}.mp3';
+            fileSavePath = recordingPath + '${uuid}.mp3';
         }
 
         cond.ele('action').att('application', 'set').att('data', 'dvpUploadFaxFile=' + fileSavePath)
@@ -2566,9 +2566,13 @@ var CreateRouteGatewayDialplan = function(reqId, ep, context, profile, destinati
             .ele('extension').att('name', 'test')
             .ele('condition').att('field', 'destination_number').att('expression', destinationPattern)
 
-        cond.ele('action').att('application', 'set').att('data', 'ringback=${us-ring}')
-            .up()
-            .ele('action').att('application', 'set').att('data', 'continue_on_fail=true')
+        if(enableRing === true || enableRing === 'true')
+        {
+            cond.ele('action').att('application', 'set').att('data', 'ringback=${us-ring}')
+                .up()
+        }
+
+        cond.ele('action').att('application', 'set').att('data', 'continue_on_fail=true')
             .up()
 
         if(dvpCallDirection === 'outbound')
@@ -2632,7 +2636,7 @@ var CreateRouteGatewayDialplan = function(reqId, ep, context, profile, destinati
 
                 if(recordingPath)
                 {
-                    fileSavePath = recordingPath + '${my_uuid}.mp3';
+                    fileSavePath = recordingPath + '${uuid}.mp3';
                 }
 
                 var playFileDetails = 'record_post_process_exec_api=curl_sendfile:' + fileUploadUrl + ' file=${dvpRecFile} class=CALLSERVER&type=CALL&category=CONVERSATION&referenceid=${uuid}&mediatype=audio&filetype=wav&sessionid=${uuid}&display=' + ep.Destination + '-${caller_id_number}';
@@ -3007,7 +3011,7 @@ var CreateRouteGatewayCampaignDialplan = function(reqId, ep, context, profile, d
 
                 if(recordingPath)
                 {
-                    fileSavePath = recordingPath + '${my_uuid}.mp3';
+                    fileSavePath = recordingPath + '${uuid}.mp3';
                 }
 
                 var playFileDetails = 'record_post_process_exec_api=curl_sendfile:' + fileUploadUrl + ' file=${dvpRecFile} class=CALLSERVER&type=CALL&category=CONVERSATION&referenceid=${uuid}&mediatype=audio&filetype=wav&sessionid=${uuid}&display=' + ep.Destination + '-${caller_id_number}';
@@ -3290,7 +3294,7 @@ var CreateRouteGatewayCampaignDialplan = function(reqId, ep, context, profile, d
 
 };
 
-var CreateFollowMeDialplan = function(reqId, fmEndpoints, context, profile, destinationPattern, ignoreEarlyMedia, numLimitInfo, companyId, tenantId, appId, dvpCallDirection, bUnit)
+var CreateFollowMeDialplan = function(reqId, fmEndpoints, context, profile, destinationPattern, ignoreEarlyMedia, numLimitInfo, companyId, tenantId, appId, dvpCallDirection, bUnit, recordingEnabled)
 {
     try
     {
@@ -3395,6 +3399,69 @@ var CreateFollowMeDialplan = function(reqId, fmEndpoints, context, profile, dest
             }
         }
 
+        if(dvpCallDirection === 'outbound')
+        {
+            cond.ele('action').att('application', 'set').att('data', 'my_uuid=${create_uuid()}').att('inline', 'true')
+                .up()
+        }
+
+        if(recordingEnabled)
+        {
+            if(dvpCallDirection === 'outbound')
+            {
+                var fileUploadUrl = 'http://' + fileServiceIp + ':' + fileServicePort + '/DVP/API/' + fileServiceVersion + '/InternalFileService/File/Upload/' + tenantId + '/' + companyId;
+
+                if(!validator.isIP(fileServiceIp))
+                {
+                    fileUploadUrl = 'http://' + fileServiceIp + '/DVP/API/' + fileServiceVersion + '/InternalFileService/File/Upload/' + tenantId + '/' + companyId;
+                }
+
+                var fileSavePath = '$${base_dir}/recordings/${my_uuid}.mp3';
+
+                if(recordingPath)
+                {
+                    fileSavePath = recordingPath + '${my_uuid}.mp3';
+                }
+
+                var playFileDetails = 'record_post_process_exec_api=curl_sendfile:' + fileUploadUrl + ' file=${dvpRecFile} class=CALLSERVER&type=CALL&category=CONVERSATION&referenceid=${my_uuid}&mediatype=audio&filetype=wav&sessionid=${my_uuid}&display=' + fmEndpoints[0].Destination + '-${caller_id_number}';
+
+                cond.ele('action').att('application', 'set').att('data', 'dvpRecFile=' + fileSavePath)
+                    .up()
+                    .ele('action').att('application', 'export').att('data', 'execute_on_answer=record_session ${dvpRecFile}')
+                    .up()
+                    .ele('action').att('application', 'export').att('data', playFileDetails)
+                    .up()
+            }
+            else
+            {
+                var fileUploadUrl = 'http://' + fileServiceIp + ':' + fileServicePort + '/DVP/API/' + fileServiceVersion + '/InternalFileService/File/Upload/' + tenantId + '/' + companyId;
+
+                if(!validator.isIP(fileServiceIp))
+                {
+                    fileUploadUrl = 'http://' + fileServiceIp + '/DVP/API/' + fileServiceVersion + '/InternalFileService/File/Upload/' + tenantId + '/' + companyId;
+                }
+
+                var fileSavePath = '$${base_dir}/recordings/${uuid}.mp3';
+
+                if(recordingPath)
+                {
+                    fileSavePath = recordingPath + '${uuid}.mp3';
+                }
+
+                var playFileDetails = 'record_post_process_exec_api=curl_sendfile:' + fileUploadUrl + ' file=${dvpRecFile} class=CALLSERVER&type=CALL&category=CONVERSATION&referenceid=${uuid}&mediatype=audio&filetype=wav&sessionid=${uuid}&display=' + fmEndpoints[0].Destination + '-${caller_id_number}';
+
+                cond.ele('action').att('application', 'set').att('data', 'dvpRecFile=' + fileSavePath)
+                    .up()
+                    .ele('action').att('application', 'export').att('data', 'execute_on_answer=record_session ${dvpRecFile}')
+                    .up()
+                    .ele('action').att('application', 'set').att('data', playFileDetails)
+                    .up()
+            }
+
+
+
+        }
+
 
 
         fmEndpoints.forEach(function(ep)
@@ -3426,15 +3493,15 @@ var CreateFollowMeDialplan = function(reqId, fmEndpoints, context, profile, dest
             {
                 destinationGroup = 'user';
 
-                var bypassMed = 'bypass_media=false';
+                var bypassMed = 'false';
 
                 if(ep.BypassMedia)
                 {
-                    bypassMed = 'bypass_media=true';
+                    bypassMed = 'true';
                 }
                 else
                 {
-                    bypassMed = 'bypass_media=false';
+                    bypassMed = 'false';
                 }
 
                 if (ep.LegStartDelay > 0)

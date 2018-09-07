@@ -931,7 +931,8 @@ var GetGatewayListForCallServerProfile = function(profile, csId, reqId, data, ca
                                     TrunkCode: trunk.TrunkCode,
                                     Proxy: undefined,
                                     Username: trunk.Username,
-                                    Password: trunk.Password
+                                    Password: trunk.Password,
+                                    Register: trunk.Register
                                 };
                                 gatewayList.push(gw);
                             })
@@ -960,7 +961,10 @@ var GetGatewayListForCallServerProfile = function(profile, csId, reqId, data, ca
                                                         IpUrl: trunk.IpUrl,
                                                         Domain: result.InternalIp,
                                                         TrunkCode: trunk.TrunkCode,
-                                                        Proxy: rslt.LoadBalancer.MainIP
+                                                        Proxy: rslt.LoadBalancer.MainIP,
+                                                        Username: trunk.Username,
+                                                        Password: trunk.Password,
+                                                        Register: trunk.Register
                                                     };
                                                     gatewayList.push(gw);
                                                 });

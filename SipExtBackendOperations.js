@@ -762,14 +762,14 @@ var GetPhoneNumberDetails = function(phnNum, callback)
     }
 };
 
-var GetGatewayListForCallServerProfile = function(profile, csId, reqId, data, callback)
+var GetGatewayListForCallServerProfile = function(profile, csName, reqId, data, callback)
 {
     try
     {
         var gatewayList = [];
 
         dbModel.SipNetworkProfile
-            .find({where :[{ProfileName: profile},{ObjType: 'EXTERNAL'}], include: [{model: dbModel.CallServer, as: "CallServer", where:[{id: csId}]},{model: dbModel.Trunk, as: "Trunk"}]})
+            .find({where :[{ProfileName: profile},{ObjType: 'EXTERNAL'}], include: [{model: dbModel.CallServer, as: "CallServer", where:[{Name: csName}]},{model: dbModel.Trunk, as: "Trunk"}]})
             .then(function (result)
             {
                 try
@@ -793,7 +793,8 @@ var GetGatewayListForCallServerProfile = function(profile, csId, reqId, data, ca
                                         TrunkCode: trunk.TrunkCode,
                                         Proxy: null,
                                         Username: trunk.Username,
-                                        Password: trunk.Password
+                                        Password: trunk.Password,
+                                        Register: trunk.Register
                                     };
                                     gatewayList.push(gw);
                                 })
@@ -824,7 +825,8 @@ var GetGatewayListForCallServerProfile = function(profile, csId, reqId, data, ca
                                                             TrunkCode: trunk.TrunkCode,
                                                             Proxy: null,
                                                             Username: trunk.Username,
-                                                            Password: trunk.Password
+                                                            Password: trunk.Password,
+                                                            Register: trunk.Register
                                                         };
                                                         gatewayList.push(gw);
                                                     });

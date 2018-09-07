@@ -392,6 +392,19 @@ var CreateGatewayProfile = function(gwList, reqId)
                         '@value': '30'
                     });
 
+                if(!gw.Register)
+                {
+                    domainEle.user.gateways.gateway.param.push({
+                        '@name': 'register',
+                        '@value': 'false'
+                    });
+
+                    domainEle.user.gateways.gateway.param.push({
+                        '@name': 'caller-id-in-from',
+                        '@value': 'true'
+                    });
+                }
+
             }
 
             obj.document.section.domain.push(domainEle);
@@ -500,6 +513,7 @@ var createDirectoryProfile = function(extName, ext, domain, email, password, con
         var tempDoc = doc.att('type', 'freeswitch/xml')
             .ele('section').att('name', 'directory')
             .ele('domain').att('name', domain)
+            //.ele('user').att('id', extName).att('number-alias', ext)
             .ele('user').att('id', extName).att('cacheable', 'false').att('number-alias', ext)
             .ele('params')
                 .ele('param').att('name', 'dial-string').att('value', '{sip_invite_domain=${domain_name},presence_id=${dialed_user}@${dialed_domain}}${sofia_contact(${dialed_user}@${dialed_domain})}')
@@ -691,7 +705,7 @@ var CreateHttpApiDialplan = function(destinationPattern, context, httApiUrl, req
 
 };
 
-var CreateHttpApiDialplanTransfer = function(destinationPattern, context, httApiUrl, reqId, numLimitInfo, appId, companyId, tenantId, dvpCallDirection, ani, appType, bUnit, isDialerIVR)
+var CreateHttpApiDialplanTransfer = function(destinationPattern, context, httApiUrl, reqId, numLimitInfo, appId, companyId, tenantId, dvpCallDirection, ani, appType, bUnit, isDialerIVR, isIvrTransfer)
 {
     try
     {
@@ -762,6 +776,12 @@ var CreateHttpApiDialplanTransfer = function(destinationPattern, context, httApi
         if(isDialerIVR)
         {
             cond.ele('action').att('application', 'set').att('data', 'is_dialer_ivr=true')
+                .up()
+        }
+
+        if(isIvrTransfer)
+        {
+            cond.ele('action').att('application', 'set').att('data', 'is_ivr_transfer=true')
                 .up()
         }
 

@@ -61,11 +61,11 @@ module.exports = {
         "dccaclientHost": "SYS_DIAMETERCLIENT_HOST",
         "dccaclientPort": "SYS_DIAMETERCLIENT_PORT",
         "dccaclientVersion": "SYS_DIAMETERCLIENT_VERSION"
-
     },
 
     "Token": "HOST_TOKEN",
     "billingEnabled": "SYS_BILLING_ENABLED",
     "RecordingPath": "SYS_CALL_RECORD_PATH",
-    "UseDashboardAMQP": "HOST_USE_DASHBOARD_MSG_QUEUE"
+    "UseDashboardAMQP": "HOST_USE_DASHBOARD_MSG_QUEUE",
+    "EnableDefaultRing": "HOST_ENABLE_DEFAULT_RING"
 };
