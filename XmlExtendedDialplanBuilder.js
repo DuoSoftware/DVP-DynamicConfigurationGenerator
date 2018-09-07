@@ -15,6 +15,8 @@ var allowCodecPref = config.Host.AllowCodecConfigure;
 
 var recordingPath = config.RecordingPath;
 
+var enableRing = config.EnableDefaultRing;
+
 var createRejectResponse = function(context)
 {
     try
@@ -384,11 +386,11 @@ var CreatePbxFeaturesUser = function(reqId, destNum, pbxType, domain, companyId,
             .up()*/
         cond.ele('action').att('application', 'att_xfer').att('data', option + pbxType + '/' + digits + '@' + domain)
             .up()
-            .ele('action').att('application', 'event').att('data', 'Event-Name=TRANSFER_DISCONNECT,caller=' + transferCallerName + ',companyId=' + companyId + ',tenantId=' + tenantId + ',digits=' + transferedParty + ',reason=${originate_disposition}')
-            .up()
             .ele('action').att('application', 'speak').att('data', 'flite|slt|transfer line disconnected')
             .up()
             .ele('action').att('application', 'playback').att('data', 'tone_stream://L=3;%(500,500,480,620)')
+            .up()
+            .ele('action').att('application', 'event').att('data', 'Event-Name=TRANSFER_DISCONNECT,caller=' + transferCallerName + ',companyId=' + companyId + ',tenantId=' + tenantId + ',digits=' + transferedParty + ',reason=${originate_disposition}')
             .up()
             /*.ele('condition').att('field', '${originate_disposition}').att('expression', '^CALL_REJECTED$')
                 .ele('action').att('application', 'speak').att('data', 'flite|slt|transfer line disconnected ${originate_disposition}')
@@ -1088,15 +1090,13 @@ var CreateRouteUserDialplan = function(reqId, ep, context, profile, destinationP
                 .up()
         }
 
-        /*cond.ele('action').att('application', 'set').att('data', 'ringback=${us-ring}')
-         .up()*/
-        cond.ele('action').att('application', 'set').att('data', 'bridge_early_media=true')
+        cond.ele('action').att('application', 'set').att('data', 'ringback=${us-ring}')
+            .up()
+            .ele('action').att('application', 'set').att('data', 'bridge_early_media=true')
             .up()
             .ele('action').att('application', 'set').att('data', 'continue_on_fail=true')
             .up()
             .ele('action').att('application', 'set').att('data', 'hangup_after_bridge=true')
-            .up()
-            .ele('action').att('application', 'set').att('data', 'false')
             .up()
             .ele('action').att('application', 'set').att('data', bypassMedia)
             .up()
@@ -2566,9 +2566,13 @@ var CreateRouteGatewayDialplan = function(reqId, ep, context, profile, destinati
             .ele('extension').att('name', 'test')
             .ele('condition').att('field', 'destination_number').att('expression', destinationPattern)
 
-        cond.ele('action').att('application', 'set').att('data', 'ringback=${us-ring}')
-            .up()
-            .ele('action').att('application', 'set').att('data', 'continue_on_fail=true')
+        if(enableRing === true || enableRing === 'true')
+        {
+            cond.ele('action').att('application', 'set').att('data', 'ringback=${us-ring}')
+                .up()
+        }
+
+        cond.ele('action').att('application', 'set').att('data', 'continue_on_fail=true')
             .up()
 
         if(dvpCallDirection === 'outbound')
@@ -3489,15 +3493,15 @@ var CreateFollowMeDialplan = function(reqId, fmEndpoints, context, profile, dest
             {
                 destinationGroup = 'user';
 
-                var bypassMed = 'bypass_media=false';
+                var bypassMed = 'false';
 
                 if(ep.BypassMedia)
                 {
-                    bypassMed = 'bypass_media=true';
+                    bypassMed = 'true';
                 }
                 else
                 {
-                    bypassMed = 'bypass_media=false';
+                    bypassMed = 'false';
                 }
 
                 if (ep.LegStartDelay > 0)
