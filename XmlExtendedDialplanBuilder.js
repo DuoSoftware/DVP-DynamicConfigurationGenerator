@@ -513,7 +513,7 @@ var CreatePbxFeaturesGateway = function(reqId, destNum, trunkNumber, trunkCode, 
             codecListString = codecList.join();
         }
 
-        var option = '{leg_timeout=60, IsTransferLeg=true, origination_caller_id_name=' + trunkNumber + ', origination_caller_id_number=' + trunkNumber + ',dvp_app_id=' + appId + ',sip_h_X-Gateway=' + trunkIp;
+        var option = '{leg_timeout=60, IsTransferLeg=true, origination_caller_id_name=' + trunkNumber + ', origination_caller_id_number=' + trunkNumber + ',dvp_app_id=' + appId + ',sip_h_X-Gateway=' + trunkIp + ',dvp_trans_caller=' + transferCallerName + ',dvp_trans_party=' + digits;
 
         if(codecListString && allowCodecPref)
         {
