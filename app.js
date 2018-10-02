@@ -2819,6 +2819,22 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/DirectoryProfile', functio
 
 });
 
+server.opts('/DynamicConfigGenerator/HealthCheck', function(req,res,next)
+{
+    res.end('OK');
+
+    return next();
+
+});
+
+server.get('/DynamicConfigGenerator/HealthCheck', function(req,res,next)
+{
+    res.end('OK');
+
+    return next();
+
+})
+
 
 server.listen(hostPort, hostIp, function () {
     console.log('%s listening at %s', server.name, server.url);
