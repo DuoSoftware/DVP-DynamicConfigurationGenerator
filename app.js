@@ -755,7 +755,7 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
         var transAgentSkill = decodeURIComponent(data['variable_ards_skill_display']);
 
 
-        if(data['my_uuid']){
+        if(!ardsClientUuid && data['my_uuid']){
             ardsClientUuid = data['my_uuid'];
         }
 
