@@ -16,6 +16,7 @@ var allowCodecPref = config.Host.AllowCodecConfigure;
 var recordingPath = config.RecordingPath;
 
 var enableRing = config.EnableDefaultRing;
+var enableTransferFailPlay = config.EnableTransferFailPlay;
 
 var createRejectResponse = function(context)
 {
@@ -74,13 +75,17 @@ var createTransferRejectResponse = function(context, transferCallerName, company
             .ele('extension').att('name', 'test')
             .ele('condition').att('field', 'destination_number').att('expression', '[^\\s]*')
             .ele('action').att('application', 'set').att('data', 'DVP_OPERATION_CAT=REJECTED')
-            .up()
+            .up();
 
 
 
-        cond.ele('action').att('application', 'speak').att('data', 'flite|slt|transfer line disconnected')
-            .up()
-            .ele('action').att('application', 'playback').att('data', 'tone_stream://L=3;%(500,500,480,620)')
+        if(enableTransferFailPlay === true || enableTransferFailPlay === "true") {
+            cond.ele('action').att('application', 'speak').att('data', 'flite|slt|transfer line disconnected')
+                .up();
+        }
+
+
+        cond.ele('action').att('application', 'playback').att('data', 'tone_stream://L=3;%(500,500,480,620)')
             .up()
             .end({pretty: true});
 
@@ -387,10 +392,13 @@ var CreatePbxFeaturesUser = function(reqId, destNum, pbxType, domain, companyId,
         /*cond.ele('action').att('application', 'event').att('data', 'Event-Name=TRANSFER_TRYING,caller=' + transferCallerName + ',companyId=' + companyId + ',tenantId=' + tenantId + ',digits=' + transferedParty + ',origCaller=' + origCaller)
             .up()*/
         cond.ele('action').att('application', 'att_xfer').att('data', option + pbxType + '/' + digits + '@' + domain)
-            .up()
-            .ele('action').att('application', 'speak').att('data', 'flite|slt|transfer line disconnected')
-            .up()
-            .ele('action').att('application', 'playback').att('data', 'tone_stream://L=3;%(500,500,480,620)')
+            .up();
+
+        if(enableTransferFailPlay === true || enableTransferFailPlay === "true") {
+            cond.ele('action').att('application', 'speak').att('data', 'flite|slt|transfer line disconnected')
+                .up();
+        }
+        cond.ele('action').att('application', 'playback').att('data', 'tone_stream://L=3;%(500,500,480,620)')
             .up()
             .ele('action').att('application', 'event').att('data', 'Event-Name=TRANSFER_DISCONNECT,caller=' + transferCallerName + ',companyId=' + companyId + ',tenantId=' + tenantId + ',digits=' + transferedParty + ',reason=${originate_disposition}')
             .up()
@@ -414,8 +422,7 @@ var CreatePbxFeaturesUser = function(reqId, destNum, pbxType, domain, companyId,
 
 var CreatePbxFeaturesGateway = function(reqId, destNum, trunkNumber, trunkCode, companyId, tenantId, appId, context, ardsClientUuid, digits, operator, trunkIp, limitInfo, codecList, transferCallerName, bUnit)
 {
-    try
-    {
+    try {
 
         if (!destNum) {
             destNum = "";
@@ -442,19 +449,16 @@ var CreatePbxFeaturesGateway = function(reqId, destNum, trunkNumber, trunkCode, 
             .ele('extension').att('name', destNum)
             .ele('condition').att('field', 'destination_number').att('expression', '^' + destNum + '$')
 
-        if(companyId)
-        {
+        if (companyId) {
             cond.ele('action').att('application', 'export').att('data', 'companyid=' + companyId)
                 .up()
         }
-        if(tenantId)
-        {
+        if (tenantId) {
             cond.ele('action').att('application', 'export').att('data', 'tenantid=' + tenantId)
                 .up()
         }
 
-        if(operator)
-        {
+        if (operator) {
             cond.ele('action').att('application', 'export').att('data', 'veeryoperator=' + operator)
                 .up()
         }
@@ -470,32 +474,27 @@ var CreatePbxFeaturesGateway = function(reqId, destNum, trunkNumber, trunkCode, 
             .up()
 
 
-        if(limitInfo)
-        {
-            if(typeof limitInfo.NumberOutboundLimit != 'undefined' && limitInfo.NumberOutboundLimit != null)
-            {
+        if (limitInfo) {
+            if (typeof limitInfo.NumberOutboundLimit != 'undefined' && limitInfo.NumberOutboundLimit != null) {
                 var limitStr = util.format('hash %d_%d_outbound %s %d !USER_BUSY', tenantId, companyId, trunkNumber, limitInfo.NumberOutboundLimit);
                 cond.ele('action').att('application', 'limit').att('data', limitStr)
                     .up()
             }
 
-            if(typeof limitInfo.NumberBothLimit != 'undefined' && limitInfo.NumberBothLimit != null)
-            {
+            if (typeof limitInfo.NumberBothLimit != 'undefined' && limitInfo.NumberBothLimit != null) {
                 var limitStr = util.format('hash %d_%d_both %s %d !USER_BUSY', tenantId, companyId, trunkNumber, limitInfo.NumberBothLimit);
                 cond.ele('action').att('application', 'limit').att('data', limitStr)
                     .up()
             }
 
-            if(typeof limitInfo.CompanyOutboundLimit != 'undefined' && limitInfo.CompanyOutboundLimit != null)
-            {
+            if (typeof limitInfo.CompanyOutboundLimit != 'undefined' && limitInfo.CompanyOutboundLimit != null) {
                 var limitStr = util.format('hash %d_%d_outbound companylimit %d !USER_BUSY', tenantId, companyId, limitInfo.CompanyOutboundLimit);
                 cond.ele('action').att('application', 'limit').att('data', limitStr)
                     .up()
 
             }
 
-            if(typeof limitInfo.CompanyBothLimit != 'undefined' && limitInfo.CompanyBothLimit != null)
-            {
+            if (typeof limitInfo.CompanyBothLimit != 'undefined' && limitInfo.CompanyBothLimit != null) {
                 var limitStr = util.format('hash %d_%d_both companylimit %d !USER_BUSY', tenantId, companyId, limitInfo.CompanyBothLimit);
                 cond.ele('action').att('application', 'limit').att('data', limitStr)
                     .up()
@@ -505,41 +504,42 @@ var CreatePbxFeaturesGateway = function(reqId, destNum, trunkNumber, trunkCode, 
 
         var codecListString = null;
 
-        if(codecList)
-        {
+        if (codecList) {
             codecList = JSON.parse(codecList);
         }
 
-        if(codecList && codecList.length > 0)
-        {
+        if (codecList && codecList.length > 0) {
             codecListString = codecList.join();
         }
 
         var option = '{leg_timeout=60, IsTransferLeg=true, origination_caller_id_name=' + trunkNumber + ', origination_caller_id_number=' + trunkNumber + ',dvp_app_id=' + appId + ',sip_h_X-Gateway=' + trunkIp + ',dvp_trans_caller=' + transferCallerName + ',dvp_trans_party=' + digits;
 
-        if(codecListString && allowCodecPref)
-        {
+        if (codecListString && allowCodecPref) {
             option = option + ',absolute_codec_string=\'' + codecListString + '\'';
         }
 
 
-        if(ardsClientUuid)
-        {
+        if (ardsClientUuid) {
             option = option + ',ards_client_uuid=' + ardsClientUuid;
         }
 
         option = option + '}';
 
-        if(bUnit)
-        {
+        if (bUnit) {
             option = option + '[business_unit=' + bUnit + ']';
         }
 
 
-        cond.ele('action').att('application', 'att_xfer').att('data', option + 'sofia/gateway/' + trunkCode + '/' +digits)
-            .up()
-            .ele('action').att('application', 'speak').att('data', 'flite|slt|transfer line disconnected')
-            .up()
+        cond.ele('action').att('application', 'att_xfer').att('data', option + 'sofia/gateway/' + trunkCode + '/' + digits)
+            .up();
+
+        if (enableTransferFailPlay === true || enableTransferFailPlay === "true") {
+            cond.ele('action').att('application', 'speak').att('data', 'flite|slt|transfer line disconnected')
+                .up();
+        }
+
+
+        cond.up()
             .ele('action').att('application', 'playback').att('data', 'tone_stream://L=3;%(500,500,480,620)')
             .up()
             .ele('action').att('application', 'event').att('data', 'Event-Name=TRANSFER_DISCONNECT,caller=' + transferCallerName + ',companyId=' + companyId + ',tenantId=' + tenantId + ',digits=' + digits + ',reason=${originate_disposition}')
