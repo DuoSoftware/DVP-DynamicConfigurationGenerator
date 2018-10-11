@@ -76,17 +76,19 @@ var createTransferRejectResponse = function(context, transferCallerName, company
             .ele('action').att('application', 'set').att('data', 'DVP_OPERATION_CAT=REJECTED')
             .up()
 
-            if(companyId && tenantId)
-            {
-                cond.ele('action').att('application', 'event').att('data', 'Event-Name=TRANSFER_DISCONNECT,caller=' + transferCallerName + ',companyId=' + companyId + ',tenantId=' + tenantId + ',digits=' + transferedParty)
-                .up()
-            }
+
 
         cond.ele('action').att('application', 'speak').att('data', 'flite|slt|transfer line disconnected')
             .up()
             .ele('action').att('application', 'playback').att('data', 'tone_stream://L=3;%(500,500,480,620)')
             .up()
             .end({pretty: true});
+
+        if(companyId && tenantId)
+        {
+            cond.ele('action').att('application', 'event').att('data', 'Event-Name=TRANSFER_DISCONNECT,caller=' + transferCallerName + ',companyId=' + companyId + ',tenantId=' + tenantId + ',digits=' + transferedParty)
+                .up()
+        }
 
 
         return "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\r\n" + doc.toString({pretty: true});
@@ -536,11 +538,11 @@ var CreatePbxFeaturesGateway = function(reqId, destNum, trunkNumber, trunkCode, 
 
         cond.ele('action').att('application', 'att_xfer').att('data', option + 'sofia/gateway/' + trunkCode + '/' +digits)
             .up()
-            .ele('action').att('application', 'event').att('data', 'Event-Name=TRANSFER_DISCONNECT,caller=' + transferCallerName + ',companyId=' + companyId + ',tenantId=' + tenantId + ',digits=' + digits + ',reason=${originate_disposition}')
-            .up()
             .ele('action').att('application', 'speak').att('data', 'flite|slt|transfer line disconnected')
             .up()
             .ele('action').att('application', 'playback').att('data', 'tone_stream://L=3;%(500,500,480,620)')
+            .up()
+            .ele('action').att('application', 'event').att('data', 'Event-Name=TRANSFER_DISCONNECT,caller=' + transferCallerName + ',companyId=' + companyId + ',tenantId=' + tenantId + ',digits=' + digits + ',reason=${originate_disposition}')
             .up()
             .end({pretty: true});
 
