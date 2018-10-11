@@ -539,8 +539,7 @@ var CreatePbxFeaturesGateway = function(reqId, destNum, trunkNumber, trunkCode, 
         }
 
 
-        cond.up()
-            .ele('action').att('application', 'playback').att('data', 'tone_stream://L=3;%(500,500,480,620)')
+        cond.ele('action').att('application', 'playback').att('data', 'tone_stream://L=3;%(500,500,480,620)')
             .up()
             .ele('action').att('application', 'event').att('data', 'Event-Name=TRANSFER_DISCONNECT,caller=' + transferCallerName + ',companyId=' + companyId + ',tenantId=' + tenantId + ',digits=' + digits + ',reason=${originate_disposition}')
             .up()
