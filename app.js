@@ -109,7 +109,7 @@ var RedisOperations = function(callUuid, companyId, tenantId, appId, appType, is
 
                 dashboardEvtHandler.PublishDashboardMessage(tenantId, companyId, "CALLSERVER", "CHANNEL", "CREATE", callUuid, '', '', eventTime, tempBUnit);
 
-                dashboardEvtHandler.PublishDashboardMessage(tenantId, companyId, "CALLSERVER", "CALL", "CREATE", callUuid, callDirection, '', eventTime, tempBUnit);
+                dashboardEvtHandler.PublishDashboardMessage(tenantId, companyId, "CALLSERVER", "CALL", "CREATE", callUuid, callDirection, callUuid, eventTime, tempBUnit);
             }
 
 
