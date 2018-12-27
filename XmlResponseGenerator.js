@@ -512,23 +512,23 @@ var createDirectoryProfile = function(extName, ext, domain, email, password, con
 
         var doc = xmlBuilder.create('document');
 
-        var xmlDoc = doc.att('type', 'freeswitch/xml')
+        var tempDoc = doc.att('type', 'freeswitch/xml')
             .ele('section').att('name', 'directory')
             .ele('domain').att('name', domain)
 
         if(regTimeOut && regTimeOut > 0 && Number.isInteger(regTimeOut))
         {
-            xmlDoc.ele('user').att('id', extName).att('cacheable', regTimeOut).att('number-alias', ext)
+            tempDoc.ele('user').att('id', extName).att('cacheable', regTimeOut).att('number-alias', ext)
         }
         else
         {
-            xmlDoc.ele('user').att('id', extName).att('cacheable', 'true').att('number-alias', ext)
+            tempDoc.ele('user').att('id', extName).att('cacheable', 'true').att('number-alias', ext)
         }
 
 
 
             //.ele('user').att('id', extName).att('cacheable', 'false').att('number-alias', ext)
-        var tempDoc = xmlDoc.ele('params')
+        tempDoc.ele('params')
                 .ele('param').att('name', 'dial-string').att('value', '{sip_invite_domain=${domain_name},presence_id=${dialed_user}@${dialed_domain}}${sofia_contact(${dialed_user}@${dialed_domain})}')
                 .up()
                 .ele('param').att('name', 'password').att('value', password)
