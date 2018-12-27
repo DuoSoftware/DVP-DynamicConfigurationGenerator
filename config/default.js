@@ -64,5 +64,6 @@ module.exports = {
     "billingEnabled": "true",
     "RecordingPath": "/usr/src/recordings/",
     "UseDashboardAMQP": "true",
-    "EnableDefaultRing": false
+    "EnableDefaultRing": false,
+    "EnableTransferFailPlay": false,
 };

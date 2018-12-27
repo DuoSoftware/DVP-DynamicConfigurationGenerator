@@ -770,6 +770,11 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
         var businessUnit = data['variable_business_unit'];
         var transAgentSkill = decodeURIComponent(data['variable_ards_skill_display']);
 
+
+        if(!ardsClientUuid && data['variable_my_uuid']){
+            ardsClientUuid = data['variable_my_uuid'];
+        }
+
         if(data['variable_dvp_trans_orig_caller'])
         {
             preTransCaller = data['variable_dvp_trans_orig_caller'];
@@ -1260,7 +1265,7 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
                                                                 {
                                                                     //Get Caller Information to Set DOD Number
 
-                                                                    var xml = xmlBuilder.CreatePbxFeaturesGateway(reqId, huntDestNum, outRule.ANI, outRule.GatewayCode, ctxt.CompanyId, ctxt.TenantId, null, huntContext, outRule.DNIS, outRule.Operator, outRule.IpUrl, NumLimitInfo, outRule.Codecs, transferCallerName, outRule.BusinessUnit);
+                                                                    var xml = xmlBuilder.CreatePbxFeaturesGateway(reqId, huntDestNum, outRule.ANI, outRule.GatewayCode, ctxt.CompanyId, ctxt.TenantId, null, huntContext, ardsClientUuid,outRule.DNIS, outRule.Operator, outRule.IpUrl, NumLimitInfo, outRule.Codecs, transferCallerName, outRule.BusinessUnit);
 
                                                                     logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
 
@@ -2834,6 +2839,22 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/DirectoryProfile', functio
     return next();
 
 });
+
+server.opts('/DynamicConfigGenerator/HealthCheck', function(req,res,next)
+{
+    res.end('OK');
+
+    return next();
+
+});
+
+server.get('/DynamicConfigGenerator/HealthCheck', function(req,res,next)
+{
+    res.end('OK');
+
+    return next();
+
+})
 
 
 server.listen(hostPort, hostIp, function () {
