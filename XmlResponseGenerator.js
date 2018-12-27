@@ -3,6 +3,8 @@ var Config = require('config');
 var logger = require('dvp-common/LogHandler/CommonLogHandler.js').logger;
 var util = require('util');
 
+var regTimeOut = Config.RegistrationTimeout;
+
 var createNotFoundResponse = function()
 {
     try
@@ -510,12 +512,23 @@ var createDirectoryProfile = function(extName, ext, domain, email, password, con
 
         var doc = xmlBuilder.create('document');
 
-        var tempDoc = doc.att('type', 'freeswitch/xml')
+        var xmlDoc = doc.att('type', 'freeswitch/xml')
             .ele('section').att('name', 'directory')
             .ele('domain').att('name', domain)
-            .ele('user').att('id', extName).att('number-alias', ext)
+
+        if(regTimeOut && regTimeOut > 0 && Number.IsInteger(regTimeOut))
+        {
+            xmlDoc.ele('user').att('id', extName).att('cacheable', regTimeOut).att('number-alias', ext)
+        }
+        else
+        {
+            xmlDoc.ele('user').att('id', extName).att('cacheable', 'true').att('number-alias', ext)
+        }
+
+
+
             //.ele('user').att('id', extName).att('cacheable', 'false').att('number-alias', ext)
-            .ele('params')
+        var tempDoc = xmlDoc.ele('params')
                 .ele('param').att('name', 'dial-string').att('value', '{sip_invite_domain=${domain_name},presence_id=${dialed_user}@${dialed_domain}}${sofia_contact(${dialed_user}@${dialed_domain})}')
                 .up()
                 .ele('param').att('name', 'password').att('value', password)
