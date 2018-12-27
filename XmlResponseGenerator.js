@@ -516,7 +516,7 @@ var createDirectoryProfile = function(extName, ext, domain, email, password, con
             .ele('section').att('name', 'directory')
             .ele('domain').att('name', domain)
 
-        if(regTimeOut && regTimeOut > 0 && Number.IsInteger(regTimeOut))
+        if(regTimeOut && regTimeOut > 0 && Number.isInteger(regTimeOut))
         {
             xmlDoc.ele('user').att('id', extName).att('cacheable', regTimeOut).att('number-alias', ext)
         }
