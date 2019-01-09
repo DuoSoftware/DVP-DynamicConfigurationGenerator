@@ -1026,7 +1026,7 @@ var CreateRouteDialerAgentDialplan = function(reqId, context, destinationPattern
 
         var ignoreEarlyM = "ignore_early_media=false";
 
-        var option = util.format('[leg_timeout=%d,origination_caller_id_name=%s,origination_caller_id_number=%s,companyid=%s,tenantid=%s,DVP_CALL_DIRECTION=outbound,ards_skill_display=%s,CALL_LEG_TYPE=AGENT]', legTimeout, customerNum, customerNum, tenantId, companyId, skill);
+        var option = util.format('[leg_timeout=%d,origination_caller_id_name=%s,origination_caller_id_number=%s,companyid=%s,tenantid=%s,DVP_CALL_DIRECTION=outbound,ards_skill_display=%s,CALL_LEG_TYPE=AGENT,DVP_ACTION_CAT=DIALER,DVP_OPERATION_CAT=AGENT]', legTimeout, customerNum, customerNum, tenantId, companyId, skill);
 
         var dnis = extension;
 
