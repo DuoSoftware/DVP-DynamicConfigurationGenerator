@@ -3,7 +3,7 @@ var dialplanBuilder = require('./XmlExtendedDialplanBuilder.js');
 var extDialplanEngine = require('./ExtendedDialplanEngine.js');
 var backendFactory = require('./BackendFactory.js');
 
-var AgentDial = function(reqId, context, recordingEnabled, extension, customerNumber, companyId, tenantId, csId, res)
+var AgentDial = function(reqId, context, recordingEnabled, extension, customerNumber, companyId, tenantId, csId, skill, res)
 {
     backendFactory.getBackendHandler().GetAllDataForExt(reqId, extension, companyId, tenantId, 'USER', csId, null, function(err, extDetails)
     {
