@@ -57,6 +57,43 @@ var createRejectResponse = function(context)
     }
 }
 
+var createRejectDefault = function(context)
+{
+    try
+    {
+        var tempContext = 'public';
+
+        if(context)
+        {
+            tempContext = context;
+        }
+        var doc = xmlBuilder.create('document');
+
+        var cond = doc.att('type', 'freeswitch/xml')
+            .ele('section').att('name', 'dialplan').att('description', 'RE Dial Plan For FreeSwitch')
+            .ele('context').att('name', tempContext)
+            .ele('extension').att('name', 'test')
+            .ele('condition').att('field', 'destination_number').att('expression', '[^\\s]*')
+
+        cond.ele('action').att('application', 'playback').att('data', 'tone_stream://L=3;%(500,500,480,620)')
+            .up()
+        cond.ele('action').att('application', 'hangup').att('data', 'CALL_REJECTED')
+            .up()
+
+            .end({pretty: true});
+
+
+        return "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\r\n" + doc.toString({pretty: true});
+
+
+    }
+    catch(ex)
+    {
+        logger.error('[DVP-DynamicConfigurationGenerator.CreateDefaultRejectDialplan] - [%s] - Exception occurred creating xml', ex);
+        return createNotFoundResponse();
+    }
+}
+
 var createTransferRejectResponse = function(context, transferCallerName, companyId, tenantId, transferedParty)
 {
     try
@@ -962,6 +999,141 @@ var CreateConferenceDialplan = function(reqId, epList, context, destinationPatte
 
         return "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\r\n" + doc.toString({pretty: true});
 
+
+
+    }
+    catch(ex)
+    {
+        logger.error('[DVP-DynamicConfigurationGenerator.CreateSendBusyMessageDialplan] - [%s] - Exception occurred creating xml', reqId, ex);
+        return createNotFoundResponse();
+    }
+
+};
+
+var CreateRouteDialerAgentDialplan = function(reqId, context, destinationPattern, transferLegInfo, legTimeout, customerNum, extension, domain, recordingEnabled, tenantId, companyId)
+{
+    try
+    {
+        if (!destinationPattern) {
+            destinationPattern = "";
+        }
+
+        if (!context) {
+            context = "";
+        }
+
+        var bypassMedia = "bypass_media=false";
+
+        var ignoreEarlyM = "ignore_early_media=false";
+
+        var option = util.format('[leg_timeout=%d,origination_caller_id_name=%s,origination_caller_id_number=%s]', legTimeout, customerNum, customerNum);
+
+        var dnis = extension;
+
+        if (domain)
+        {
+            dnis = util.format('%s@%s', extension, domain);
+        }
+        var destinationGroup = 'user';
+
+        var calling = util.format('%s%s/%s', option, destinationGroup, extension);
+
+        var doc = xmlBuilder.create('document');
+
+        var cond = doc.att('type', 'freeswitch/xml')
+            .ele('section').att('name', 'dialplan').att('description', 'RE Dial Plan For FreeSwitch')
+            .ele('context').att('name', context)
+            .ele('extension').att('name', 'test')
+            .ele('condition').att('field', 'destination_number').att('expression', destinationPattern)
+
+        cond.ele('action').att('application', 'set').att('data', 'ringback=${us-ring}')
+            .up()
+            .ele('action').att('application', 'set').att('data', 'bridge_early_media=true')
+            .up()
+            .ele('action').att('application', 'set').att('data', 'continue_on_fail=true')
+            .up()
+            .ele('action').att('application', 'set').att('data', 'hangup_after_bridge=true')
+            .up()
+            .ele('action').att('application', 'set').att('data', bypassMedia)
+            .up()
+
+        if(recordingEnabled)
+        {
+            var fileUploadUrl = 'http://' + fileServiceIp + ':' + fileServicePort + '/DVP/API/' + fileServiceVersion + '/InternalFileService/File/Upload/' + tenantId + '/' + companyId;
+
+            if(!validator.isIP(fileServiceIp))
+            {
+                fileUploadUrl = 'http://' + fileServiceIp + '/DVP/API/' + fileServiceVersion + '/InternalFileService/File/Upload/' + tenantId + '/' + companyId;
+            }
+
+            var fileSavePath = '$${base_dir}/recordings/${uuid}.mp3';
+
+            if(recordingPath)
+            {
+                fileSavePath = recordingPath + '${uuid}.mp3';
+            }
+
+            var playFileDetails = 'record_post_process_exec_api=curl_sendfile:' + fileUploadUrl + ' file=${dvpRecFile} class=CALLSERVER&type=CALL&category=CONVERSATION&referenceid=${uuid}&mediatype=audio&filetype=wav&sessionid=${uuid}&display=' + extension + '-${caller_id_number}';
+
+
+            cond.ele('action').att('application', 'set').att('data', 'dvpRecFile=' + fileSavePath)
+                .up()
+                .ele('action').att('application', 'export').att('data', 'execute_on_answer=record_session ${dvpRecFile}')
+                .up()
+                .ele('action').att('application', 'set').att('data', playFileDetails)
+                .up()
+
+
+
+        }
+
+        if(transferLegInfo && transferLegInfo.TransferCode)
+        {
+            if(transferLegInfo.InternalLegs && transferLegInfo.TransferCode.InternalTransfer)
+            {
+                cond.ele('action').att('application', 'bind_meta_app').att('data', transferLegInfo.TransferCode.InternalTransfer + ' ' + transferLegInfo.InternalLegs + ' s execute_extension::att_xfer XML PBXFeatures')
+                    .up()
+            }
+
+            if(transferLegInfo.ExternalLegs && transferLegInfo.TransferCode.ExternalTransfer)
+            {
+                cond.ele('action').att('application', 'bind_meta_app').att('data', transferLegInfo.TransferCode.ExternalTransfer + ' ' + transferLegInfo.ExternalLegs + ' s execute_extension::att_xfer_outbound XML PBXFeatures')
+                    .up()
+            }
+
+            if(transferLegInfo.GroupLegs && transferLegInfo.TransferCode.GroupTransfer)
+            {
+                cond.ele('action').att('application', 'bind_meta_app').att('data', transferLegInfo.TransferCode.GroupTransfer + ' ' + transferLegInfo.GroupLegs + ' s execute_extension::att_xfer_group XML PBXFeatures')
+                    .up()
+            }
+
+            if(transferLegInfo.ConferenceLegs && transferLegInfo.TransferCode.ConferenceTransfer)
+            {
+                cond.ele('action').att('application', 'bind_meta_app').att('data', transferLegInfo.TransferCode.ConferenceTransfer + ' ' + transferLegInfo.ConferenceLegs + ' s execute_extension::att_xfer_conference XML PBXFeatures')
+                    .up()
+            }
+
+            if(transferLegInfo.IVRLegs && transferLegInfo.TransferCode.IVRTransfer)
+            {
+                cond.ele('action').att('application', 'bind_meta_app').att('data', transferLegInfo.TransferCode.IVRTransfer + ' ' + transferLegInfo.IVRLegs + ' s execute_extension::att_xfer_ivr XML PBXFeatures')
+                    .up()
+            }
+        }
+
+
+        cond.ele('action').att('application', 'bridge').att('data', calling)
+            .up()
+
+        cond.ele('action').att('application', 'hangup')
+            .up()
+
+        cond.end({pretty: true});
+
+        var xmlStr = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\r\n" + doc.toString({pretty: true});
+
+        var decoded = xmlStr.replace(/&amp;/g, '&');
+
+        return decoded;
 
 
     }
@@ -3606,6 +3778,7 @@ module.exports.CreateFollowMeDialplan = CreateFollowMeDialplan;
 module.exports.CreateForwardingDialplan = CreateForwardingDialplan;
 module.exports.CreateRouteGatewayDialplan = CreateRouteGatewayDialplan;
 module.exports.CreateRouteGatewayCampaignDialplan = CreateRouteGatewayCampaignDialplan;
+module.exports.CreateRouteDialerAgentDialplan = CreateRouteDialerAgentDialplan;
 module.exports.CreatePickUpDialplan = CreatePickUpDialplan;
 module.exports.CreateInterceptDialplan= CreateInterceptDialplan;
 module.exports.CreateBargeDialplan = CreateBargeDialplan;
@@ -3625,3 +3798,4 @@ module.exports.FaxReceiveUpload = FaxReceiveUpload;
 module.exports.CreatePbxFeaturesUser = CreatePbxFeaturesUser;
 module.exports.CreateAttendantTransferUser = CreateAttendantTransferUser;
 module.exports.createTransferRejectResponse = createTransferRejectResponse;
+module.exports.createRejectDefault = createRejectDefault;
