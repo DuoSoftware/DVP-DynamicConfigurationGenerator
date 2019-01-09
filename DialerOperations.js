@@ -7,7 +7,7 @@ var AgentDial = function(reqId, context, recordingEnabled, extension, customerNu
     {
         if(err || !extDetails)
         {
-            var xml = xmlBuilder.createRejectDefault(context);
+            var xml = dialplanBuilder.createRejectDefault(context);
             res.end(xml);
         }
         else
@@ -34,7 +34,7 @@ var AgentDial = function(reqId, context, recordingEnabled, extension, customerNu
             else
             {
                 logger.debug('DVP-DynamicConfigurationGenerator.ProcessCallForwarding] - [%s] - Cloud enduser not set', reqId);
-                callback(undefined, xmlBuilder.createRejectResponse());
+                callback(undefined, dialplanBuilder.createRejectResponse());
             }
 
         }

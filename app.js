@@ -1468,7 +1468,7 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
                             if(actionCat === 'DIALER' && opCat === "AGENT")
                             {
                                 //VALIDATE EXTENTION AND ROUTE TO AGENT
-                                dialerOperations.AgentDial(reqId, callerContext, callerContext.RecordEnabled, dnisNum, data["variable_sip_to_uri"], contextCompany, contextTenant, csId, res);
+                                dialerOperations.AgentDial(reqId, callerContext, callerContext.RecordEnabled, destNum, data["variable_sip_to_uri"], contextCompany, contextTenant, csId, res);
                             }
                             else
                             {
