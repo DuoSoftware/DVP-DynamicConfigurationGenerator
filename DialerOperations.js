@@ -1,5 +1,6 @@
 var logger = require('dvp-common/LogHandler/CommonLogHandler.js').logger;
 var dialplanBuilder = require('./XmlExtendedDialplanBuilder.js');
+var extDialplanEngine = require('./ExtendedDialplanEngine.js');
 var backendFactory = require('./BackendFactory.js');
 
 var AgentDial = function(reqId, context, recordingEnabled, extension, customerNumber, companyId, tenantId, csId, res)
@@ -23,7 +24,7 @@ var AgentDial = function(reqId, context, recordingEnabled, extension, customerNu
                     domain = extDetails.SipUACEndpoint.CloudEndUser.Domain;
                 }
 
-                var attTransInfo = AttendantTransferLegInfoHandler(reqId, null, extDetails.SipUACEndpoint);
+                var attTransInfo = extDialplanEngine.AttendantTransferLegInfoHandler(reqId, null, extDetails.SipUACEndpoint);
 
                 var xml = dialplanBuilder.CreateRouteDialerAgentDialplan(reqId, context, '[^\\s]*', attTransInfo, 60, customerNumber, extension, domain, recordingEnabled, tenantId, companyId);
 
