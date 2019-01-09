@@ -1036,7 +1036,7 @@ var CreateRouteDialerAgentDialplan = function(reqId, context, destinationPattern
         }
         var destinationGroup = 'user';
 
-        var calling = util.format('%s%s/%s', option, destinationGroup, extension);
+        var calling = util.format('%s%s/%s', option, destinationGroup, dnis);
 
         var doc = xmlBuilder.create('document');
 
