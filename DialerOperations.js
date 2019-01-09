@@ -26,7 +26,7 @@ var AgentDial = function(reqId, context, recordingEnabled, extension, customerNu
 
                 var attTransInfo = extDialplanEngine.AttendantTransferLegInfoHandler(reqId, null, extDetails.SipUACEndpoint);
 
-                var xml = dialplanBuilder.CreateRouteDialerAgentDialplan(reqId, context, '[^\\s]*', attTransInfo, 60, customerNumber, extension, domain, recordingEnabled, tenantId, companyId);
+                var xml = dialplanBuilder.CreateRouteDialerAgentDialplan(reqId, context, '[^\\s]*', attTransInfo, 60, customerNumber, extension, domain, recordingEnabled, tenantId, companyId, skill);
 
                 logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
 
