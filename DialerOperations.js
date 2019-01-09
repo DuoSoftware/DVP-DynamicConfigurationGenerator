@@ -1,3 +1,4 @@
+var logger = require('dvp-common/LogHandler/CommonLogHandler.js').logger;
 var dialplanBuilder = require('./XmlExtendedDialplanBuilder.js');
 var backendFactory = require('./BackendFactory.js');
 
@@ -14,7 +15,6 @@ var AgentDial = function(reqId, context, recordingEnabled, extension, customerNu
         {
             if (extDetails.SipUACEndpoint && extDetails.SipUACEndpoint.CloudEndUser)
             {
-                logger.debug('DVP-DynamicConfigurationGenerator.AgentDial] - [%s] - Cloud enduser is set', reqId);
 
                 var domain = '';
 
@@ -26,6 +26,8 @@ var AgentDial = function(reqId, context, recordingEnabled, extension, customerNu
                 var attTransInfo = AttendantTransferLegInfoHandler(reqId, null, extDetails.SipUACEndpoint);
 
                 var xml = dialplanBuilder.CreateRouteDialerAgentDialplan(reqId, context, '[^\\s]*', attTransInfo, 60, customerNumber, extension, domain, recordingEnabled, tenantId, companyId);
+
+                logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
 
                 res.end(xml);
 
