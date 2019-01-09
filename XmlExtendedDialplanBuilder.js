@@ -1078,7 +1078,7 @@ var CreateRouteDialerAgentDialplan = function(reqId, context, destinationPattern
 
             cond.ele('action').att('application', 'set').att('data', 'dvpRecFile=' + fileSavePath)
                 .up()
-                .ele('action').att('application', 'export').att('data', 'execute_on_answer=record_session ${dvpRecFile}')
+                .ele('action').att('application', 'set').att('data', 'execute_on_answer=record_session ${dvpRecFile}')
                 .up()
                 .ele('action').att('application', 'set').att('data', playFileDetails)
                 .up()
