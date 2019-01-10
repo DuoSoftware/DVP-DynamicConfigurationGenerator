@@ -3,7 +3,7 @@ var dialplanBuilder = require('./XmlExtendedDialplanBuilder.js');
 var extDialplanEngine = require('./ExtendedDialplanEngine.js');
 var backendFactory = require('./BackendFactory.js');
 
-var AgentDial = function(reqId, context, recordingEnabled, extension, customerNumber, companyId, tenantId, csId, agentPubKey, campaignId, skill, res)
+var AgentDial = function(reqId, context, recordingEnabled, extension, customerNumber, companyId, tenantId, csId, agentPubKey, campaignId, skill, ardsUuid, res)
 {
     backendFactory.getBackendHandler().GetAllDataForExt(reqId, extension, companyId, tenantId, 'USER', csId, null, function(err, extDetails)
     {
@@ -26,7 +26,7 @@ var AgentDial = function(reqId, context, recordingEnabled, extension, customerNu
 
                 var attTransInfo = extDialplanEngine.AttendantTransferLegInfoHandler(reqId, null, extDetails.SipUACEndpoint);
 
-                var xml = dialplanBuilder.CreateRouteDialerAgentDialplan(reqId, context, '[^\\s]*', attTransInfo, 60, customerNumber, extension, domain, recordingEnabled, tenantId, companyId, agentPubKey, campaignId, skill);
+                var xml = dialplanBuilder.CreateRouteDialerAgentDialplan(reqId, context, '[^\\s]*', attTransInfo, 60, customerNumber, extension, domain, recordingEnabled, tenantId, companyId, agentPubKey, campaignId, skill, ardsUuid);
 
                 logger.debug('DVP-DynamicConfigurationGenerator.CallApp] - [%s] - API RESPONSE : %s', reqId, xml);
 
