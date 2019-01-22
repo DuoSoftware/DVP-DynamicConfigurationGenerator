@@ -1010,7 +1010,7 @@ var CreateConferenceDialplan = function(reqId, epList, context, destinationPatte
 
 };
 
-var CreateRouteDialerAgentDialplan = function(reqId, context, destinationPattern, transferLegInfo, legTimeout, customerNum, extension, domain, recordingEnabled, tenantId, companyId, agentPubKey, campaignId, skill, ardsUuid)
+var CreateRouteDialerAgentDialplan = function(reqId, context, destinationPattern, transferLegInfo, legTimeout, customerNum, extension, domain, recordingEnabled, tenantId, companyId, agentPubKey, campaignId, skill, ardsUuid, ardsServerType, ardsReqType, ardsResourceId, ardsOrigUuid)
 {
     try
     {
@@ -1026,7 +1026,7 @@ var CreateRouteDialerAgentDialplan = function(reqId, context, destinationPattern
 
         var ignoreEarlyM = "ignore_early_media=false";
 
-        var option = util.format('[leg_timeout=%d,origination_caller_id_name=%s,origination_caller_id_number=%s,companyid=%s,tenantid=%s,CampaignId=%s,DVP_CALL_DIRECTION=outbound,DIALER_AGENT_EVENT=%s,ards_skill_display=%s,ards_client_uuid=%s,CALL_LEG_TYPE=AGENT,DVP_ACTION_CAT=DIALER,DVP_OPERATION_CAT=AGENT]', legTimeout, customerNum, customerNum, companyId, tenantId, campaignId, agentPubKey, skill, ardsUuid);
+        var option = util.format('[leg_timeout=%d,origination_caller_id_name=%s,origination_caller_id_number=%s,companyid=%s,tenantid=%s,CampaignId=%s,DVP_CALL_DIRECTION=outbound,DIALER_AGENT_EVENT=%s,ards_skill_display=%s,ards_client_uuid=%s,ards_servertype=%s,ards_requesttype=%s,ards_resource_id=%s,OriginalUuidARDS=%s,CALL_LEG_TYPE=AGENT,DVP_ACTION_CAT=DIALER,DVP_OPERATION_CAT=AGENT]', legTimeout, customerNum, customerNum, companyId, tenantId, campaignId, agentPubKey, skill, ardsUuid, ardsServerType, ardsReqType, ardsResourceId, ardsOrigUuid);
 
         var dnis = extension;
 
