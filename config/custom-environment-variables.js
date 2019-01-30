@@ -68,5 +68,6 @@ module.exports = {
     "RecordingPath": "SYS_CALL_RECORD_PATH",
     "UseDashboardAMQP": "HOST_USE_DASHBOARD_MSG_QUEUE",
     "EnableDefaultRing": "HOST_ENABLE_DEFAULT_RING",
-    "EnableTransferFailPlay": "HOST_ENABLE_TRANSFER_PLAY"
+    "EnableTransferFailPlay": "HOST_ENABLE_TRANSFER_PLAY",
+    "RegistrationTimeout": "HOST_REGISTRATION_TIMEOUT"
 };

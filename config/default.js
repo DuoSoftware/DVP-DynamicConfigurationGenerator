@@ -66,4 +66,5 @@ module.exports = {
     "UseDashboardAMQP": "true",
     "EnableDefaultRing": false,
     "EnableTransferFailPlay": false,
+    "RegistrationTimeout": 300000
 };
