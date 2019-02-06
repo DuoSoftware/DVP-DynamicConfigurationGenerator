@@ -754,6 +754,7 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
         var eventTime = data['Event-Date-Timestamp'];
         var businessUnit = data['variable_business_unit'];
         var transAgentSkill = decodeURIComponent(data['variable_ards_skill_display']);
+        var facetoneRecSession = data['variable_facetone_record_session'];
 
 
         if(!ardsClientUuid && data['variable_my_uuid']){
@@ -1541,6 +1542,10 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
 
                                         if(appType === 'HTTAPI' && varCompanyId && varTenantId)
                                         {
+                                            if(facetoneRecSession === 'true')
+                                            {
+                                                ctxt.RecordingEnabled = true;
+                                            }
                                             HandleOutRequest(reqId, data, callerIdNum, varTenantId, appType, varCompanyId, dvpOriginationType, destNum, domain, callerContext, profile, varUuid, isDialplanGiven, ctxt, cacheData, eventTime, null, isDialerIVR, res);
                                         }
                                         else
