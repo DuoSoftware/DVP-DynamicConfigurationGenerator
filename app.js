@@ -1542,11 +1542,14 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
 
                                         if(appType === 'HTTAPI' && varCompanyId && varTenantId)
                                         {
+                                            var tempRecCtxt = {
+                                                RecordingEnabled : false
+                                            };
                                             if(facetoneRecSession === 'true')
                                             {
-                                                ctxt.RecordingEnabled = true;
+                                                tempRecCtxt.RecordingEnabled = true;
                                             }
-                                            HandleOutRequest(reqId, data, callerIdNum, varTenantId, appType, varCompanyId, dvpOriginationType, destNum, domain, callerContext, profile, varUuid, isDialplanGiven, ctxt, cacheData, eventTime, null, isDialerIVR, res);
+                                            HandleOutRequest(reqId, data, callerIdNum, varTenantId, appType, varCompanyId, dvpOriginationType, destNum, domain, callerContext, profile, varUuid, isDialplanGiven, tempRecCtxt, cacheData, eventTime, null, isDialerIVR, res);
                                         }
                                         else
                                         {
