@@ -2577,7 +2577,7 @@ var CreateRouteGatewayDialplan = function(reqId, ep, context, profile, destinati
 
                 if(recordingPath)
                 {
-                    fileSavePath = recordingPath + '${my_uuid}.mp3';
+                    fileSavePath = recordingPath + '${uuid}.mp3';
                 }
 
                 var playFileDetails = 'record_post_process_exec_api=curl_sendfile:' + fileUploadUrl + ' file=${dvpRecFile} class=CALLSERVER&type=CALL&category=CONVERSATION&referenceid=${uuid}&mediatype=audio&filetype=wav&sessionid=${uuid}&display=' + ep.Destination + '-${caller_id_number}';
@@ -2586,7 +2586,7 @@ var CreateRouteGatewayDialplan = function(reqId, ep, context, profile, destinati
                     .up()
                     .ele('action').att('application', 'export').att('data', 'execute_on_answer=record_session ${dvpRecFile}')
                     .up()
-                    .ele('action').att('application', 'set').att('data', playFileDetails)
+                    .ele('action').att('application', 'export').att('data', playFileDetails)
                     .up()
             }
 

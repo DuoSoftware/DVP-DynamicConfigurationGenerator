@@ -746,6 +746,7 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
         var transferCallerName = data['variable_user_id'];
         var preTransCaller = data['variable_origination_caller_id_number'];
         var eventTime = data['Event-Date-Timestamp'];
+        var facetoneRecSession = data['variable_facetone_record_session'];
 
         if(data['variable_pre_transfer_caller_id_number'])
         {
@@ -1489,6 +1490,14 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
 
                                 if(appType === 'HTTAPI' && varCompanyId && varTenantId)
                                 {
+                                    var tempRecCtxt = {
+                                        RecordingEnabled : false
+                                    };
+
+                                    if(facetoneRecSession === 'true')
+                                    {
+                                        tempRecCtxt.RecordingEnabled = true;
+                                    }
                                     HandleOutRequest(reqId, data, callerIdNum, varTenantId, appType, varCompanyId, dvpOriginationType, destNum, domain, callerContext, profile, varUuid, isDialplanGiven, ctxt, cacheData, eventTime, res);
                                 }
                                 else
