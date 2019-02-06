@@ -2834,7 +2834,7 @@ var CreateRouteGatewayDialplan = function(reqId, ep, context, profile, destinati
                     .up()
                     .ele('action').att('application', 'export').att('data', 'execute_on_answer=record_session ${dvpRecFile}')
                     .up()
-                    .ele('action').att('application', 'set').att('data', playFileDetails)
+                    .ele('action').att('application', 'export').att('data', playFileDetails)
                     .up()
             }
 
