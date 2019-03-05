@@ -1498,7 +1498,7 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
                                     {
                                         tempRecCtxt.RecordingEnabled = true;
                                     }
-                                    HandleOutRequest(reqId, data, callerIdNum, varTenantId, appType, varCompanyId, dvpOriginationType, destNum, domain, callerContext, profile, varUuid, isDialplanGiven, ctxt, cacheData, eventTime, res);
+                                    HandleOutRequest(reqId, data, callerIdNum, varTenantId, appType, varCompanyId, dvpOriginationType, destNum, domain, callerContext, profile, varUuid, isDialplanGiven, tempRecCtxt, cacheData, eventTime, res);
                                 }
                                 else
                                 {
