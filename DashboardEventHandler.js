@@ -138,7 +138,7 @@ var PublishDashboardMessage = function(tenantId, companyId, eventClass, eventTyp
         logger.debug("DASHBOARD PUBLISH : MESSAGE : " + pubMessage);
 
     }
-    else if(amqpClient)
+    if(amqpClient)
     {
         var tenantInt = 0;
         var companyInt = 0;
@@ -179,4 +179,51 @@ var PublishDashboardMessage = function(tenantId, companyId, eventClass, eventTyp
 
 };
 
+var PublishDVPEventsMessage = function(uniqueId, eventName, eventTime, companyId, tenantId, bUnit, direction, timestamp, from, to)
+{
+    if(amqpClient)
+    {
+        try
+        {
+            var evtData =
+                {
+                    SessionId: uniqueId,
+                    EventName: eventName,
+                    CompanyId: companyId,
+                    TenantId: tenantId,
+                    EventClass: "CALL",
+                    EventType: "CHANNEL",
+                    EventCategory: "INITIATED",
+                    EventTime: eventTime,
+                    EventData: "",
+                    EventParams: {
+                        EventType: "INITIATED",
+                        Direction: direction,
+                        SessionId: uniqueId,
+                        Timestamp: timestamp,
+                        From: from,
+                        To: to,
+                        Skill: "",
+                        BusinessUnit: bUnit
+                    },
+                    BusinessUnit: bUnit
+                };
+
+            amqpClient.publish('DVPEVENTS', evtData, {
+                contentType: 'application/json'
+            });
+
+            logger.debug("DVP EVENTS PUBLISH : MESSAGE : " + JSON.stringify(evtData));
+        }
+        catch(ex)
+        {
+            logger.error('Error sending message : ', ex);
+
+        }
+
+    }
+
+};
+
+module.exports.PublishDVPEventsMessage= PublishDVPEventsMessage;
 module.exports.PublishDashboardMessage= PublishDashboardMessage;
