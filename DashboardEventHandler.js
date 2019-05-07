@@ -196,7 +196,8 @@ var PublishDVPEventsMessage = function(uniqueId, eventName, eventTime, companyId
                     EventCategory: "INITIATED",
                     EventTime: eventTime,
                     EventData: "",
-                    EventParams: {
+                    EventParams: "",
+                    EventSpecificData: {
                         EventType: "INITIATED",
                         Direction: direction,
                         SessionId: uniqueId,
