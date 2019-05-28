@@ -332,6 +332,27 @@ var CheckIddValidity = function(dnis, trNum)
 
 };
 
+var CheckIddValidityByNumberLength = function(dnis, trNum)
+{
+    try
+    {
+        if(dnis.length > 10)
+        {
+            return false;
+        }
+        else{
+            return true;
+        }
+
+    }
+    catch(err)
+    {
+        logger.error('DVP-DynamicConfigurationGenerator.CheckIddValidity] - ERROR occurred', err);
+        return false;
+    }
+
+};
+
 
 var ProcessCallForwarding = function(reqId, aniNum, dnisNum, callerDomain, context, direction, extraData, companyId, tenantId, disconReason, fwdId, dodNumber, securityToken, origName, origNum, csId, cacheData, callback)
 {
@@ -790,7 +811,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                             logger.debug('[DVP-DynamicConfigurationGenerator.ProcessExtendedDialplan] - [%s] - TO EXTENSION FOUND - TYPE : %s', reqId, extDetails.ObjCategory);
                             toFaxType = extDetails.ExtraData;
 
-                            var dodNumber = null;
+                            var dodNumber = extDetails.DodNumber;
 
                             if(extDetails.ObjCategory === 'USER')
                             {
@@ -2716,9 +2737,9 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                     else if(rule)
                                                     {
                                                         var allowGwCall = false;
-                                                        if(iddEnabled)
+                                                        if(!iddEnabled)
                                                         {
-                                                            if(CheckIddValidity(rule.DNIS, rule.TrunkNumber))
+                                                            if(!CheckIddValidityByNumberLength(rule.DNIS, rule.TrunkNumber))
                                                             {
                                                                 allowGwCall = true;
                                                             }
@@ -4327,3 +4348,4 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
 module.exports.ProcessExtendedDialplan = ProcessExtendedDialplan;
 module.exports.ProcessCallForwarding = ProcessCallForwarding;
 module.exports.AttendantTransferLegInfoHandler = AttendantTransferLegInfoHandler;
+module.exports.CheckIddValidityByNumberLength = CheckIddValidityByNumberLength;
