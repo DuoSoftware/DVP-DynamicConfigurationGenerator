@@ -114,11 +114,6 @@ var createTransferRejectResponse = function(context, transferCallerName, company
             .ele('action').att('application', 'set').att('data', 'DVP_OPERATION_CAT=REJECTED')
             .up();
 
-        cond.ele('action').att('application', 'set').att('dvp_trans_caller', transferCallerName)
-            .up();
-        cond.ele('action').att('application', 'set').att('dvp_trans_party', transferedParty)
-            .up();
-
 
 
         if(enableTransferFailPlay === true || enableTransferFailPlay === "true") {
