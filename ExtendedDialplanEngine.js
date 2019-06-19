@@ -14,6 +14,8 @@ var underscore = require('underscore');
 var libphonenumber = require('libphonenumber');
 var backendFactory = require('./BackendFactory.js');
 var LimitValidator = require('./LimitValidator.js').LimitValidator;
+var extend = require('util')._extend;
+
 
 /*var backendHandler;
 var ruleHandler;
@@ -490,7 +492,7 @@ var ProcessCallForwarding = function(reqId, aniNum, dnisNum, callerDomain, conte
                                     logger.debug('DVP-DynamicConfigurationGenerator.ProcessCallForwarding] - [%s] - Outbound rule for gateway forward not found', reqId);
                                     callback(undefined, xmlBuilder.createRejectResponse());
                                 }
-                            })
+                            },extraData)
                         }
                         else
                         {
@@ -732,6 +734,8 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
         var appId = '';
         var csId = -1;
         var appType = '';
+
+        var exData = extend({}, extraData);
 
         if(ctxt && ctxt.RecordingEnabled)
         {
@@ -1285,7 +1289,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                 {
                                                                     callback(new Error('Outbound rule not found'), xmlBuilder.createRejectResponse());
                                                                 }
-                                                            })
+                                                            },exData)
                                                         }
                                                         else if(pbxObj.Endpoints && (pbxObj.Endpoints.ObjCategory === 'PBXUSER' || pbxObj.Endpoints.ObjCategory === 'USER'))
                                                         {
@@ -2274,7 +2278,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                     {
                                                                         callback(undefined, xmlBuilder.createRejectResponse());
                                                                     }
-                                                                })
+                                                                }, exData)
                                                             }
                                                             else if(pbxObj.Endpoints && (pbxObj.Endpoints.ObjCategory === 'PBXUSER' || pbxObj.Endpoints.ObjCategory === 'USER'))
                                                             {
@@ -2722,6 +2726,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
 
                         if(url)
                         {
+
                             extApi.RemoteGetDialplanConfig(reqId, ani, dnis, context, direction, undefined, fromUserUuid, undefined, undefined, appId, url, companyId, tenantId, securityToken, function(err, pbxDetails)
                             {
                                 if(err)
@@ -2906,7 +2911,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                     {
                                                         callback(undefined, xmlBuilder.createRejectResponse());
                                                     }
-                                                })
+                                                }, exData)
                                             }
                                             else if(operationType === 'PICKUP')
                                             {
@@ -3068,6 +3073,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                         }
                                         else
                                         {
+
                                             backendFactory.getRuleHandler().PickCallRuleOutboundComplete(reqId, ani, dnis, '', context, companyId, tenantId, true, cacheData, dodNumber, function(err, rule)
                                             {
                                                 if(err)
@@ -3192,12 +3198,12 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                 {
                                                     callback(undefined, xmlBuilder.createRejectResponse());
                                                 }
-                                            })
+                                            }, exData)
                                         }
 
                                     }
                                 }
-                            })
+                            });
                         }
                         else
                         {
@@ -3334,7 +3340,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                     {
                                         callback(undefined, xmlBuilder.createRejectResponse());
                                     }
-                                })
+                                }, exData)
                             }
 
                         }
@@ -3822,7 +3828,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                                                         {
                                                                             callback(undefined, xmlBuilder.createRejectResponse());
                                                                         }
-                                                                    })
+                                                                    },exData)
                                                                 }
                                                                 else if(pbxObj.Endpoints && (pbxObj.Endpoints.ObjCategory === 'PBXUSER' || pbxObj.Endpoints.ObjCategory === 'USER'))
                                                                 {
@@ -4368,7 +4374,7 @@ var ProcessExtendedDialplan = function(reqId, ani, dnis, context, direction, ext
                                     {
                                         callback(undefined, xmlBuilder.createRejectResponse());
                                     }
-                                })
+                                },exData)
                             }
 
                         }
