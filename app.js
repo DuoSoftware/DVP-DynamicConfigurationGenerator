@@ -1318,7 +1318,7 @@ server.post('/DVP/API/:version/DynamicConfigGenerator/CallApp', function(req,res
                                                 res.end(xml);
                                             }
 
-                                        });
+                                        },data);
 
                                     });
 
