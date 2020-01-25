@@ -7,11 +7,20 @@
 
 #EXPOSE 8816
 
-FROM node:9.9.0
-ARG VERSION_TAG
-RUN git clone -b $VERSION_TAG https://github.com/DuoSoftware/DVP-DynamicConfigurationGenerator.git /usr/local/src/dynamicconfigurationgenerator
-RUN cd /usr/local/src/dynamicconfigurationgenerator;
+# FROM node:9.9.0
+# ARG VERSION_TAG
+# RUN git clone -b $VERSION_TAG https://github.com/DuoSoftware/DVP-DynamicConfigurationGenerator.git /usr/local/src/dynamicconfigurationgenerator
+# RUN cd /usr/local/src/dynamicconfigurationgenerator;
+# WORKDIR /usr/local/src/dynamicconfigurationgenerator
+# RUN npm install
+# EXPOSE 8816
+# CMD [ "node", "/usr/local/src/dynamicconfigurationgenerator/app.js" ]
+
+
+FROM node:10-alpine
 WORKDIR /usr/local/src/dynamicconfigurationgenerator
+COPY package*.json ./
 RUN npm install
+COPY . .
 EXPOSE 8816
-CMD [ "node", "/usr/local/src/dynamicconfigurationgenerator/app.js" ]
+CMD [ "node", "app.js" ]
