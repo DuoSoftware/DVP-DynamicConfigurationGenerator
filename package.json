@@ -1,7 +1,7 @@
 {
   "name": "dvp-dynamicconfiggenerator",
   "version": "1.0.0",
-  "description": "DVP-DynamicConfigurationGenerator\r =================================",
+  "description": "DVP-DynamicConfigurationGenerator\r ==================================",
   "main": "app.js",
   "dependencies": {
     "amqp": "^0.2.6",
