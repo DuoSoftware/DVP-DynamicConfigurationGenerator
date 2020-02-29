@@ -42,6 +42,18 @@ var hostVersion = config.Host.Version;
 
 var securityToken = config.Token;
 
+process.on("uncaughtException", function(err) {
+  console.error(err);
+  console.log("[Unhandled Exception] Node Exiting...");
+  process.exit(1);
+});
+
+process.on("unhandledRejection", err => {
+  console.error(err);
+  console.log("[Unhandled Rejection] Node Exiting...");
+  process.exit(1);
+});
+
 var server = restify.createServer({
     name: 'DVP-DynamicConfigurationGenerator',
     formatters : {
