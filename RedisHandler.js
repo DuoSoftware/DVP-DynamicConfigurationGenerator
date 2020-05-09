@@ -343,3 +343,4 @@ module.exports.GetObjectParseJson = GetObjectParseJson;
 module.exports.IncrementKey = IncrementKey;
 module.exports.AddToHash = AddToHash;
 module.exports.ExpireKey = ExpireKey;
+module.exports.RedisClient = client;

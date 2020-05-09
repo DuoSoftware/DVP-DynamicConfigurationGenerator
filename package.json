@@ -6,11 +6,12 @@
   "dependencies": {
     "amqp": "^0.2.6",
     "async": "^2.0.1",
-    "bluebird": "^3.4.7",
+    "bluebird": "^3.7.2",
     "buffer": "^4.5.0",
     "config": "^1.15.0",
     "dvp-common": "1.1.0",
     "dvp-dbmodels": "^3.4.0",
+    "dvp-healthcheck": "^1.0.6",
     "dvp-ruleservice": "2.4.2",
     "ip": "^1.1.0",
     "libphonenumber": "0.0.9",
