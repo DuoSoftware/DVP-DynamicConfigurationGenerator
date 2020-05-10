@@ -1,10 +1,10 @@
 module.exports = {
     "DB": {
         "Type":"postgres",
-        "User":"duo",
-        "Password":"DuoS123",
+        "User":"postgres",
+        "Password":"",
         "Port":5432,
-        "Host":"104.236.231.11",
+        "Host":"",
         "Database":"duo",
         "Cluster": true
     },
@@ -21,12 +21,12 @@ module.exports = {
             "mode":"instance",//instance, cluster, sentinel
             "ip": "138.197.90.92",
             "port": 6389,
-            "user": "duo",
-            "password": "DuoS123",
+            "user": "",
+            "password": "",
             "db": 0,
             "sentinels":{
                 "hosts": "138.197.90.92,45.55.205.92,162.243.81.39",
-                "port":16389,
+                "port":6379,
                 "name":"redis-cluster"
             }
 
