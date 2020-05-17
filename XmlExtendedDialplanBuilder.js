@@ -1071,7 +1071,7 @@ var CreateRouteDialerAgentDialplan = function(reqId, context, destinationPattern
         {
             var fileUploadUrl = 'http://' + fileServiceIp + ':' + fileServicePort + '/DVP/API/' + fileServiceVersion + '/InternalFileService/File/Upload/' + tenantId + '/' + companyId;
 
-            if(!validator.isIP(fileServiceIp))
+            if(!config.Services.dynamicPort && !validator.isIP(fileServiceIp))
             {
                 fileUploadUrl = 'http://' + fileServiceIp + '/DVP/API/' + fileServiceVersion + '/InternalFileService/File/Upload/' + tenantId + '/' + companyId;
             }
@@ -1309,7 +1309,7 @@ var CreateRouteUserDialplan = function(reqId, ep, context, profile, destinationP
             {
                 var fileUploadUrl = 'http://' + fileServiceIp + ':' + fileServicePort + '/DVP/API/' + fileServiceVersion + '/InternalFileService/File/Upload/' + ep.TenantId + '/' + ep.CompanyId;
 
-                if(!validator.isIP(fileServiceIp))
+                if(!config.Services.dynamicPort && !validator.isIP(fileServiceIp))
                 {
                     fileUploadUrl = 'http://' + fileServiceIp + '/DVP/API/' + fileServiceVersion + '/InternalFileService/File/Upload/' + ep.TenantId + '/' + ep.CompanyId;
                 }
@@ -1336,7 +1336,7 @@ var CreateRouteUserDialplan = function(reqId, ep, context, profile, destinationP
             {
                 var fileUploadUrl = 'http://' + fileServiceIp + ':' + fileServicePort + '/DVP/API/' + fileServiceVersion + '/InternalFileService/File/Upload/' + ep.TenantId + '/' + ep.CompanyId;
 
-                if(!validator.isIP(fileServiceIp))
+                if(!config.Services.dynamicPort && !validator.isIP(fileServiceIp))
                 {
                     fileUploadUrl = 'http://' + fileServiceIp + '/DVP/API/' + fileServiceVersion + '/InternalFileService/File/Upload/' + ep.TenantId + '/' + ep.CompanyId;
                 }
@@ -2690,7 +2690,7 @@ var FaxReceiveUpload = function(reqId, context, destinationPattern, numLimitInfo
 
         var fileUploadUrl = 'http://' + fileServiceIp + ':' + fileServicePort + '/DVP/API/' + fileServiceVersion + '/InternalFileService/File/Upload/' + tenantId + '/' + companyId;
 
-        if(!validator.isIP(fileServiceIp))
+        if(!config.Services.dynamicPort && !validator.isIP(fileServiceIp))
         {
             fileUploadUrl = 'http://' + fileServiceIp + '/DVP/API/' + fileServiceVersion + '/InternalFileService/File/Upload/' + tenantId + '/' + companyId;
         }
@@ -2791,7 +2791,7 @@ var CreateRouteGatewayDialplan = function(reqId, ep, context, profile, destinati
             {
                 var fileUploadUrl = 'http://' + fileServiceIp + ':' + fileServicePort + '/DVP/API/' + fileServiceVersion + '/InternalFileService/File/Upload/' + ep.TenantId + '/' + ep.CompanyId;
 
-                if(!validator.isIP(fileServiceIp))
+                if(!config.Services.dynamicPort && !validator.isIP(fileServiceIp))
                 {
                     fileUploadUrl = 'http://' + fileServiceIp + '/DVP/API/' + fileServiceVersion + '/InternalFileService/File/Upload/' + ep.TenantId + '/' + ep.CompanyId;
                 }
@@ -2816,7 +2816,7 @@ var CreateRouteGatewayDialplan = function(reqId, ep, context, profile, destinati
             {
                 var fileUploadUrl = 'http://' + fileServiceIp + ':' + fileServicePort + '/DVP/API/' + fileServiceVersion + '/InternalFileService/File/Upload/' + ep.TenantId + '/' + ep.CompanyId;
 
-                if(!validator.isIP(fileServiceIp))
+                if(!config.Services.dynamicPort && !validator.isIP(fileServiceIp))
                 {
                     fileUploadUrl = 'http://' + fileServiceIp + '/DVP/API/' + fileServiceVersion + '/InternalFileService/File/Upload/' + ep.TenantId + '/' + ep.CompanyId;
                 }
@@ -3166,7 +3166,7 @@ var CreateRouteGatewayCampaignDialplan = function(reqId, ep, context, profile, d
             {
                 var fileUploadUrl = 'http://' + fileServiceIp + ':' + fileServicePort + '/DVP/API/' + fileServiceVersion + '/InternalFileService/File/Upload/' + ep.TenantId + '/' + ep.CompanyId;
 
-                if(!validator.isIP(fileServiceIp))
+                if(!config.Services.dynamicPort && !validator.isIP(fileServiceIp))
                 {
                     fileUploadUrl = 'http://' + fileServiceIp + '/DVP/API/' + fileServiceVersion + '/InternalFileService/File/Upload/' + ep.TenantId + '/' + ep.CompanyId;
                 }
@@ -3191,7 +3191,7 @@ var CreateRouteGatewayCampaignDialplan = function(reqId, ep, context, profile, d
             {
                 var fileUploadUrl = 'http://' + fileServiceIp + ':' + fileServicePort + '/DVP/API/' + fileServiceVersion + '/InternalFileService/File/Upload/' + ep.TenantId + '/' + ep.CompanyId;
 
-                if(!validator.isIP(fileServiceIp))
+                if(!config.Services.dynamicPort && !validator.isIP(fileServiceIp))
                 {
                     fileUploadUrl = 'http://' + fileServiceIp + '/DVP/API/' + fileServiceVersion + '/InternalFileService/File/Upload/' + ep.TenantId + '/' + ep.CompanyId;
                 }
@@ -3600,7 +3600,7 @@ var CreateFollowMeDialplan = function(reqId, fmEndpoints, context, profile, dest
             {
                 var fileUploadUrl = 'http://' + fileServiceIp + ':' + fileServicePort + '/DVP/API/' + fileServiceVersion + '/InternalFileService/File/Upload/' + tenantId + '/' + companyId;
 
-                if(!validator.isIP(fileServiceIp))
+                if(!config.Services.dynamicPort && !validator.isIP(fileServiceIp))
                 {
                     fileUploadUrl = 'http://' + fileServiceIp + '/DVP/API/' + fileServiceVersion + '/InternalFileService/File/Upload/' + tenantId + '/' + companyId;
                 }
@@ -3625,7 +3625,7 @@ var CreateFollowMeDialplan = function(reqId, fmEndpoints, context, profile, dest
             {
                 var fileUploadUrl = 'http://' + fileServiceIp + ':' + fileServicePort + '/DVP/API/' + fileServiceVersion + '/InternalFileService/File/Upload/' + tenantId + '/' + companyId;
 
-                if(!validator.isIP(fileServiceIp))
+                if(!config.Services.dynamicPort && !validator.isIP(fileServiceIp))
                 {
                     fileUploadUrl = 'http://' + fileServiceIp + '/DVP/API/' + fileServiceVersion + '/InternalFileService/File/Upload/' + tenantId + '/' + companyId;
                 }

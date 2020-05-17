@@ -80,7 +80,7 @@ var CheckBalance = function(reqId, uuid, from, to, type, provider, companyId, te
 
                 var httpUrl = util.format('http://%s/DVP/API/%s/dcca/checkbalance', dccaclientHost, dccaclientVersion);
 
-                if(validator.isIP(dccaclientHost))
+                if(config.Services.dynamicPort || validator.isIP(dccaclientHost))
                 {
                     httpUrl = util.format('http://%s:%s/DVP/API/%s/dcca/checkbalance', dccaclientHost, dccaclientPort, dccaclientVersion);
                 }
