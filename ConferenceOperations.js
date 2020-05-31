@@ -1,7 +1,7 @@
 var underscore = require('underscore');
 var xmlBuilder = require('./XmlExtendedDialplanBuilder.js');
 var xBuilder = require('./XmlResponseGenerator.js');
-var logger = require('dvp-common/LogHandler/CommonLogHandler.js').logger;
+var logger = require('dvp-common-lite/LogHandler/CommonLogHandler.js').logger;
 var ruleBackendHandler = require('dvp-ruleservice/CallRuleBackendOperations.js');
 
 var CreateConferenceEndpointList = function(reqId, context, companyId, tenantId, dialOutUsers, confExt, cacheData, callback)

@@ -1,7 +1,7 @@
 'use strict';
 
 var httpReq = require('request');
-var logger = require('dvp-common/LogHandler/CommonLogHandler.js').logger;
+var logger = require('dvp-common-lite/LogHandler/CommonLogHandler.js').logger;
 var config = require('config');
 var Promise = require('bluebird');
 var util = require('util');
