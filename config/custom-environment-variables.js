@@ -3,6 +3,7 @@
  */
 
 module.exports = {
+    "EmailSendMethod": "SYS_EMAIL_SEND_METHOD",
 
     "DB": {
         "Type":"SYS_DATABASE_TYPE",
@@ -11,6 +12,30 @@ module.exports = {
         "Port":"SYS_SQL_PORT",
         "Host":"SYS_DATABASE_HOST",
         "Database":"SYS_DATABASE_NAME"
+    },
+
+    "SMSServer": {
+        "ip": "SYS_SMSSERVER_HOST",
+        "port": "SYS_SMSSERVER_PORT",
+        "password": "SYS_SMSSERVER_PASSWORD",
+        "user": "SYS_SMSSERVER_USER"
+    },
+
+    "SMTP": {
+        "ip": "SYS_SMTP_HOST",
+        "port": "SYS_SMTP_PORT",
+        "user": "SYS_SMTP_USER",
+        "password": "SYS_SMTP_PASSWORD"
+    },
+
+    "Mongo": {
+        "ip": "SYS_MONGO_HOST",
+        "port": "SYS_MONGO_PORT",
+        "dbname": "SYS_MONGO_DB",
+        "password": "SYS_MONGO_PASSWORD",
+        "user": "SYS_MONGO_USER",
+        "type": "SYS_MONGO_TYPE"
+
     },
 
     "Host":{
@@ -55,12 +80,35 @@ module.exports = {
     "Services":
     {
 
+        "accessToken": "HOST_TOKEN",
         "fileServiceHost": "SYS_FILESERVICE_HOST",
         "fileServicePort": "SYS_FILESERVICE_PORT",
         "fileServiceVersion":"SYS_FILESERVICE_VERSION",
         "dccaclientHost": "SYS_DIAMETERCLIENT_HOST",
         "dccaclientPort": "SYS_DIAMETERCLIENT_PORT",
-        "dccaclientVersion": "SYS_DIAMETERCLIENT_VERSION"
+        "dccaclientVersion": "SYS_DIAMETERCLIENT_VERSION",
+
+        "resourceServiceHost": "SYS_RESOURCESERVICE_HOST",
+        "resourceServicePort": "SYS_RESOURCESERVICE_PORT",
+        "resourceServiceVersion": "SYS_RESOURCESERVICE_VERSION",
+
+        "uploadurl": "SYS_FILESERVICE_HOST",
+        "uploadport":"SYS_FILESERVICE_PORT",
+        "uploadurlVersion":"SYS_FILESERVICE_VERSION",
+
+        "interactionurl": "SYS_INTERACTIONS_HOST",
+        "interactionport": "SYS_INTERACTIONS_PORT",
+        "interactionversion":"SYS_INTERACTIONS_VERSION",
+
+
+        "cronurl": "SYS_SCHEDULEWORKER_HOST",
+        "cronport": "SYS_SCHEDULEWORKER_PORT",
+        "cronversion":"SYS_SCHEDULEWORKER_VERSION",
+
+
+        "ticketServiceHost": "SYS_LITETICKET_HOST",
+        "ticketServicePort":  "SYS_LITETICKET_PORT",
+        "ticketServiceVersion":  "SYS_LITETICKET_VERSION",
     },
 
     "Token": "HOST_TOKEN",
