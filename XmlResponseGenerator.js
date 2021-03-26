@@ -1,37 +1,38 @@
 var xmlBuilder = require('xmlbuilder');
 var Config = require('config');
-var logger = require('dvp-common/LogHandler/CommonLogHandler.js').logger;
+var logger = require('dvp-common-lite/LogHandler/CommonLogHandler.js').logger;
 var util = require('util');
 
-var createNotFoundResponse = function()
-{
-    try
-    {
+var regTimeOut = Config.RegistrationTimeout;
+var rTOut = 'true';
+
+if (regTimeOut && regTimeOut > 0 && Number.isInteger(regTimeOut)) {
+    rTOut = regTimeOut
+}
+
+var createNotFoundResponse = function () {
+    try {
         var doc = xmlBuilder.create('document');
         doc.att('type', 'freeswitch/xml')
             .ele('section').att('name', 'result')
-                .ele('result').att('status', 'not found')
-                .up()
+            .ele('result').att('status', 'not found')
             .up()
-        .end({pretty: true});
+            .up()
+            .end({ pretty: true });
 
-        return "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\r\n" + doc.toString({pretty: true});
+        return "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\r\n" + doc.toString({ pretty: true });
     }
-    catch(ex)
-    {
+    catch (ex) {
         return '';
     }
 
 }
 
-var createRejectResponse = function(context)
-{
-    try
-    {
+var createRejectResponse = function (context) {
+    try {
         var tempContext = 'public';
 
-        if(context)
-        {
+        if (context) {
             tempContext = context;
         }
 
@@ -48,35 +49,30 @@ var createRejectResponse = function(context)
         cond.ele('action').att('application', 'hangup').att('data', 'CALL_REJECTED')
             .up()
 
-            .end({pretty: true});
+            .end({ pretty: true });
 
 
-        return "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\r\n" + doc.toString({pretty: true});
+        return "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\r\n" + doc.toString({ pretty: true });
 
     }
-    catch(ex)
-    {
+    catch (ex) {
         logger.error('[DVP-DynamicConfigurationGenerator.CreateSendBusyMessageDialplan] - [%s] - Exception occurred creating xml', ex);
         return createNotFoundResponse();
     }
 }
 
-var CreateUserGroupDirectoryProfile = function(grp, reqId)
-{
-    try
-    {
+var CreateUserGroupDirectoryProfile = function (grp, reqId) {
+    try {
         var grpDomain = grp.Domain ? grp.Domain : "";
         //var element = new xmlBuilder.create('users');
 
 
-        var users = {'user': []};
+        var users = { 'user': [] };
 
 
 
-        if(grp.SipUACEndpoint)
-        {
-            grp.SipUACEndpoint.forEach(function(sipUsr)
-            {
+        if (grp.SipUACEndpoint) {
+            grp.SipUACEndpoint.forEach(function (sipUsr) {
 
                 var sipUsername = sipUsr.SipUsername ? sipUsr.SipUsername : "";
                 var sipExt = sipUsr.SipExtension ? sipUsr.SipExtension : "";
@@ -84,28 +80,26 @@ var CreateUserGroupDirectoryProfile = function(grp, reqId)
                 var sipUsrDomain = "";
                 var sipUserContext = "";
 
-                if(sipUsr.CloudEndUser && sipUsr.CloudEndUser.Domain)
-                {
+                if (sipUsr.CloudEndUser && sipUsr.CloudEndUser.Domain) {
                     sipUsrDomain = sipUsr.CloudEndUser.Domain;
                 }
 
-                if(sipUsr.ContextId)
-                {
+                if (sipUsr.ContextId) {
                     sipUserContext = sipUsr.ContextId;
                 }
 
                 var userObj = {
-                        '@id': sipUsername, '@cacheable': 'false', '@number-alias': sipExt,
-                        'params': {'param':[]},
-                        'variables': {'variable':[]}
+                    '@id': sipUsername, '@cacheable': 'false', '@number-alias': sipExt,
+                    'params': { 'param': [] },
+                    'variables': { 'variable': [] }
                 };
 
-                userObj.params.param.push({'@name' : 'dial-string', '@value' : '{sip_invite_domain=${domain_name},presence_id=${dialed_user}@${dialed_domain}}${sofia_contact(${dialed_user}@${dialed_domain})}'});
-                userObj.params.param.push({'@name' : 'password', '@value' : sipPassword});
+                userObj.params.param.push({ '@name': 'dial-string', '@value': '{sip_invite_domain=${domain_name},presence_id=${dialed_user}@${dialed_domain}}${sofia_contact(${dialed_user}@${dialed_domain})}' });
+                userObj.params.param.push({ '@name': 'password', '@value': sipPassword });
 
-                userObj.variables.variable.push({'@name' : 'domain', '@value' : sipUsrDomain});
-                userObj.variables.variable.push({'@name' : 'user_context', '@value' : sipUserContext});
-                userObj.variables.variable.push({'@name' : 'user_id', '@value' : sipUsername});
+                userObj.variables.variable.push({ '@name': 'domain', '@value': sipUsrDomain });
+                userObj.variables.variable.push({ '@name': 'user_context', '@value': sipUserContext });
+                userObj.variables.variable.push({ '@name': 'user_id', '@value': sipUsername });
 
 
                 users.user.push(userObj);
@@ -117,25 +111,22 @@ var CreateUserGroupDirectoryProfile = function(grp, reqId)
         }
 
         var grpExt = "";
-        if(grp.Extension && grp.Extension.Extension)
-        {
+        if (grp.Extension && grp.Extension.Extension) {
             grpExt = grp.Extension.Extension;
         }
 
         var obj2 = {
-                group : {'@name' : grpExt, 'users' : {'user': []}}
+            group: { '@name': grpExt, 'users': { 'user': [] } }
 
         };
 
 
 
-        if(grp.SipUACEndpoint)
-        {
+        if (grp.SipUACEndpoint) {
 
-            grp.SipUACEndpoint.forEach(function (sipUsr)
-            {
+            grp.SipUACEndpoint.forEach(function (sipUsr) {
                 var sipExt = sipUsr.SipExtension ? sipUsr.SipExtension : "";
-                var usrPointerObj = {'@id': sipExt, '@type': 'pointer'};
+                var usrPointerObj = { '@id': sipExt, '@type': 'pointer' };
                 obj2.group.users.user.push(usrPointerObj);
 
             });
@@ -158,11 +149,11 @@ var CreateUserGroupDirectoryProfile = function(grp, reqId)
         };
 
         var xml = xmlBuilder.create(obj);
-        xml.end({pretty: true});
+        xml.end({ pretty: true });
 
         //var gwStr = section.end({pretty: true});
 
-        return "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\r\n" + xml.toString({pretty: true});
+        return "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\r\n" + xml.toString({ pretty: true });
 
         /*var doc = xmlBuilder.create('document').att('type', 'freeswitch/xml')
             doc.ele('section').att('name', 'directory')
@@ -176,8 +167,7 @@ var CreateUserGroupDirectoryProfile = function(grp, reqId)
         return "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\r\n" + doc.toString({pretty: true});*/
 
     }
-    catch(ex)
-    {
+    catch (ex) {
         logger.error('[DVP-DynamicConfigurationGenerator.CreateUserGroupDirectoryProfile] - [%s] - Exception occurred creating xml', reqId, ex);
         return createNotFoundResponse();
     }
@@ -186,10 +176,8 @@ var CreateUserGroupDirectoryProfile = function(grp, reqId)
 
 }
 
-var CreateGatewayProfile = function(gwList, reqId)
-{
-    try
-    {
+var CreateGatewayProfile = function (gwList, reqId) {
+    try {
         var expireSec = 60;
         var retrySec = 3600;
         var pingSec = 60;
@@ -213,12 +201,10 @@ var CreateGatewayProfile = function(gwList, reqId)
 
 
 
-        gwList.forEach(function(gw)
-        {
+        gwList.forEach(function (gw) {
 
             var proxy = gw.IpUrl;
-            if(gw.Proxy)
-            {
+            if (gw.Proxy) {
                 proxy = gw.Proxy;
             }
 
@@ -227,13 +213,11 @@ var CreateGatewayProfile = function(gwList, reqId)
 
             var domain = gw.Domain;
 
-            if(gw.Username)
-            {
+            if (gw.Username) {
                 username = gw.Username;
                 domain = gw.IpUrl;
 
-                if(gw.Password)
-                {
+                if (gw.Password) {
                     password = gw.Password;
                 }
             }
@@ -271,8 +255,7 @@ var CreateGatewayProfile = function(gwList, reqId)
 
 
 
-            if(!username)
-            {
+            if (!username) {
                 domainEle.user.gateways.gateway.param.push(
                     {
                         '@name': 'username',
@@ -344,8 +327,7 @@ var CreateGatewayProfile = function(gwList, reqId)
                     });
 
             }
-            else
-            {
+            else {
                 domainEle.user.gateways.gateway.param.push(
                     {
                         '@name': 'realm',
@@ -391,6 +373,18 @@ var CreateGatewayProfile = function(gwList, reqId)
                         '@name': 'retry-seconds',
                         '@value': '30'
                     });
+
+                if (!gw.Register) {
+                    domainEle.user.gateways.gateway.param.push({
+                        '@name': 'register',
+                        '@value': 'false'
+                    });
+
+                    domainEle.user.gateways.gateway.param.push({
+                        '@name': 'caller-id-in-from',
+                        '@value': 'true'
+                    });
+                }
 
             }
 
@@ -457,10 +451,9 @@ var CreateGatewayProfile = function(gwList, reqId)
 
         //var gwStr = section.end({pretty: true});
 
-        return xml.end({pretty: true});
+        return xml.end({ pretty: true });
     }
-    catch(ex)
-    {
+    catch (ex) {
         logger.error('[DVP-DynamicConfigurationGenerator.CreateGatewayProfile] - [%s] - Exception occurred creating xml', reqId, ex);
         return createNotFoundResponse();
     }
@@ -469,8 +462,7 @@ var CreateGatewayProfile = function(gwList, reqId)
 
 }
 
-var createDirectoryProfile = function(extName, ext, domain, email, password, context, sendEmail, reqId, pin)
-{
+var createDirectoryProfile = function (extName, ext, domain, email, password, context, sendEmail, reqId, pin) {
     try {
 
         if (!extName) {
@@ -500,15 +492,14 @@ var createDirectoryProfile = function(extName, ext, domain, email, password, con
         var tempDoc = doc.att('type', 'freeswitch/xml')
             .ele('section').att('name', 'directory')
             .ele('domain').att('name', domain)
-            .ele('user').att('id', extName).att('cacheable', 'false').att('number-alias', ext)
+            .ele('user').att('id', extName).att('cacheable', rTOut).att('number-alias', ext)
             .ele('params')
-                .ele('param').att('name', 'dial-string').att('value', '{sip_invite_domain=${domain_name},presence_id=${dialed_user}@${dialed_domain}}${sofia_contact(${dialed_user}@${dialed_domain})}')
-                .up()
-                .ele('param').att('name', 'password').att('value', password)
-                .up();
+            .ele('param').att('name', 'dial-string').att('value', '{sip_invite_domain=${domain_name},presence_id=${dialed_user}@${dialed_domain}}${sofia_contact(${dialed_user}@${dialed_domain})}')
+            .up()
+            .ele('param').att('name', 'password').att('value', password)
+            .up();
 
-        if(sendEmail)
-        {
+        if (sendEmail) {
             tempDoc.ele('param').att('name', 'vm-email-all-messages').att('value', 'true')
                 .up()
                 .ele('param').att('name', 'vm-attach-file').att('value', 'true')
@@ -518,14 +509,17 @@ var createDirectoryProfile = function(extName, ext, domain, email, password, con
 
         }
 
-        if(pin)
-        {
+        if (pin) {
             tempDoc.ele('param').att('name', 'vm-password').att('value', pin)
                 .up()
         }
 
         tempDoc.up()
             .ele('variables')
+            .ele('variable').att('name', 'effective_caller_id_name').att('value', extName)
+            .up()
+            .ele('variable').att('name', 'effective_caller_id_number').att('value', ext)
+            .up()
             .ele('variable').att('name', 'domain').att('value', domain)
             .up()
             .ele('variable').att('name', 'user_context').att('value', context)
@@ -536,7 +530,7 @@ var createDirectoryProfile = function(extName, ext, domain, email, password, con
             .up()
             .up()
             .up()
-            .end({pretty: true});
+            .end({ pretty: true });
 
         /*doc.att('type', 'freeswitch/xml')
             .ele('section').att('name', 'directory')
@@ -568,20 +562,17 @@ var createDirectoryProfile = function(extName, ext, domain, email, password, con
         .end({pretty: true});*/
 
 
-        return "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\r\n" + doc.toString({pretty: true});
+        return "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\r\n" + doc.toString({ pretty: true });
     }
-    catch(ex)
-    {
+    catch (ex) {
         logger.error('[DVP-DynamicConfigurationGenerator.createDirectoryProfile] - [%s] - Exception occurred creating xml', reqId, ex);
         return createNotFoundResponse();
     }
 
 };
 
-var CreateHttpApiDialplan = function(destinationPattern, context, httApiUrl, reqId, numLimitInfo, appId, companyId, tenantId, dvpCallDirection, ani)
-{
-    try
-    {
+var CreateHttpApiDialplan = function (destinationPattern, context, httApiUrl, reqId, numLimitInfo, appId, companyId, tenantId, dvpCallDirection, ani, bUnit) {
+    try {
         if (!destinationPattern) {
             destinationPattern = "";
         }
@@ -602,60 +593,55 @@ var CreateHttpApiDialplan = function(destinationPattern, context, httApiUrl, req
             .ele('extension').att('name', 'test')
             .ele('condition').att('field', 'destination_number').att('expression', destinationPattern)
 
-        if(numLimitInfo)
-        {
-            if(typeof numLimitInfo.NumberInboundLimit != 'undefined' && numLimitInfo.NumberInboundLimit != null)
-            {
+        if (numLimitInfo) {
+            if (typeof numLimitInfo.NumberInboundLimit != 'undefined' && numLimitInfo.NumberInboundLimit != null) {
                 var limitStr = util.format('hash %d_%d_inbound %s %d !USER_BUSY', tenantId, companyId, numLimitInfo.TrunkNumber, numLimitInfo.NumberInboundLimit);
                 cond.ele('action').att('application', 'limit').att('data', limitStr)
                     .up()
             }
 
-            if(typeof numLimitInfo.NumberBothLimit != 'undefined' && numLimitInfo.NumberBothLimit != null)
-            {
+            if (typeof numLimitInfo.NumberBothLimit != 'undefined' && numLimitInfo.NumberBothLimit != null) {
                 var limitStr = util.format('hash %d_%d_both %s %d !USER_BUSY', tenantId, companyId, numLimitInfo.TrunkNumber, numLimitInfo.NumberBothLimit);
                 cond.ele('action').att('application', 'limit').att('data', limitStr)
                     .up()
             }
 
-            if(typeof numLimitInfo.CompanyInboundLimit != 'undefined' && numLimitInfo.CompanyInboundLimit != null)
-            {
+            if (typeof numLimitInfo.CompanyInboundLimit != 'undefined' && numLimitInfo.CompanyInboundLimit != null) {
                 var limitStr = util.format('hash %d_%d_inbound companylimit %d !USER_BUSY', tenantId, companyId, numLimitInfo.CompanyInboundLimit);
                 cond.ele('action').att('application', 'limit').att('data', limitStr)
                     .up()
             }
 
-            if(typeof numLimitInfo.CompanyBothLimit != 'undefined' && numLimitInfo.CompanyBothLimit != null)
-            {
+            if (typeof numLimitInfo.CompanyBothLimit != 'undefined' && numLimitInfo.CompanyBothLimit != null) {
                 var limitStr = util.format('hash %d_%d_both companylimit %d !USER_BUSY', tenantId, companyId, numLimitInfo.CompanyBothLimit);
                 cond.ele('action').att('application', 'limit').att('data', limitStr)
                     .up()
             }
         }
 
-        if(companyId)
-        {
+        if (companyId) {
             cond.ele('action').att('application', 'export').att('data', 'companyid=' + companyId)
                 .up()
         }
-        if(tenantId)
-        {
+        if (tenantId) {
             cond.ele('action').att('application', 'export').att('data', 'tenantid=' + tenantId)
                 .up()
         }
-        if(appId)
-        {
+        if (appId) {
             cond.ele('action').att('application', 'export').att('data', 'dvp_app_id=' + appId)
                 .up()
         }
-        if(dvpCallDirection)
-        {
+        if (dvpCallDirection) {
             cond.ele('action').att('application', 'export').att('data', 'DVP_CALL_DIRECTION=' + dvpCallDirection)
                 .up()
         }
 
-        if(ani)
-        {
+        if (bUnit) {
+            cond.ele('action').att('application', 'export').att('data', 'business_unit=' + bUnit)
+                .up()
+        }
+
+        if (ani) {
             cond.ele('action').att('application', 'set').att('data', 'effective_caller_id_number=' + ani)
                 .up()
         }
@@ -670,25 +656,22 @@ var CreateHttpApiDialplan = function(destinationPattern, context, httApiUrl, req
             .up();
 
 
-        cond.end({pretty: true});
+        cond.end({ pretty: true });
 
 
-        return "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\r\n" + doc.toString({pretty: true});
+        return "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\r\n" + doc.toString({ pretty: true });
 
 
     }
-    catch(ex)
-    {
+    catch (ex) {
         logger.error('[DVP-DynamicConfigurationGenerator.CreateHttpApiDialplan] - [%s] - Exception occurred creating xml', reqId, ex);
         return createNotFoundResponse();
     }
 
 };
 
-var CreateHttpApiDialplanTransfer = function(destinationPattern, context, httApiUrl, reqId, numLimitInfo, appId, companyId, tenantId, dvpCallDirection, ani, appType)
-{
-    try
-    {
+var CreateHttpApiDialplanTransfer = function (destinationPattern, context, httApiUrl, reqId, numLimitInfo, appId, companyId, tenantId, dvpCallDirection, ani, appType, bUnit, isDialerIVR, isIvrTransfer) {
+    try {
         if (!destinationPattern) {
             destinationPattern = "";
         }
@@ -709,25 +692,20 @@ var CreateHttpApiDialplanTransfer = function(destinationPattern, context, httApi
             .ele('extension').att('name', 'test')
             .ele('condition').att('field', 'destination_number').att('expression', destinationPattern)
 
-        if(numLimitInfo && numLimitInfo.CheckLimit)
-        {
-            if(numLimitInfo.NumType === 'INBOUND')
-            {
+        if (numLimitInfo && numLimitInfo.CheckLimit) {
+            if (numLimitInfo.NumType === 'INBOUND') {
                 var limitStr = util.format('hash %d_%d_inbound %s %d !USER_BUSY', numLimitInfo.TenantId, numLimitInfo.CompanyId, numLimitInfo.TrunkNumber, numLimitInfo.InboundLimit);
                 cond.ele('action').att('application', 'limit').att('data', limitStr)
                     .up()
             }
-            else if(numLimitInfo.NumType === 'BOTH')
-            {
-                if(numLimitInfo.InboundLimit)
-                {
+            else if (numLimitInfo.NumType === 'BOTH') {
+                if (numLimitInfo.InboundLimit) {
                     var limitStr = util.format('hash %d_%d_inbound %s %d !USER_BUSY', numLimitInfo.TenantId, numLimitInfo.CompanyId, numLimitInfo.TrunkNumber, numLimitInfo.InboundLimit);
                     cond.ele('action').att('application', 'limit').att('data', limitStr)
                         .up()
                 }
 
-                if(numLimitInfo.BothLimit)
-                {
+                if (numLimitInfo.BothLimit) {
                     var limitStr = util.format('hash %d_%d_both %s %d !USER_BUSY', numLimitInfo.TenantId, numLimitInfo.CompanyId, numLimitInfo.TrunkNumber, numLimitInfo.BothLimit);
                     cond.ele('action').att('application', 'limit').att('data', limitStr)
                         .up()
@@ -736,35 +714,45 @@ var CreateHttpApiDialplanTransfer = function(destinationPattern, context, httApi
 
         }
 
-        if(companyId)
-        {
+        if (companyId) {
             cond.ele('action').att('application', 'export').att('data', 'companyid=' + companyId)
                 .up()
         }
-        if(tenantId)
-        {
+        if (tenantId) {
             cond.ele('action').att('application', 'export').att('data', 'tenantid=' + tenantId)
                 .up()
         }
-        if(appId)
-        {
+
+        if (bUnit) {
+            cond.ele('action').att('application', 'export').att('data', 'business_unit=' + bUnit)
+                .up()
+        }
+
+        if (isDialerIVR) {
+            cond.ele('action').att('application', 'set').att('data', 'is_dialer_ivr=true')
+                .up()
+        }
+
+        if (isIvrTransfer) {
+            cond.ele('action').att('application', 'set').att('data', 'is_ivr_transfer=true')
+                .up()
+        }
+
+        if (appId) {
             cond.ele('action').att('application', 'export').att('data', 'dvp_app_id=' + appId)
                 .up()
         }
-        if(dvpCallDirection)
-        {
+        if (dvpCallDirection) {
             cond.ele('action').att('application', 'export').att('data', 'DVP_CALL_DIRECTION=' + dvpCallDirection)
                 .up()
         }
 
-        if(ani)
-        {
+        if (ani) {
             cond.ele('action').att('application', 'set').att('data', 'effective_caller_id_number=' + ani)
                 .up()
         }
 
-        if(appType != 'DIALER')
-        {
+        if (appType != 'DIALER') {
             cond.ele('action').att('application', 'set').att('data', 'DVP_OPERATION_CAT=HTTAPI')
                 .up();
         }
@@ -776,25 +764,22 @@ var CreateHttpApiDialplanTransfer = function(destinationPattern, context, httApi
             .up();
 
 
-        cond.end({pretty: true});
+        cond.end({ pretty: true });
 
 
-        return "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\r\n" + doc.toString({pretty: true});
+        return "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\r\n" + doc.toString({ pretty: true });
 
 
     }
-    catch(ex)
-    {
+    catch (ex) {
         logger.error('[DVP-DynamicConfigurationGenerator.CreateHttpApiDialplan] - [%s] - Exception occurred creating xml', reqId, ex);
         return createNotFoundResponse();
     }
 
 };
 
-var CreateSocketApiDialplan = function(destinationPattern, context, socketUrl, reqId, numLimitInfo, appId, companyId, tenantId, dvpCallDirection)
-{
-    try
-    {
+var CreateSocketApiDialplan = function (destinationPattern, context, socketUrl, reqId, numLimitInfo, appId, companyId, tenantId, dvpCallDirection, bUnit) {
+    try {
         if (!destinationPattern) {
             destinationPattern = "";
         }
@@ -811,25 +796,20 @@ var CreateSocketApiDialplan = function(destinationPattern, context, socketUrl, r
             .ele('extension').att('name', 'test')
             .ele('condition').att('field', 'destination_number').att('expression', destinationPattern)
 
-        if(numLimitInfo && numLimitInfo.CheckLimit)
-        {
-            if(numLimitInfo.NumType === 'INBOUND')
-            {
+        if (numLimitInfo && numLimitInfo.CheckLimit) {
+            if (numLimitInfo.NumType === 'INBOUND') {
                 var limitStr = util.format('hash %d_%d_inbound %s %d !USER_BUSY', numLimitInfo.TenantId, numLimitInfo.CompanyId, numLimitInfo.TrunkNumber, numLimitInfo.InboundLimit);
                 cond.ele('action').att('application', 'limit').att('data', limitStr)
                     .up()
             }
-            else if(numLimitInfo.NumType === 'BOTH')
-            {
-                if(numLimitInfo.InboundLimit)
-                {
+            else if (numLimitInfo.NumType === 'BOTH') {
+                if (numLimitInfo.InboundLimit) {
                     var limitStr = util.format('hash %d_%d_inbound %s %d !USER_BUSY', numLimitInfo.TenantId, numLimitInfo.CompanyId, numLimitInfo.TrunkNumber, numLimitInfo.InboundLimit);
                     cond.ele('action').att('application', 'limit').att('data', limitStr)
                         .up()
                 }
 
-                if(numLimitInfo.BothLimit)
-                {
+                if (numLimitInfo.BothLimit) {
                     var limitStr = util.format('hash %d_%d_both %s %d !USER_BUSY', numLimitInfo.TenantId, numLimitInfo.CompanyId, numLimitInfo.TrunkNumber, numLimitInfo.BothLimit);
                     cond.ele('action').att('application', 'limit').att('data', limitStr)
                         .up()
@@ -838,23 +818,23 @@ var CreateSocketApiDialplan = function(destinationPattern, context, socketUrl, r
 
         }
 
-        if(companyId)
-        {
+        if (companyId) {
             cond.ele('action').att('application', 'export').att('data', 'companyid=' + companyId)
                 .up()
         }
-        if(tenantId)
-        {
+        if (tenantId) {
             cond.ele('action').att('application', 'export').att('data', 'tenantid=' + tenantId)
                 .up()
         }
-        if(appId)
-        {
+        if (bUnit) {
+            cond.ele('action').att('application', 'export').att('data', 'business_unit=' + bUnit)
+                .up()
+        }
+        if (appId) {
             cond.ele('action').att('application', 'export').att('data', 'dvp_app_id=' + appId)
                 .up()
         }
-        if(dvpCallDirection)
-        {
+        if (dvpCallDirection) {
             cond.ele('action').att('application', 'export').att('data', 'DVP_CALL_DIRECTION=' + dvpCallDirection)
                 .up()
         }
@@ -868,23 +848,21 @@ var CreateSocketApiDialplan = function(destinationPattern, context, socketUrl, r
             .up()
 
 
-        cond.end({pretty: true});
+        cond.end({ pretty: true });
 
 
-        return "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\r\n" + doc.toString({pretty: true});
+        return "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\r\n" + doc.toString({ pretty: true });
 
 
     }
-    catch(ex)
-    {
+    catch (ex) {
         logger.error('[DVP-DynamicConfigurationGenerator.CreateSocketApiDialplan] - [%s] - Exception occurred creating xml', reqId, ex);
         return createNotFoundResponse();
     }
 
 };
 
-var CreateRouteGatewayDialplan = function(reqId, ep, context, profile, destinationPattern, ignoreEarlyMedia)
-{
+var CreateRouteGatewayDialplan = function (reqId, ep, context, profile, destinationPattern, ignoreEarlyMedia) {
     try {
         if (!destinationPattern) {
             destinationPattern = "";
@@ -952,12 +930,11 @@ var CreateRouteGatewayDialplan = function(reqId, ep, context, profile, destinati
             .ele('action').att('application', 'set').att('data', calling)
             .up()
 
-        return cond.end({pretty: true});
+        return cond.end({ pretty: true });
 
 
     }
-    catch(ex)
-    {
+    catch (ex) {
         logger.error('[DVP-DynamicConfigurationGenerator.CreateSendBusyMessageDialplan] - [%s] - Exception occurred creating xml', reqId, ex);
         return createNotFoundResponse();
     }
