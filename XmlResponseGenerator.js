@@ -516,10 +516,6 @@ var createDirectoryProfile = function (extName, ext, domain, email, password, co
 
         tempDoc.up()
             .ele('variables')
-            .ele('variable').att('name', 'effective_caller_id_name').att('value', extName)
-            .up()
-            .ele('variable').att('name', 'effective_caller_id_number').att('value', ext)
-            .up()
             .ele('variable').att('name', 'domain').att('value', domain)
             .up()
             .ele('variable').att('name', 'user_context').att('value', context)
